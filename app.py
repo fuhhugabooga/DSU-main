@@ -24,7 +24,7 @@ def get_base64_image(image_path):
 st.set_page_config(
     layout="wide",
     page_title="Ecosistem DSU",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # ---------------------------------
@@ -34,46 +34,94 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* GLOBAL RESET */
+    /* =========================================
+       GLOBAL RESET & BASE STYLES
+       ========================================= */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
+
+    * {
+        box-sizing: border-box;
+    }
+
     .stApp {
         background: linear-gradient(135deg, #0a0e1a 0%, #1a0f0f 100%);
         font-family: 'Inter', sans-serif;
     }
-    
+
     .block-container {
         padding-top: 0rem !important;
-        padding-bottom: 2rem !important;
-        max-width: 95% !important;
+        padding-bottom: 0rem !important;
+        max-width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Add padding for Statistici and Despre pages */
+    .page-with-padding .block-container {
         padding-left: 2rem !important;
         padding-right: 2rem !important;
-        margin-top: -30px !important; /* Pulls content up into the empty header space */
+        max-width: 1400px !important;
+        margin: 0 auto !important;
     }
-    
-    /* REMOVE the ".main .block-container" rule that was here previously */
-    
-    header[data-testid="stHeader"] { 
-        display: none !important;
+
+    @media (max-width: 768px) {
+        .page-with-padding .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
     }
-    
-    div[data-testid="stToolbar"] {
-        display: none !important;
-    }
-    
+
+    /* Hide Streamlit default elements */
+    header[data-testid="stHeader"] { display: none !important; }
+    div[data-testid="stToolbar"] { display: none !important; }
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
-    
-    /* Remove ghost spacing */
+
     .main .block-container {
-        padding-top: 1rem !important;
+        padding-top: 0 !important;
     }
-    
+
+    /* Sidebar styling for network page */
     section[data-testid="stSidebar"] {
-        display: none !important;
+        background: linear-gradient(180deg, rgba(10, 14, 26, 0.98) 0%, rgba(26, 15, 15, 0.98) 100%) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
-    
-    /* STICKY HEADER */
+
+    section[data-testid="stSidebar"] > div {
+        background: transparent !important;
+        padding-top: 60px !important;
+    }
+
+    /* Sidebar button styling */
+    section[data-testid="stSidebar"] button {
+        font-size: 0.8rem !important;
+        padding: 10px 12px !important;
+        text-align: center !important;
+        justify-content: center !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    section[data-testid="stSidebar"] button p {
+        text-align: center !important;
+        width: 100% !important;
+    }
+
+    /* Sidebar expander styling */
+    section[data-testid="stSidebar"] details {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    section[data-testid="stSidebar"] .streamlit-expanderHeader {
+        font-size: 0.8rem !important;
+        padding: 6px 10px !important;
+    }
+
+    /* =========================================
+       STICKY HEADER - DESKTOP & MOBILE
+       ========================================= */
     .sticky-header-container {
         position: fixed;
         top: 0;
@@ -83,107 +131,96 @@ st.markdown(
         background: linear-gradient(135deg, #0a0e1a 0%, #1a0f0f 100%);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        padding: 10px 24px;
+        padding: 8px 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
     }
 
     .sticky-header-spacer {
-        height: 65px;
-        margin-bottom: 10px;
+        height: 60px;
+        flex-shrink: 0;
     }
 
     .header-logo {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
+        flex-shrink: 0;
     }
 
-    .header-logo-box {
-        width: 45px;
-        height: 45px;
-        background: rgba(220, 38, 38, 0.2);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #dc2626;
-        font-weight: bold;
-        font-size: 0.9rem;
+    .header-logo img {
+        height: 40px;
+        width: auto;
+        border-radius: 4px;
     }
 
     .header-title {
         color: #ffffff;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 700;
-    }
-
-    .header-nav {
-        display: flex;
-        gap: 8px;
-    }
-
-    .header-nav-btn {
-        background: transparent;
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 8px 20px;
-        color: #94a3b8;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-    }
-
-    .header-nav-btn:hover {
-        background: rgba(220, 38, 38, 0.1);
-        border-color: rgba(220, 38, 38, 0.5);
-    }
-
-    .header-nav-btn.active {
-        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-        border-color: transparent;
-        color: #ffffff;
+        white-space: nowrap;
     }
 
     .header-logos {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
+        flex-shrink: 0;
     }
 
-    .header-logo-placeholder {
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
+    .header-logos img {
+        height: 32px;
+        width: auto;
+        border-radius: 4px;
     }
 
-    /* Radio buttons - position in sticky header */
+    /* Navigation - scrollable on mobile */
+    .header-nav-wrapper {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 4px 0;
+    }
+
+    .header-nav-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Radio buttons styling */
     .stRadio {
         position: fixed !important;
-        top: 12px !important;
+        top: 10px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         z-index: 9999999 !important;
+        max-width: calc(100vw - 300px);
     }
 
     div[role="radiogroup"] {
         flex-direction: row;
-        gap: 8px;
+        gap: 6px;
         justify-content: center;
         background: transparent;
+        flex-wrap: nowrap;
+        white-space: nowrap;
     }
 
     div[role="radiogroup"] label {
         background: transparent !important;
         border: 2px solid rgba(255, 255, 255, 0.15) !important;
         border-radius: 10px !important;
-        padding: 8px 20px !important;
+        padding: 6px 14px !important;
         transition: all 0.3s ease;
         cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     div[role="radiogroup"] label:hover {
@@ -192,10 +229,11 @@ st.markdown(
     }
 
     div[role="radiogroup"] label p {
-        font-size: 0.9rem !important;
+        font-size: 0.85rem !important;
         font-weight: 600 !important;
         color: #94a3b8 !important;
         margin: 0 !important;
+        white-space: nowrap;
     }
 
     div[role="radiogroup"] label > div:first-child {
@@ -212,12 +250,195 @@ st.markdown(
         font-weight: 700 !important;
     }
 
-    /* Remove all bottom borders and padding from graph container */
+    /* =========================================
+       MOBILE RESPONSIVE HEADER
+       ========================================= */
+    @media (max-width: 768px) {
+        .sticky-header-container {
+            padding: 6px 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .header-title {
+            display: none;
+        }
+
+        .header-logo img {
+            height: 35px;
+        }
+
+        .header-logos {
+            gap: 6px;
+        }
+
+        .header-logos img {
+            height: 28px;
+        }
+
+        .stRadio {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            transform: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            order: 3;
+            margin-top: 4px;
+        }
+
+        div[role="radiogroup"] {
+            justify-content: center;
+            gap: 4px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 4px;
+        }
+
+        div[role="radiogroup"] label {
+            padding: 5px 10px !important;
+        }
+
+        div[role="radiogroup"] label p {
+            font-size: 0.75rem !important;
+        }
+
+        .sticky-header-spacer {
+            height: 90px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .header-logos img:not(:first-child) {
+            display: none;
+        }
+
+        .sticky-header-spacer {
+            height: 85px;
+        }
+    }
+
+    /* =========================================
+       STATS OVERLAY PANEL
+       ========================================= */
+    .stats-overlay {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 200px;
+        background: rgba(10, 14, 26, 0.92);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        padding: 14px;
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .stats-overlay h4 {
+        color: #ffffff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: center;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(153, 27, 27, 0.08) 100%);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .stat-card:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .stat-label {
+        color: #94a3b8;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        color: #ffffff;
+        font-size: 1.4rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .legend-section {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .legend-title {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+    }
+
+    .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .legend-diamond {
+        width: 10px;
+        height: 10px;
+        transform: rotate(45deg);
+        flex-shrink: 0;
+    }
+
+    .legend-text {
+        font-size: 0.72rem;
+        color: #cbd5e1;
+    }
+
+    /* Mobile Stats Overlay Adjustment */
+    @media (max-width: 768px) {
+        .stats-overlay {
+            position: relative !important;
+            top: auto !important;
+            bottom: auto !important;
+            right: auto !important;
+            left: auto !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 10px 0 !important;
+            border-radius: 12px !important;
+        }
+    }
+
+    /* =========================================
+       GRAPH CONTAINER - FULL SCREEN
+       ========================================= */
     iframe {
         border: none !important;
     }
 
-    /* Fix empty space under graph */
     .element-container:has(iframe) {
         margin-bottom: 0 !important;
         padding-bottom: 0 !important;
@@ -227,7 +448,6 @@ st.markdown(
         margin-bottom: 0 !important;
     }
 
-    /* Graph container zoom animation */
     @keyframes zoomIn {
         from {
             transform: scale(0.85);
@@ -243,10 +463,23 @@ st.markdown(
         animation: zoomIn 0.8s ease-out forwards;
     }
 
-    /* Graph iframe - fill available space */
-    iframe {
-        height: calc(100vh - 100px) !important;
-        min-height: 600px !important;
+    /* Graph fills available space */
+    .graph-container iframe {
+        width: 100% !important;
+        height: calc(100vh - 60px) !important;
+        min-height: 500px !important;
+    }
+
+    @media (max-width: 768px) {
+        .graph-container iframe {
+            height: 60vh !important;
+            min-height: 350px !important;
+        }
+
+        /* Touch-friendly improvements */
+        .stApp iframe {
+            touch-action: pan-x pan-y pinch-zoom !important;
+        }
     }
     
     /* CARDS */
@@ -254,67 +487,66 @@ st.markdown(
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
     }
-    
+
     .glass-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 48px rgba(220, 38, 38, 0.2);
+        box-shadow: 0 8px 24px rgba(220, 38, 38, 0.15);
         border-color: rgba(220, 38, 38, 0.3);
     }
-    
+
     .partner-card {
         background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(153, 27, 27, 0.1) 100%);
         border: 1px solid rgba(220, 38, 38, 0.3);
-        border-radius: 20px;
-        padding: 28px;
-        margin-bottom: 24px;
-        box-shadow: 0 8px 32px rgba(220, 38, 38, 0.15);
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.1);
     }
-    
+
     .partner-title {
-        font-size: 1.75rem;
+        font-size: 1rem;
         font-weight: 700;
         background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid rgba(220, 38, 38, 0.2);
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+        word-wrap: break-word;
     }
-    
+
     .partner-desc {
-        font-size: 1.05rem;
+        font-size: 0.85rem;
         color: #cbd5e1;
-        line-height: 1.7;
-        margin-bottom: 20px;
+        line-height: 1.5;
+        margin-bottom: 12px;
     }
-    
-    /* INFO BOXES */
+
+    /* INFO BOXES - Compact */
     .info-box {
-        background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(153, 27, 27, 0.1) 100%);
-        border-left: 4px solid #dc2626;
-        padding: 20px;
-        margin-bottom: 16px;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.1);
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(153, 27, 27, 0.08) 100%);
+        border-left: 3px solid #dc2626;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border-radius: 8px;
     }
-    
+
     .info-title {
         font-weight: 700;
         color: #f87171;
-        font-size: 1.1rem;
-        margin-bottom: 8px;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
     }
-    
+
     .info-text {
         color: #cbd5e1;
-        font-size: 0.95rem;
-        line-height: 1.6;
+        font-size: 0.8rem;
+        line-height: 1.4;
     }
     
     /* METRICS */
@@ -350,58 +582,44 @@ st.markdown(
         -webkit-text-fill-color: transparent;
     }
     
-    /* BADGES */
+    /* BADGES - Compact */
     .badge {
         display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
         font-weight: 600;
-        margin-right: 8px;
-        margin-bottom: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        transition: all 0.2s ease;
+        margin-right: 4px;
+        margin-bottom: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
-    
-    .badge:hover {
-        transform: scale(1.05);
-    }
-    
+
     .badge-strategic {
         background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         color: #ffffff;
-        border: 1px solid rgba(245, 158, 11, 0.3);
     }
-    
+
     .badge-ukraine {
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         color: #ffffff;
-        border: 1px solid rgba(59, 130, 246, 0.3);
     }
-    
+
     .badge-fonss {
         background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
         color: #ffffff;
-        border: 1px solid rgba(236, 72, 153, 0.3);
     }
-    
+
     .tag-domain {
         display: inline-block;
         background: rgba(220, 38, 38, 0.15);
         color: #fca5a5;
         border: 1px solid rgba(220, 38, 38, 0.3);
-        padding: 6px 14px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        margin-right: 6px;
-        margin-bottom: 6px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        margin-right: 4px;
+        margin-bottom: 4px;
         font-weight: 500;
-        transition: all 0.2s ease;
-    }
-    
-    .tag-domain:hover {
-        background: rgba(220, 38, 38, 0.25);
-        border-color: rgba(220, 38, 38, 0.5);
     }
     
     /* SEARCH BOX */
@@ -412,53 +630,138 @@ st.markdown(
         color: #ffffff !important;
     }
     
-    /* BUTTONS */
+    /* BUTTONS - Compact */
     .stButton > button {
         background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
         color: white;
         border: none;
-        border-radius: 12px;
-        padding: 12px 24px;
+        border-radius: 8px;
+        padding: 8px 16px;
         font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
     }
-    
+
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 24px rgba(220, 38, 38, 0.4);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
     }
-    
-    /* EXPANDER */
+
+    /* Secondary buttons */
+    .stButton > button[kind="secondary"] {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #94a3b8;
+    }
+
+    /* EXPANDER - Compact */
     .streamlit-expanderHeader {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
         color: #cbd5e1 !important;
         font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 12px !important;
     }
-    
+
     .streamlit-expanderHeader:hover {
-        background: rgba(220, 38, 38, 0.1);
+        background: rgba(220, 38, 38, 0.08);
     }
-    
-    /* SECTION HEADERS */
+
+    details[data-testid="stExpander"] {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        margin-bottom: 6px;
+    }
+
+    /* SECTION HEADERS - Compact */
     h3 {
         color: #ffffff;
         font-weight: 700;
-        margin-bottom: 24px;
-        font-size: 1.5rem;
+        margin-bottom: 12px;
+        font-size: 1rem;
     }
     
     h4 {
         color: #e2e8f0;
         font-weight: 600;
-        margin-bottom: 16px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
     }
-    
+
     /* DIVIDER */
     hr {
-        border-color: rgba(255, 255, 255, 0.1);
-        margin: 32px 0;
+        border-color: rgba(255, 255, 255, 0.08);
+        margin: 12px 0;
+    }
+
+    /* FILTER SECTION STYLES */
+    .filter-section-title {
+        color: #f87171;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        margin-top: 12px;
+    }
+
+    .filter-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #cbd5e1;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 6px;
+        width: 100%;
+    }
+
+    .filter-btn:hover {
+        background: rgba(220, 38, 38, 0.1);
+        border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    .filter-btn.active {
+        background: rgba(220, 38, 38, 0.2);
+        border-color: rgba(220, 38, 38, 0.5);
+        color: #fca5a5;
+    }
+
+    .filter-btn-icon {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* Multiselect compact */
+    div[data-baseweb="select"] {
+        font-size: 0.8rem !important;
+    }
+
+    /* Hide streamlit elements in network page for cleaner look */
+    .network-page div[data-testid="stVerticalBlock"] > div:empty {
+        display: none !important;
+    }
+
+    /* Touch-friendly for mobile */
+    @media (max-width: 768px) {
+        .filter-btn {
+            padding: 10px 14px;
+            font-size: 0.85rem;
+        }
+
+        .stButton > button {
+            padding: 10px 18px;
+            font-size: 0.85rem;
+        }
     }
     </style>
     """,
@@ -654,28 +957,130 @@ page = st.radio(
 )
 
 # ---------------------------------
-# 4. PAGE: ECOSISTEM
+# 4. PAGE: ECOSISTEM (REFACTORED - IMMERSIVE LAYOUT)
 # ---------------------------------
 
 if page == "Rețea parteneri":
+    # Initialize session state
     if "selected_id" not in st.session_state:
         st.session_state["selected_id"] = None
     if "filter_domains" not in st.session_state:
         st.session_state["filter_domains"] = all_domain_labels
     if "special_filter" not in st.session_state:
-        st.session_state["special_filter"] = None  # Can be "strategic", "ukraine", or None
-
+        st.session_state["special_filter"] = None
     if "entity_filter" not in st.session_state:
-         st.session_state["entity_filter"] = None
+        st.session_state["entity_filter"] = None
+    if "sidebar_open" not in st.session_state:
+        st.session_state["sidebar_open"] = False
 
-    col_controls, col_graph, col_stats = st.columns([1.2, 3.0, 1.0], gap="medium")
+    # Calculate statistics upfront
+    total_partners = len([n for n in nodes_data.values() if n["type"] == "Partner" and n.get("parent_id") is None])
+    total_domains = len([n for n in nodes_data.values() if n["type"] == "Domain"])
+    total_connections = len(edges_data)
+    strategic_count = len([n for n in nodes_data.values() if n.get("strategic")])
+    ukraine_count = len([n for n in nodes_data.values() if n.get("ukraine")])
 
-    with col_controls:
-        st.markdown("### Explorează")
-        
-        partner_names = sorted([info["label"] for nid, info in nodes_data.items() 
-                               if info["type"] == "Partner" and info.get("parent_id") is None])
-        
+    entity_counts = {}
+    for nid, info in nodes_data.items():
+        if info["type"] == "Partner" and info.get("parent_id") is None:
+            etype = classify_entity_type(info["label"])
+            entity_counts[etype] = entity_counts.get(etype, 0) + 1
+
+    partner_names = sorted([info["label"] for nid, info in nodes_data.items()
+                           if info["type"] == "Partner" and info.get("parent_id") is None])
+
+    # Render Stats and Legend Overlay (combined HTML - positioned fixed)
+    st.markdown(f"""
+    <div class="stats-overlay">
+        <h4>Statistici Rețea</h4>
+        <div class="stat-card">
+            <div class="stat-label">Parteneri</div>
+            <div class="stat-value">{total_partners}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Domenii</div>
+            <div class="stat-value">{total_domains}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Conexiuni</div>
+            <div class="stat-value">{total_connections}</div>
+        </div>
+        <div class="legend-section">
+            <div class="legend-title">Legendă</div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #8b5cf6;"></div>
+                <span class="legend-text">Universitate</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #10b981;"></div>
+                <span class="legend-text">ONG</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #3b82f6;"></div>
+                <span class="legend-text">Instituție de stat</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #f59e0b;"></div>
+                <span class="legend-text">Companie privată</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #ec4899;"></div>
+                <span class="legend-text">Media</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #14b8a6;"></div>
+                <span class="legend-text">Organizație profesională</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-diamond" style="background: #dc2626;"></div>
+                <span class="legend-text">Domeniu de activitate</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Use Streamlit sidebar for filters
+    with st.sidebar:
+        # ============================================
+        # INFO SECTION - App description at top
+        # ============================================
+        st.markdown("""
+        <div class="glass-card" style="margin-bottom: 16px;">
+            <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
+                Rețeaua de Parteneri DSU
+            </div>
+            <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 12px;">
+                Vizualizare interactivă a parteneriatelor dintre Departamentul pentru Situații de Urgență
+                și organizațiile care contribuie la răspunsul național în caz de urgență.
+            </div>
+            <div style="font-size: 0.75rem; color: #94a3b8; line-height: 1.6;">
+                <b>Ce puteți afla?</b><br>
+                • Cine sunt partenerii DSU<br>
+                • În ce domenii activează<br>
+                • Care sunt partenerii strategici<br>
+                • Cine ajută în criza din Ucraina
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="info-box" style="margin-bottom: 16px;">
+            <div class="info-title">Cum navigați</div>
+            <div class="info-text">
+                <b>Click</b> pe un nod pentru detalii<br>
+                <b>Scroll</b> pentru zoom<br>
+                <b>Drag</b> pentru a muta vizualizarea
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # ============================================
+        # SEARCH SECTION
+        # ============================================
+        st.markdown('<div class="filter-section-title">Caută partener</div>', unsafe_allow_html=True)
+
         def on_search_change():
             selected_name = st.session_state["search_box"]
             found_id = None
@@ -692,564 +1097,437 @@ if page == "Rețea parteneri":
                 current_idx = partner_names.index(node["label"])
 
         st.selectbox(
-            "Caută partener:", 
-            options=partner_names, 
-            index=current_idx, 
-            key="search_box", 
-            on_change=on_search_change, 
+            "Caută partener:",
+            options=partner_names,
+            index=current_idx,
+            key="search_box",
+            on_change=on_search_change,
             placeholder="Selectează organizație...",
             label_visibility="collapsed"
         )
-        
+
         st.markdown("---")
 
+        # ============================================
+        # ENTITY TYPE FILTER - Uniform buttons
+        # ============================================
+        st.markdown('<div class="filter-section-title">Sortează după tip</div>', unsafe_allow_html=True)
+
+        if st.session_state.get("entity_filter"):
+            if st.button("✕ Resetează filtrul", key="reset_entity", type="secondary", use_container_width=True):
+                st.session_state["entity_filter"] = None
+                st.rerun()
+
+        for etype, config in ENTITY_TYPES.items():
+            count = entity_counts.get(etype, 0)
+            is_active = st.session_state.get("entity_filter") == etype
+            btn_type = "primary" if is_active else "secondary"
+
+            if st.button(f"{etype} ({count})", key=f"etype_{etype}", type=btn_type, use_container_width=True):
+                if is_active:
+                    st.session_state["entity_filter"] = None
+                else:
+                    st.session_state["entity_filter"] = etype
+                    st.session_state["selected_id"] = None
+                st.rerun()
+
+        st.markdown("---")
+
+        # ============================================
+        # DOMAIN FILTER
+        # ============================================
+        st.markdown('<div class="filter-section-title">Sortează după domeniu</div>', unsafe_allow_html=True)
+
+        c1, c2 = st.columns(2)
+        if c1.button("Toate", use_container_width=True, key="sel_all"):
+            st.session_state["filter_domains"] = all_domain_labels
+            st.rerun()
+        if c2.button("Nimic", use_container_width=True, key="sel_none"):
+            st.session_state["filter_domains"] = []
+            st.rerun()
+
+        current_selection = set(st.session_state["filter_domains"])
+        new_selection = set()
+
+        for group_name, group_domains in DOMAIN_GROUPS.items():
+            available_in_group = [d for d in group_domains if d in all_domain_labels]
+            if available_in_group:
+                with st.expander(f"{group_name}", expanded=False):
+                    sel = st.multiselect(
+                        "Selectează:",
+                        options=available_in_group,
+                        default=[d for d in available_in_group if d in current_selection],
+                        key=f"group_{group_name}",
+                        label_visibility="collapsed"
+                    )
+                    new_selection.update(sel)
+        st.session_state["filter_domains"] = list(new_selection)
+
+        st.markdown("---")
+
+        # ============================================
+        # SPECIAL FILTERS - Strategic & Ukraine
+        # ============================================
+        st.markdown('<div class="filter-section-title">Parteneri speciali</div>', unsafe_allow_html=True)
+
+        is_strat_active = st.session_state.get("special_filter") == "strategic"
+        is_ukr_active = st.session_state.get("special_filter") == "ukraine"
+
+        strat_type = "primary" if is_strat_active else "secondary"
+        if st.button(f"⭐ Parteneri strategici ({strategic_count})", key="btn_strategic", type=strat_type, use_container_width=True):
+            if is_strat_active:
+                st.session_state["special_filter"] = None
+            else:
+                st.session_state["special_filter"] = "strategic"
+                st.session_state["selected_id"] = None
+            st.rerun()
+
+        ukr_type = "primary" if is_ukr_active else "secondary"
+        if st.button(f"🇺🇦 Sprijin Ucraina ({ukraine_count})", key="btn_ukraine", type=ukr_type, use_container_width=True):
+            if is_ukr_active:
+                st.session_state["special_filter"] = None
+            else:
+                st.session_state["special_filter"] = "ukraine"
+                st.session_state["selected_id"] = None
+            st.rerun()
+
+        st.markdown("---")
+
+        # ============================================
+        # SELECTED PARTNER INFO
+        # ============================================
         selected_id = st.session_state["selected_id"]
-        
+
         if selected_id and selected_id in nodes_data:
+            st.markdown('<div class="filter-section-title">Partener selectat</div>', unsafe_allow_html=True)
             info = nodes_data[selected_id]
+
             if info["type"] == "Partner":
                 badges_html = ""
-                if info.get("strategic"): 
+                if info.get("strategic"):
                     badges_html += '<span class="badge badge-strategic">Strategic</span>'
-                if info.get("ukraine"): 
+                if info.get("ukraine"):
                     badges_html += '<span class="badge badge-ukraine">Ucraina</span>'
-                if info.get("is_fonss_member"): 
-                    badges_html += '<span class="badge badge-fonss">Membru FONSS</span>'
-                
+                if info.get("is_fonss_member"):
+                    badges_html += '<span class="badge badge-fonss">FONSS</span>'
+
                 if info.get("is_fonss_member"):
                     tags_html = '<span class="tag-domain">Servicii sociale</span>'
                 else:
                     my_domains = [nodes_data[t]["label"] for s, t in edges_data if s == selected_id and t in nodes_data]
                     tags_html = "".join([f'<span class="tag-domain">{d}</span>' for d in sorted(set(my_domains))])
 
+                # Get entity type for display
+                entity_type = classify_entity_type(info['label'])
+
                 st.markdown(f"""
                 <div class="partner-card">
                     <div class="partner-title">{info['label']}</div>
-                    <div style="margin-bottom:16px;">{badges_html}</div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="font-size: 0.7rem; color: #94a3b8; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;">{entity_type}</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">{badges_html}</div>
                     <div class="partner-desc">{info['description']}</div>
-                    <div style="font-size:0.85rem; color:#94a3b8; margin-bottom:10px; font-weight:600;">DOMENII DE ACTIVITATE</div>
+                    <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 12px; margin-bottom: 6px; font-weight: 600;">DOMENII DE ACTIVITATE</div>
                     <div>{tags_html}</div>
                 </div>
                 """, unsafe_allow_html=True)
-                
-                if selected_id == fonss_id: 
-                    st.info("S-au afișat în graf organizațiile membre FONSS.")
+
+                if selected_id == fonss_id:
+                    st.info("Se afișează organizațiile membre FONSS.")
             else:
                 partners_linked = [nodes_data[s]["label"] for s, t in edges_data if t == selected_id and s in nodes_data]
                 st.markdown(f"""
                 <div class="partner-card">
                     <div class="partner-title">{info['label']}</div>
-                    <div class="partner-desc">Acest domeniu conectează <b>{len(partners_linked)}</b> parteneri DSU.</div>
+                    <div class="partner-desc">Acest domeniu conectează <b>{len(partners_linked)}</b> parteneri.</div>
                 </div>
                 """, unsafe_allow_html=True)
-            
-            if st.button("← Înapoi la vedere generală", use_container_width=True):
+
+            if st.button("← Înapoi la rețea", use_container_width=True, key="back_btn"):
                 st.session_state["selected_id"] = None
                 st.rerun()
-        else:
-            st.markdown("""
-            <div class="info-box">
-                <div class="info-title">Ce vezi aici?</div>
-                <div class="info-text">
-                    O hartă interactivă a colaborărilor DSU cu societatea civilă și instituții publice.
-                </div>
-            </div>
 
-            <div class="info-box">
-                <div class="info-title">De ce contează?</div>
-                <div class="info-text">
-                    Conexiunile arată capacitatea de reacție integrată. DSU nu acționează singur, ci într-un ecosistem.
-                </div>
-            </div>
-
-            <div class="info-box" style="border-left-color: #94a3b8;">
-                <div class="info-title">Notă date</div>
-                <div class="info-text">
-                    Sunt afișate doar parteneriatele formale și documentate, nu toate colaborările ad-hoc.
-                </div>
-            </div>
-
-            <div class="info-box" style="border-left-color: #10b981;">
-                <div class="info-title">Cum navighez?</div>
-                <div class="info-text">
-                    <b>Click</b> pe un nod pentru detalii<br>
-                    <b>Scroll</b> pentru zoom in/out<br>
-                    <b>Drag</b> pentru a muta vizualizarea
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
+        # ============================================
+        # EXPORT SECTION
+        # ============================================
         st.markdown("---")
-        st.markdown("### Caută după domenii")
-        
-        c1, c2 = st.columns(2)
-        if c1.button("Select all", use_container_width=True):
-            st.session_state["filter_domains"] = all_domain_labels
-            st.rerun()
-        if c2.button("Clear all", use_container_width=True):
-            st.session_state["filter_domains"] = []
-            st.rerun()
+        st.markdown('<div class="filter-section-title">Exportă date</div>', unsafe_allow_html=True)
 
-        current_selection = set(st.session_state["filter_domains"])
-        new_selection = set()
-        for group_name, group_domains in DOMAIN_GROUPS.items():
-            available_in_group = [d for d in group_domains if d in all_domain_labels]
-            if available_in_group:
-                with st.expander(f"{group_name}", expanded=False):
-                    sel = st.multiselect(
-                        "Selectează:", 
-                        options=available_in_group, 
-                        default=[d for d in available_in_group if d in current_selection], 
-                        key=f"group_{group_name}", 
-                        label_visibility="collapsed"
-                    )
-                    new_selection.update(sel)
-        st.session_state["filter_domains"] = list(new_selection)
+        # Get filtered partners based on current filters
+        special_filter = st.session_state.get("special_filter")
+        entity_filter = st.session_state.get("entity_filter")
+        domain_filter = st.session_state.get("filter_domains", all_domain_labels)
 
-    with col_graph:
-        final_nodes = []
-        final_edges = []
-        
-        # Smaller, cleaner fonts
-        common_font_style = {"color": "#ffffff", "size": 10, "face": "Inter"}
-        hub_font_style = {"color": "#ffffff", "size": 14, "face": "Inter", "bold": True}
-
-        focus_id = st.session_state["selected_id"]
-        edges_to_draw = []
-        hub_id = None
-        leaf_ids = []
-        random.seed(42)
-
-        if focus_id:
-            focus_node = nodes_data.get(focus_id, {})
-            is_parent_focus = (focus_id == fonss_id)
-            is_child_focus = (focus_node.get("parent_id") is not None)
-
-            if is_parent_focus: 
-                hub_id = fonss_id
-                for nid, info in nodes_data.items():
-                    if info.get("parent_id") == fonss_id:
-                        leaf_ids.append(nid)
-                        edges_to_draw.append((nid, fonss_id))
-            elif is_child_focus: 
-                hub_id = focus_node.get("parent_id")
-                leaf_ids = [focus_id] 
-                edges_to_draw.append((focus_id, hub_id))
-            else: 
-                hub_id = focus_id
-                for s, t in edges_data:
-                    if s == hub_id:
-                        leaf_ids.append(t)
-                        edges_to_draw.append((s, t))
-                    elif t == hub_id:
-                        leaf_ids.append(s)
-                        edges_to_draw.append((s, t))
-
-        if hub_id:
-            # RADIAL FOCUSED VIEW
-            info_hub = nodes_data[hub_id]
-            final_nodes.append(Node(
-                id=hub_id, 
-                label=info_hub["label"][:30] + "..." if len(info_hub["label"]) > 30 else info_hub["label"],
-                size=40,
-                shape="dot" if info_hub["type"]=="Partner" else "diamond",
-                color="#dc2626",
-                font=hub_font_style,
-                x=0, y=0, fixed=True
-            ))
-
-            count = len(leaf_ids)
-            radius = 300  # Reduced for better fit with zoom
-            
-            for i, nid in enumerate(leaf_ids):
-                info = nodes_data[nid]
-                angle = 2 * math.pi * i / max(count, 1)
-                pos_x = radius * math.cos(angle)
-                pos_y = radius * math.sin(angle)
-                
-                if info["type"] == "Domain":
-                    color = "#dc2626"
-                elif info.get("is_fonss_member"):
-                    color = "#b91c1c"
-                else:
-                    color = get_entity_color(info["label"])
-                
-                # Truncate long labels
-                label = info["label"][:25] + "..." if len(info["label"]) > 25 else info["label"]
-
-                final_nodes.append(Node(
-                    id=nid, label=label, size=22,
-                    shape="dot" if info["type"]=="Partner" else "diamond",
-                    color=color, font=common_font_style,
-                    x=pos_x, y=pos_y, fixed=True
-                ))
-            
-            for s, t in edges_to_draw:
-                final_edges.append(Edge(
-                    source=s, target=t, 
-                    color="#dc2626",
-                    width=1.5
-                ))
-                
-            config = Config(
-                width="100%",
-                height=900,
-                directed=False,
-                physics=False,
-                hierarchical=False,
-                nodeHighlightBehavior=True,
-                highlightColor="#FFFFFF",
-                initialZoom=2.0,
-                minZoom=0.8,
-                maxZoom=5.0,
-                staticGraphWithDragAndDrop=True
-            )
-
-        else:
-            # CLUSTERED VIEW BY DOMAIN
-            
-            # --- 1. MODIFICARE FILTRARE: PRELUAM FILTRELE ACTIVE ---
-            special_filter = st.session_state.get("special_filter")
-            entity_filter = st.session_state.get("entity_filter") # <--- NOU
-
-            visible_domain_ids = {nid for nid, info in nodes_data.items()
-                                  if info["type"] == "Domain"
-                                  and info["label"] in st.session_state["filter_domains"]}
-
-            relevant_partners = set()
-            active_edges = []
-
-            for s, t in edges_data:
-                # Verificăm dacă conexiunea duce către un domeniu vizibil
-                if t in visible_domain_ids:
-                    partner_node = nodes_data[s]
-                    
-                    # Verificăm doar dacă e partener principal (nu sub-nod)
-                    if partner_node.get("parent_id") is None:
-                        
-                        # --- 2. APLICĂM FILTRELE CUMULATIV (AND logic) ---
-                        matches_special = True
-                        matches_entity = True
-
-                        # Verificare filtru special (Strategic / Ucraina)
-                        if special_filter == "strategic" and not partner_node.get("strategic"):
-                            matches_special = False
-                        elif special_filter == "ukraine" and not partner_node.get("ukraine"):
-                            matches_special = False
-                        
-                        # Verificare filtru entitate (Universitate / ONG / etc) <--- NOU
-                        if entity_filter:
-                            # Calculăm tipul entității curente
-                            current_type = classify_entity_type(partner_node["label"])
-                            if current_type != entity_filter:
-                                matches_entity = False
-
-                        # Dacă trece de toate filtrele, îl adăugăm
-                        if matches_special and matches_entity:
-                            relevant_partners.add(s)
-                            active_edges.append((s, t))
-            
-            # (Restul codului de desenare rămâne la fel, dar folosește listele filtrate mai sus)
-            # Dacă filtrele sunt active, restrângem domeniile afișate doar la cele relevante
-            if special_filter or entity_filter:
-                connected_domain_ids = {t for s, t in active_edges}
-                visible_domain_ids = visible_domain_ids & connected_domain_ids
-
-            domain_list = list(visible_domain_ids)
-            # ... continuă codul original de poziționare (cols, rows, etc.) ...
-            # ... asigură-te că folosești codul existent pentru final_nodes.append ...
-            
-            # COPIAZĂ RESTUL LOGICII DE POZIȚIONARE DIN CODUL TĂU VECHI DE AICI ÎN JOS
-            # (Codul care calculează coordonatele x, y pentru domenii și parteneri)
-            # Doar asigură-te că 'relevant_partners' și 'active_edges' sunt cele calculate mai sus.
-            
-            # --- RE-INSERARE LOGICA POZIȚIONARE PENTRU INTEGRITATE ---
-            num_domains = len(domain_list)
-            if num_domains > 0:
-                cols = math.ceil(math.sqrt(num_domains))
-                rows = math.ceil(num_domains / cols)
-                spacing = 400 
-                
-                for idx, nid in enumerate(domain_list):
-                    row = idx // cols
-                    col = idx % cols
-                    x = (col - cols/2) * spacing
-                    y = (row - rows/2) * spacing
-                    
-                    label = nodes_data[nid]["label"][:20] + "..." if len(nodes_data[nid]["label"]) > 20 else nodes_data[nid]["label"]
-                    
-                    final_nodes.append(Node(
-                        id=nid, label=label, size=30, 
-                        shape="diamond", color="#dc2626", font=hub_font_style,
-                        x=x, y=y
-                    ))
-            
-            for nid in relevant_partners:
-                info = nodes_data[nid]
-                color = get_entity_color(info["label"])
-                
-                connected_domains = [t for s, t in active_edges if s == nid]
-                if connected_domains:
-                    domain_idx = domain_list.index(connected_domains[0]) if connected_domains[0] in domain_list else 0
-                    row = domain_idx // cols
-                    col = domain_idx % cols
-                    base_x = (col - cols/2) * spacing
-                    base_y = (row - rows/2) * spacing
-                    x = base_x + random.uniform(-150, 150)
-                    y = base_y + random.uniform(-150, 150)
-                else:
-                    x = random.uniform(-400, 400)
-                    y = random.uniform(-400, 400)
-                
-                label = info["label"][:20] + "..." if len(info["label"]) > 20 else info["label"]
-                
-                final_nodes.append(Node(
-                    id=nid, label=label, size=20,
-                    shape="dot", color=color, font=common_font_style,
-                    x=x, y=y
-                ))
-                 
-            for s, t in active_edges:
-                final_edges.append(Edge(
-                    source=s, target=t, 
-                    color="rgba(220, 38, 38, 0.2)", 
-                    width=3
-                ))
-
-            config = Config(
-                width="100%",
-                height=900,
-                directed=False,
-                physics=True,
-                hierarchical=False,
-                nodeHighlightBehavior=True,
-                highlightColor="#FFFFFF",
-                initialZoom=1.8,
-                minZoom=0.5,
-                maxZoom=5.0,
-                staticGraphWithDragAndDrop=False,
-                collapsible=False,
-                node={"highlightStrokeColor": "#dc2626"},
-                link={"highlightColor": "#dc2626"}
-            )
-        
-        # Handle clicking on nodes
-        return_value = agraph(nodes=final_nodes, edges=final_edges, config=config)
-
-        # Logica de click (rămâne la fel)
-        if return_value:
-            clicked_id = None
-            if isinstance(return_value, str):
-                clicked_id = return_value
-            elif isinstance(return_value, dict):
-                if "id" in return_value:
-                    clicked_id = return_value["id"]
-                elif "nodes" in return_value and len(return_value["nodes"]) > 0:
-                    clicked_id = return_value["nodes"][0]
-            
-            if clicked_id and clicked_id in nodes_data and clicked_id != st.session_state["selected_id"]:
-                st.session_state["selected_id"] = clicked_id
-                st.rerun()
-
-    # --- RIGHT PANEL: STATISTICS & LEGEND ---
-    with col_stats:
-        st.markdown("### Statistici rețea")
-
-        # Calculate network statistics
-        total_partners = len([n for n in nodes_data.values() if n["type"] == "Partner" and n.get("parent_id") is None])
-        total_domains = len([n for n in nodes_data.values() if n["type"] == "Domain"])
-        total_connections = len(edges_data)
-        strategic_count = len([n for n in nodes_data.values() if n.get("strategic")])
-        ukraine_count = len([n for n in nodes_data.values() if n.get("ukraine")])
-
-        # Entity type breakdown
-        entity_counts = {}
+        filtered_partners = []
         for nid, info in nodes_data.items():
             if info["type"] == "Partner" and info.get("parent_id") is None:
-                etype = classify_entity_type(info["label"])
-                entity_counts[etype] = entity_counts.get(etype, 0) + 1
+                # Check special filter
+                if special_filter == "strategic" and not info.get("strategic"):
+                    continue
+                if special_filter == "ukraine" and not info.get("ukraine"):
+                    continue
 
-        # Display metrics
-        st.metric("Total parteneri", total_partners)
-        st.metric("Domenii de activitate", total_domains)
-        st.metric("Conexiuni", total_connections)
+                # Check entity filter
+                if entity_filter:
+                    if classify_entity_type(info["label"]) != entity_filter:
+                        continue
 
-        st.markdown("---")
+                # Check domain filter
+                partner_domains = [nodes_data[t]["label"] for s, t in edges_data if s == nid and t in nodes_data and nodes_data[t]["type"] == "Domain"]
+                if domain_filter and not any(d in domain_filter for d in partner_domains):
+                    continue
 
-        # ---------------------------------------------------------
-        # BUTOANE FILTRARE STILIZATE (MERGED FUNCTIONALITY)
-        # ---------------------------------------------------------
-        
-        # 1. Definim starea și etichetele
-        is_strat_active = st.session_state.get("special_filter") == "strategic"
-        is_ukr_active = st.session_state.get("special_filter") == "ukraine"
+                filtered_partners.append({
+                    "Nume": info["label"],
+                    "Tip": classify_entity_type(info["label"]),
+                    "Strategic": "Da" if info.get("strategic") else "Nu",
+                    "Sprijin Ucraina": "Da" if info.get("ukraine") else "Nu",
+                    "Domenii": ", ".join(partner_domains),
+                    "Descriere": info.get("description", "")
+                })
 
-        # Adăugăm un checkmark dacă este activ
-        strat_label = f"{'✓ ' if is_strat_active else ''}{strategic_count} Parteneri strategici"
-        ukr_label = f"{'✓ ' if is_ukr_active else ''}{ukraine_count} Sprijin Ucraina"
+        # Create DataFrame for export
+        if filtered_partners:
+            export_df = pd.DataFrame(filtered_partners)
 
-        # 2. CSS Custom pentru a transforma butoanele standard în "Badges" colorate
-        # Folosim :nth-of-type pentru a targeta specific butoanele din coloane
-        st.markdown("""
-        <style>
-        /* Ascundem stilul default al butoanelor din containerul următor */
-        div[data-testid="stHorizontalBlock"] button {
-            border: none;
-            color: white;
-            font-size: 0.85rem;
-            font-weight: 600;
-            padding: 0.5rem 1rem;
-            border-radius: 20px; /* Formă de pill/insignă */
-            line-height: 1.2;
-            transition: transform 0.2s;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
+            # CSV Export
+            csv_data = export_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label=f"📥 Descarcă CSV ({len(filtered_partners)} parteneri)",
+                data=csv_data,
+                file_name="parteneri_dsu.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
 
-        div[data-testid="stHorizontalBlock"] button:hover {
-            transform: scale(1.05);
-            border: none;
-            color: white;
-        }
-
-        div[data-testid="stHorizontalBlock"] button:focus {
-            color: white !important;
-            border: none !important;
-        }
-
-        /* Butonul 1: STRATEGIC (Orange/Brown) */
-        div[data-testid="column"]:nth-of-type(1) button {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        /* Stare activă pentru Strategic (mai strălucitor sau bordură albă) */
-        div[data-testid="column"]:nth-of-type(1) button:active,
-        div[data-testid="column"]:nth-of-type(1) button:focus {
-             background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-             box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.5);
-        }
-
-        /* Butonul 2: UCRAINA (Blue) */
-        div[data-testid="column"]:nth-of-type(2) button {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-        /* Stare activă pentru Ucraina */
-        div[data-testid="column"]:nth-of-type(2) button:active,
-        div[data-testid="column"]:nth-of-type(2) button:focus {
-             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-        # 3. Crearea butoanelor funcționale
-        # Folosim un container pentru a izola CSS-ul cât de cât
-        col_btn1, col_btn2 = st.columns([1, 1])
-        
-        with col_btn1:
-            if st.button(strat_label, key="btn_strategic_pill"):
-                if is_strat_active:
-                    st.session_state["special_filter"] = None
-                else:
-                    st.session_state["special_filter"] = "strategic"
-                    st.session_state["selected_id"] = None # Reset selection
-                st.rerun()
-
-        with col_btn2:
-            if st.button(ukr_label, key="btn_ukraine_pill"):
-                if is_ukr_active:
-                    st.session_state["special_filter"] = None
-                else:
-                    st.session_state["special_filter"] = "ukraine"
-                    st.session_state["selected_id"] = None # Reset selection
-                st.rerun()
-
-        # Mesaj informativ discret sub butoane
-        if st.session_state.get("special_filter"):
-            filter_text = "strategic" if st.session_state["special_filter"] == "strategic" else "Ucraina"
-            st.caption(f"Filtru activ: {filter_text} (Click din nou pentru a dezactiva)")
-
-        st.markdown("---")
-
-        # Legend Header
-        st.markdown("### Caută după tip partener")
-        
-        # Dacă există un filtru activ, afișăm buton de resetare
-        if st.session_state.get("entity_filter"):
-            st.caption(f"Filtru activ: {st.session_state['entity_filter']}")
-            if st.button("✕ Șterge filtrul de entitate", type="secondary", use_container_width=True):
-                st.session_state["entity_filter"] = None
-                st.rerun()
+            st.caption("Descarcă lista partenerilor afișați în format CSV.")
         else:
-            st.caption("Apasă pe o categorie din legendă pentru a filtra harta pe baza tipului de partener ales.")
+            st.caption("Niciun partener de exportat cu filtrele curente.")
 
-        st.markdown("**Tip entitate:**")
+    # Main content - Full width graph (outside sidebar)
+    final_nodes = []
+    final_edges = []
 
-        # Generăm CSS dinamic pentru a colora marginea butoanelor
-        # Acest CSS face butoanele să aibă o linie colorată în stânga, similar cu legenda
-        css_legend = "<style>"
-        for etype, config in ENTITY_TYPES.items():
-            safe_cls = etype.replace(" ", "-").replace("ă", "a").replace("ț", "t").lower()
-            color = config['color']
-            # Stilizăm butonul specific folosind un div wrapper sau o clasă (Streamlit e limitat aici, 
-            # deci vom folosi o abordare vizuală cu markdown + button separate sau columns)
-        css_legend += "</style>"
-        st.markdown(css_legend, unsafe_allow_html=True)
+    # Font styles
+    common_font_style = {"color": "#ffffff", "size": 10, "face": "Inter"}
+    hub_font_style = {"color": "#ffffff", "size": 14, "face": "Inter", "bold": True}
 
-        # Loop prin tipuri de entități pentru a crea butoane
-        for etype, config in ENTITY_TYPES.items():
-            count = entity_counts.get(etype, 0)
-            color = config['color']
-            
-            # Folosim coloane pentru a simula "Bulina colorată + Butonul Text"
-            c_dot, c_btn = st.columns([0.15, 0.85])
-            
-            with c_dot:
-                # Desenăm bulina statică, perfect aliniată
-                st.markdown(
-                    f'<div style="margin-top: 10px; width: 16px; height: 16px; background-color: {color}; border-radius: 50%;"></div>', 
-                    unsafe_allow_html=True
-                )
-            
-            with c_btn:
-                # Butonul funcționează ca filtru
-                # Dacă e activ, îl facem "primary" (plin), altfel "secondary" (outline/transparent)
-                is_active = (st.session_state.get("entity_filter") == etype)
-                btn_type = "primary" if is_active else "secondary"
-                
-                if st.button(f"{etype} ({count})", key=f"leg_btn_{etype}", type=btn_type, use_container_width=True):
-                    # Logică de toggle: dacă apeși pe cel activ, se dezactivează
-                    if is_active:
-                        st.session_state["entity_filter"] = None
-                    else:
-                        st.session_state["entity_filter"] = etype
-                        st.session_state["selected_id"] = None # Resetăm selecția individuală
-                    st.rerun()
+    focus_id = st.session_state["selected_id"]
+    edges_to_draw = []
+    hub_id = None
+    leaf_ids = []
+    random.seed(42)
 
-        st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
+    if focus_id:
+        focus_node = nodes_data.get(focus_id, {})
+        is_parent_focus = (focus_id == fonss_id)
+        is_child_focus = (focus_node.get("parent_id") is not None)
 
-        # Legenda pentru domenii (rămâne statică)
-        st.markdown("**Domenii:**")
-        st.markdown("""
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
-            <div style="width: 16px; height: 16px; background: #dc2626; transform: rotate(45deg);"></div>
-            <span style="color: #cbd5e1; font-size: 0.9rem;">Domeniu de activitate</span>
-        </div>
-        """, unsafe_allow_html=True)
+        if is_parent_focus:
+            hub_id = fonss_id
+            for nid, info in nodes_data.items():
+                if info.get("parent_id") == fonss_id:
+                    leaf_ids.append(nid)
+                    edges_to_draw.append((nid, fonss_id))
+        elif is_child_focus:
+            hub_id = focus_node.get("parent_id")
+            leaf_ids = [focus_id]
+            edges_to_draw.append((focus_id, hub_id))
+        else:
+            hub_id = focus_id
+            for s, t in edges_data:
+                if s == hub_id:
+                    leaf_ids.append(t)
+                    edges_to_draw.append((s, t))
+                elif t == hub_id:
+                    leaf_ids.append(s)
+                    edges_to_draw.append((s, t))
+
+    if hub_id:
+        # RADIAL FOCUSED VIEW
+        info_hub = nodes_data[hub_id]
+        final_nodes.append(Node(
+            id=hub_id,
+            label=info_hub["label"][:30] + "..." if len(info_hub["label"]) > 30 else info_hub["label"],
+            size=40,
+            shape="dot" if info_hub["type"] == "Partner" else "diamond",
+            color="#dc2626",
+            font=hub_font_style,
+            x=0, y=0, fixed=True
+        ))
+
+        count = len(leaf_ids)
+        radius = 300
+
+        for i, nid in enumerate(leaf_ids):
+            info = nodes_data[nid]
+            angle = 2 * math.pi * i / max(count, 1)
+            pos_x = radius * math.cos(angle)
+            pos_y = radius * math.sin(angle)
+
+            if info["type"] == "Domain":
+                color = "#dc2626"
+            elif info.get("is_fonss_member"):
+                color = "#b91c1c"
+            else:
+                color = get_entity_color(info["label"])
+
+            label = info["label"][:25] + "..." if len(info["label"]) > 25 else info["label"]
+
+            final_nodes.append(Node(
+                id=nid, label=label, size=22,
+                shape="dot" if info["type"] == "Partner" else "diamond",
+                color=color, font=common_font_style,
+                x=pos_x, y=pos_y, fixed=True
+            ))
+
+        for s, t in edges_to_draw:
+            final_edges.append(Edge(
+                source=s, target=t,
+                color="#dc2626",
+                width=1.5
+            ))
+
+        config = Config(
+            width="100%",
+            height=900,
+            directed=False,
+            physics=False,
+            hierarchical=False
+        )
+
+    else:
+        # CLUSTERED VIEW BY DOMAIN
+        special_filter = st.session_state.get("special_filter")
+        entity_filter = st.session_state.get("entity_filter")
+
+        visible_domain_ids = {nid for nid, info in nodes_data.items()
+                              if info["type"] == "Domain"
+                              and info["label"] in st.session_state["filter_domains"]}
+
+        relevant_partners = set()
+        active_edges = []
+
+        for s, t in edges_data:
+            if t in visible_domain_ids:
+                partner_node = nodes_data[s]
+
+                if partner_node.get("parent_id") is None:
+                    matches_special = True
+                    matches_entity = True
+
+                    if special_filter == "strategic" and not partner_node.get("strategic"):
+                        matches_special = False
+                    elif special_filter == "ukraine" and not partner_node.get("ukraine"):
+                        matches_special = False
+
+                    if entity_filter:
+                        current_type = classify_entity_type(partner_node["label"])
+                        if current_type != entity_filter:
+                            matches_entity = False
+
+                    if matches_special and matches_entity:
+                        relevant_partners.add(s)
+                        active_edges.append((s, t))
+
+        if special_filter or entity_filter:
+            connected_domain_ids = {t for s, t in active_edges}
+            visible_domain_ids = visible_domain_ids & connected_domain_ids
+
+        domain_list = list(visible_domain_ids)
+        num_domains = len(domain_list)
+        cols = 1
+        spacing = 400
+
+        if num_domains > 0:
+            cols = math.ceil(math.sqrt(num_domains))
+            rows = math.ceil(num_domains / cols)
+
+            for idx, nid in enumerate(domain_list):
+                row = idx // cols
+                col = idx % cols
+                x = (col - cols / 2) * spacing
+                y = (row - rows / 2) * spacing
+
+                label = nodes_data[nid]["label"][:20] + "..." if len(nodes_data[nid]["label"]) > 20 else nodes_data[nid]["label"]
+
+                final_nodes.append(Node(
+                    id=nid, label=label, size=30,
+                    shape="diamond", color="#dc2626", font=hub_font_style,
+                    x=x, y=y
+                ))
+
+        for nid in relevant_partners:
+            info = nodes_data[nid]
+            color = get_entity_color(info["label"])
+
+            connected_domains = [t for s, t in active_edges if s == nid]
+            if connected_domains and domain_list:
+                domain_idx = domain_list.index(connected_domains[0]) if connected_domains[0] in domain_list else 0
+                row = domain_idx // cols
+                col = domain_idx % cols
+                base_x = (col - cols / 2) * spacing
+                base_y = (row - rows / 2) * spacing
+                x = base_x + random.uniform(-150, 150)
+                y = base_y + random.uniform(-150, 150)
+            else:
+                x = random.uniform(-400, 400)
+                y = random.uniform(-400, 400)
+
+            label = info["label"][:20] + "..." if len(info["label"]) > 20 else info["label"]
+
+            final_nodes.append(Node(
+                id=nid, label=label, size=20,
+                shape="dot", color=color, font=common_font_style,
+                x=x, y=y
+            ))
+
+        for s, t in active_edges:
+            final_edges.append(Edge(
+                source=s, target=t,
+                color="rgba(220, 38, 38, 0.2)",
+                width=3
+            ))
+
+        config = Config(
+            width="100%",
+            height=900,
+            directed=False,
+            physics=True,
+            hierarchical=False
+        )
+
+    # Render the graph
+    return_value = agraph(nodes=final_nodes, edges=final_edges, config=config)
+
+    # Handle clicking on nodes
+    if return_value:
+        clicked_id = None
+        if isinstance(return_value, str):
+            clicked_id = return_value
+        elif isinstance(return_value, dict):
+            if "id" in return_value:
+                clicked_id = return_value["id"]
+            elif "nodes" in return_value and len(return_value["nodes"]) > 0:
+                clicked_id = return_value["nodes"][0]
+
+        if clicked_id and clicked_id in nodes_data and clicked_id != st.session_state["selected_id"]:
+            st.session_state["selected_id"] = clicked_id
+            st.rerun()
 
 # ---------------------------------
 # 5. PAGINA: STATISTICI (V2.0 - REDESIGN)
 # ---------------------------------
 
 elif page == "Statistici":
+    # Add padding class for this page
+    st.markdown('<style>.stApp .main .block-container { padding-left: 2rem !important; padding-right: 2rem !important; max-width: 1400px !important; margin: 0 auto !important; }</style>', unsafe_allow_html=True)
+
     st.markdown("### DSU în cifre")
     st.markdown("""
     <div style="background-color: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; border-left: 5px solid #dc2626; margin-bottom: 25px;">
-        Date în curs de prelucrare. Ultimele date disponibile sunt din 2024 
+        Date în curs de prelucrare. Ultimele date disponibile sunt din 2024
     </div>
     """, unsafe_allow_html=True)
     
@@ -1519,6 +1797,9 @@ elif page == "Statistici":
 # ---------------------------------
 
 elif page == "Despre proiect":
+    # Add padding class for this page
+    st.markdown('<style>.stApp .main .block-container { padding-left: 2rem !important; padding-right: 2rem !important; max-width: 1400px !important; margin: 0 auto !important; }</style>', unsafe_allow_html=True)
+
     st.markdown("### Despre acest proiect")
 
     col1, col2 = st.columns([2, 1])
