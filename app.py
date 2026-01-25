@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import os
 import math
@@ -24,8 +25,24 @@ def get_base64_image(image_path):
 st.set_page_config(
     layout="wide",
     page_title="Ecosistem DSU",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
+
+# Force sidebar to be visible with JavaScript
+st.markdown("""
+<script>
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+        if (sidebar) {
+            sidebar.style.display = 'block';
+            sidebar.style.transform = 'translateX(0)';
+            sidebar.style.visibility = 'visible';
+        }
+    }, 100);
+});
+</script>
+""", unsafe_allow_html=True)
 
 # ---------------------------------
 # 1. MODERN CSS STYLING
@@ -48,6 +65,13 @@ st.markdown(
         font-family: 'Inter', sans-serif;
     }
 
+    :root {
+        --motion-fast: 140ms;
+        --motion-base: 220ms;
+        --motion-slow: 360ms;
+        --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
     .block-container {
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
@@ -67,19 +91,56 @@ st.markdown(
 
     @media (max-width: 768px) {
         .page-with-padding .block-container {
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+        }
+
+        .block-container {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+
+        /* Fix main content width on mobile */
+        .main .block-container {
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+        }
+
+        /* Streamlit columns on mobile - stack vertically */
+        div[data-testid="column"] {
+            width: 100% !important;
+            flex: 1 1 100% !important;
         }
     }
 
-    /* Hide Streamlit default elements */
-    header[data-testid="stHeader"] { display: none !important; }
-    div[data-testid="stToolbar"] { display: none !important; }
+    @media (max-width: 480px) {
+        .page-with-padding .block-container {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+    }
+
+    /* Hide Streamlit default elements except header/toolbar so sidebar toggle stays accessible */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
 
     .main .block-container {
         padding-top: 0 !important;
+    }
+
+    @keyframes pageFadeSlide {
+        0% {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stApp .main {
+        animation: pageFadeSlide var(--motion-slow) var(--motion-ease) both;
     }
 
     /* Sidebar styling for network page */
@@ -88,9 +149,107 @@ st.markdown(
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
-    section[data-testid="stSidebar"] > div {
-        background: transparent !important;
-        padding-top: 60px !important;
+    /* Desktop: Force sidebar visible */
+    @media (min-width: 769px) {
+        section[data-testid="stSidebar"],
+        section[data-testid="stSidebar"][aria-hidden="true"],
+        section[data-testid="stSidebar"][data-collapsed="true"] {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: 21rem !important;
+            min-width: 21rem !important;
+            max-width: 21rem !important;
+            margin-left: 0 !important;
+            transform: none !important;
+            position: relative !important;
+        }
+
+        /* Hide Streamlit's native sidebar collapse button on desktop */
+        button[kind="header"],
+        button[data-testid="collapsedControl"],
+        button[data-testid="stSidebarNavToggle"],
+        button[aria-label="Close sidebar"],
+        button[title="Close sidebar"],
+        section[data-testid="stSidebar"] button[kind="header"],
+        section[data-testid="stSidebar"] svg[data-testid="stChevronRight"],
+        section[data-testid="stSidebar"] button:has(svg),
+        div[data-testid="stSidebarNav"] + button,
+        [class*="collapsedControl"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+    }
+
+    /* Mobile: Hide sidebar completely - use Streamlit native toggle */
+    @media (max-width: 768px) {
+        /* Sidebar slides in from left */
+        section[data-testid="stSidebar"] {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 280px !important;
+            max-width: 85vw !important;
+            min-width: auto !important;
+            height: 100vh !important;
+            z-index: 999998 !important;
+            transform: translateX(-100%) !important;
+            transition: transform 0.3s ease !important;
+        }
+
+        /* Hide Streamlit's native toggle buttons on mobile too */
+        button[data-testid="collapsedControl"],
+        button[data-testid="baseButton-header"],
+        button[data-testid="stSidebarNavToggle"] {
+            display: none !important;
+        }
+
+        /* Mobile sidebar content adjustments */
+        section[data-testid="stSidebar"] > div {
+            padding-top: 16px !important;
+            padding-bottom: 80px !important;
+            height: 100% !important;
+            overflow-y: auto !important;
+        }
+
+        section[data-testid="stSidebar"] > div > div:first-child {
+            display: block !important;
+        }
+
+        section[data-testid="stSidebar"] > div > div:nth-child(2) {
+            padding-top: 0 !important;
+        }
+
+        /* Ensure sidebar buttons are properly sized for touch */
+        section[data-testid="stSidebar"] button {
+            min-height: 44px !important;
+            font-size: 0.85rem !important;
+        }
+
+        section[data-testid="stSidebar"] .streamlit-expanderHeader {
+            min-height: 44px !important;
+            font-size: 0.85rem !important;
+        }
+    }
+
+    /* Desktop sidebar content */
+    @media (min-width: 769px) {
+        section[data-testid="stSidebar"] > div {
+            background: transparent !important;
+            padding-top: 60px !important;
+        }
+
+        /* NUCLEAR OPTION - Hide the entire sidebar header */
+        section[data-testid="stSidebar"] > div > div:first-child {
+            display: none !important;
+        }
+        
+        /* Add padding to sidebar content after hiding header */
+        section[data-testid="stSidebar"] > div > div:nth-child(2) {
+            padding-top: 2rem !important;
+        }
     }
 
     /* Sidebar button styling */
@@ -128,18 +287,49 @@ st.markdown(
         left: 0;
         right: 0;
         z-index: 999999;
+        height: 64px;
         background: linear-gradient(135deg, #0a0e1a 0%, #1a0f0f 100%);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        padding: 8px 16px;
+        padding: 0 20px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 16px;
+    }
+
+    /* Mobile menu button - hidden on desktop */
+    .mobile-menu-btn {
+        display: none;
+        background: rgba(220, 38, 38, 0.8);
+        border: 1px solid rgba(220, 38, 38, 0.6);
+        color: #ffffff;
+        font-size: 1.3rem;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        flex-shrink: 0;
+        line-height: 1;
+        transition: all 0.2s ease;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-menu-btn:hover,
+    .mobile-menu-btn:active {
+        background: rgba(220, 38, 38, 1);
+    }
+
+    @media (max-width: 768px) {
+        .mobile-menu-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     }
 
     .sticky-header-spacer {
-        height: 60px;
+        height: 64px;
         flex-shrink: 0;
     }
 
@@ -148,12 +338,14 @@ st.markdown(
         align-items: center;
         gap: 12px;
         flex-shrink: 0;
+        height: 64px;
     }
 
     .header-logo img {
         height: 40px;
         width: auto;
         border-radius: 4px;
+        display: block;
     }
 
     .header-title {
@@ -161,19 +353,30 @@ st.markdown(
         font-size: 1rem;
         font-weight: 700;
         white-space: nowrap;
+        line-height: 1;
     }
 
     .header-logos {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         flex-shrink: 0;
+        height: 64px;
     }
 
     .header-logos img {
-        height: 32px;
+        height: 34px;
         width: auto;
         border-radius: 4px;
+        display: block;
+    }
+
+    .header-nav {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
     }
 
     /* Navigation - scrollable on mobile */
@@ -193,59 +396,120 @@ st.markdown(
         display: none;
     }
 
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sidebar-toggle-btn {
+        background: rgba(220, 38, 38, 0.2);
+        border: 1px solid rgba(220, 38, 38, 0.4);
+        color: #ffffff;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        margin-right: 8px;
+        line-height: 1;
+    }
+
+    .sidebar-toggle-btn:hover {
+        background: rgba(220, 38, 38, 0.4);
+        border-color: rgba(220, 38, 38, 0.6);
+    }
+
     /* Radio buttons styling */
     .stRadio {
         position: fixed !important;
-        top: 10px !important;
+        top: 0 !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         z-index: 9999999 !important;
-        max-width: calc(100vw - 300px);
+        max-width: calc(100vw - 360px);
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
     }
 
-    div[role="radiogroup"] {
+    .stRadio div[role="radiogroup"] {
         flex-direction: row;
-        gap: 6px;
+        gap: 10px;
         justify-content: center;
-        background: transparent;
+        align-items: center;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
         flex-wrap: nowrap;
         white-space: nowrap;
+        backdrop-filter: none !important;
     }
 
-    div[role="radiogroup"] label {
-        background: transparent !important;
-        border: 2px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 10px !important;
-        padding: 6px 14px !important;
-        transition: all 0.3s ease;
+    .stRadio div[role="radiogroup"] label {
+        background: rgba(15, 23, 42, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 12px !important;
+        padding: 6px 18px !important;
+        transition: all 0.2s ease;
         cursor: pointer;
         white-space: nowrap;
         flex-shrink: 0;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
     }
 
-    div[role="radiogroup"] label:hover {
-        background: rgba(220, 38, 38, 0.1) !important;
+    .stRadio div[role="radiogroup"] label:hover {
+        background: rgba(220, 38, 38, 0.12) !important;
         border-color: rgba(220, 38, 38, 0.5) !important;
     }
 
-    div[role="radiogroup"] label p {
+    .stRadio div[role="radiogroup"] label p {
         font-size: 0.85rem !important;
         font-weight: 600 !important;
         color: #94a3b8 !important;
         margin: 0 !important;
         white-space: nowrap;
+        line-height: 1;
+        text-align: center;
+        width: 100%;
     }
 
-    div[role="radiogroup"] label > div:first-child {
+    .stRadio div[role="radiogroup"] label > div:first-child {
         display: none !important;
     }
 
-    div[data-baseweb="radio"] div[aria-checked="true"] + div {
-        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
-        border-color: transparent !important;
+    .stRadio div[role="radiogroup"] label > div:last-child {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        text-align: center !important;
     }
 
-    div[data-baseweb="radio"] div[aria-checked="true"] + div p {
+    .stRadio div[role="radiogroup"] label span,
+    .stRadio div[role="radiogroup"] label p {
+        display: block !important;
+        text-align: center !important;
+        width: 100% !important;
+    }
+
+    .stRadio div[data-baseweb="radio"] div[aria-checked="true"] + div {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        border-color: transparent !important;
+        box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35);
+    }
+
+    .stRadio div[data-baseweb="radio"] div[aria-checked="true"] + div p {
         color: #ffffff !important;
         font-weight: 700 !important;
     }
@@ -255,8 +519,10 @@ st.markdown(
        ========================================= */
     @media (max-width: 768px) {
         .sticky-header-container {
-            padding: 6px 10px;
-            flex-wrap: wrap;
+            padding: 8px 12px;
+            height: auto;
+            min-height: 56px;
+            flex-wrap: nowrap;
             gap: 8px;
         }
 
@@ -264,57 +530,99 @@ st.markdown(
             display: none;
         }
 
+        .header-logo {
+            height: auto;
+        }
+
         .header-logo img {
-            height: 35px;
+            height: 32px;
         }
 
         .header-logos {
             gap: 6px;
+            height: auto;
         }
 
         .header-logos img {
-            height: 28px;
+            height: 26px;
         }
 
+        /* Radio nav on mobile - horizontal scroll */
         .stRadio {
             position: relative !important;
             top: auto !important;
             left: auto !important;
             transform: none !important;
+            width: auto !important;
+            max-width: none !important;
+            height: auto !important;
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+
+        .stRadio > div {
             width: 100% !important;
-            max-width: 100% !important;
-            order: 3;
-            margin-top: 4px;
         }
 
-        div[role="radiogroup"] {
-            justify-content: center;
-            gap: 4px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 4px;
+        .stRadio div[role="radiogroup"] {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+            gap: 6px !important;
+            padding: 4px 0 !important;
+            justify-content: flex-start !important;
         }
 
-        div[role="radiogroup"] label {
-            padding: 5px 10px !important;
+        .stRadio div[role="radiogroup"]::-webkit-scrollbar {
+            display: none !important;
         }
 
-        div[role="radiogroup"] label p {
-            font-size: 0.75rem !important;
+        .stRadio div[role="radiogroup"] label {
+            padding: 6px 12px !important;
+            min-width: max-content !important;
+            height: 32px !important;
+            border-radius: 8px !important;
+        }
+
+        .stRadio div[role="radiogroup"] label p {
+            font-size: 0.7rem !important;
         }
 
         .sticky-header-spacer {
-            height: 90px;
+            height: 56px !important;
         }
     }
 
     @media (max-width: 480px) {
-        .header-logos img:not(:first-child) {
+        .sticky-header-container {
+            padding: 6px 8px;
+        }
+
+        .header-logo img {
+            height: 28px;
+        }
+
+        .header-logos img {
+            height: 22px;
+        }
+
+        .header-logos img:nth-child(n+3) {
             display: none;
         }
 
+        .stRadio div[role="radiogroup"] label {
+            padding: 5px 10px !important;
+            height: 28px !important;
+        }
+
+        .stRadio div[role="radiogroup"] label p {
+            font-size: 0.65rem !important;
+        }
+
         .sticky-header-spacer {
-            height: 85px;
+            height: 52px !important;
         }
     }
 
@@ -333,6 +641,9 @@ st.markdown(
         padding: 14px;
         z-index: 1000;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        transition: transform var(--motion-base) var(--motion-ease),
+                    opacity var(--motion-base) var(--motion-ease),
+                    box-shadow var(--motion-base) var(--motion-ease);
     }
 
     .stats-overlay h4 {
@@ -353,7 +664,7 @@ st.markdown(
         border-radius: 10px;
         padding: 10px;
         margin-bottom: 8px;
-        text-align: center;
+        text-align: left;
     }
 
     .stat-card:last-of-type {
@@ -365,7 +676,7 @@ st.markdown(
         font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.3px;
-        margin-bottom: 4px;
+        margin-top: 2px;
     }
 
     .stat-value {
@@ -375,6 +686,7 @@ st.markdown(
         background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        line-height: 1.2;
     }
 
     .legend-section {
@@ -417,18 +729,76 @@ st.markdown(
         color: #cbd5e1;
     }
 
-    /* Mobile Stats Overlay Adjustment */
+    .reset-graph-btn {
+        width: 100%;
+        margin-top: 12px;
+        padding: 8px 12px;
+        background: rgba(220, 38, 38, 0.15);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+        border-radius: 8px;
+        color: #f87171;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .reset-graph-btn:hover {
+        background: rgba(220, 38, 38, 0.25);
+        border-color: rgba(220, 38, 38, 0.5);
+    }
+
+    /* Mobile Stats Overlay - Compact horizontal bar at bottom */
     @media (max-width: 768px) {
         .stats-overlay {
-            position: relative !important;
+            position: fixed !important;
             top: auto !important;
-            bottom: auto !important;
-            right: auto !important;
-            left: auto !important;
+            bottom: 0 !important;
+            right: 0 !important;
+            left: 0 !important;
             width: 100% !important;
             max-width: none !important;
-            margin: 10px 0 !important;
-            border-radius: 12px !important;
+            margin: 0 !important;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 10px 12px !important;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+            max-height: none !important;
+            overflow: visible !important;
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        .stats-overlay h4 {
+            font-size: 0.65rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        /* Horizontal scrollable stats row */
+        .stats-overlay .stat-card {
+            display: inline-block;
+            width: auto;
+            min-width: 80px;
+            vertical-align: top;
+            padding: 6px 10px;
+            margin-bottom: 0;
+            margin-right: 8px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+        }
+
+        .stat-label {
+            font-size: 0.55rem;
+        }
+
+        /* Hide legend on mobile to save space */
+        .legend-section {
+            display: none;
+        }
+
+        .reset-graph-btn {
+            display: none;
         }
     }
 
@@ -472,13 +842,98 @@ st.markdown(
 
     @media (max-width: 768px) {
         .graph-container iframe {
-            height: 60vh !important;
-            min-height: 350px !important;
+            height: calc(100vh - 120px) !important;
+            min-height: 400px !important;
         }
 
         /* Touch-friendly improvements */
         .stApp iframe {
             touch-action: pan-x pan-y pinch-zoom !important;
+        }
+
+        /* Better mobile card layout */
+        .glass-card,
+        .partner-card {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+
+        .partner-title {
+            font-size: 0.9rem;
+        }
+
+        .partner-desc {
+            font-size: 0.8rem;
+        }
+
+        /* Mobile metrics */
+        div[data-testid="stMetric"] {
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        div[data-testid="stMetricValue"] {
+            font-size: 1.5rem;
+        }
+
+        div[data-testid="stMetricLabel"] {
+            font-size: 0.75rem;
+        }
+
+        /* Improve touch targets */
+        .stButton > button {
+            min-height: 44px;
+            padding: 10px 16px;
+        }
+
+        /* Better mobile typography */
+        h3 {
+            font-size: 0.95rem;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+        }
+
+        /* Info boxes mobile */
+        .info-box {
+            padding: 8px 10px;
+        }
+
+        .info-title {
+            font-size: 0.8rem;
+        }
+
+        .info-text {
+            font-size: 0.75rem;
+        }
+
+        /* Badges mobile */
+        .badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+        }
+
+        .tag-domain {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .graph-container iframe {
+            height: calc(100vh - 100px) !important;
+            min-height: 350px !important;
+        }
+
+        .glass-card,
+        .partner-card {
+            padding: 10px;
+        }
+
+        div[data-testid="stMetricValue"] {
+            font-size: 1.25rem;
         }
     }
     
@@ -492,6 +947,7 @@ st.markdown(
         margin-bottom: 12px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
+        will-change: transform, box-shadow;
     }
 
     .glass-card:hover {
@@ -506,6 +962,10 @@ st.markdown(
         padding: 14px;
         margin-bottom: 12px;
         box-shadow: 0 4px 16px rgba(220, 38, 38, 0.1);
+        transition: transform var(--motion-base) var(--motion-ease),
+                    box-shadow var(--motion-base) var(--motion-ease),
+                    border-color var(--motion-base) var(--motion-ease);
+        will-change: transform, box-shadow;
     }
 
     .partner-title {
@@ -534,6 +994,8 @@ st.markdown(
         padding: 10px 12px;
         margin-bottom: 8px;
         border-radius: 8px;
+        transition: transform var(--motion-base) var(--motion-ease),
+                    box-shadow var(--motion-base) var(--motion-ease);
     }
 
     .info-title {
@@ -557,6 +1019,7 @@ st.markdown(
         border-radius: 16px;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
+        will-change: transform, box-shadow;
     }
     
     div[data-testid="stMetric"]:hover {
@@ -639,8 +1102,13 @@ st.markdown(
         padding: 8px 16px;
         font-weight: 600;
         font-size: 0.8rem;
-        transition: all 0.2s ease;
+        transition: transform var(--motion-base) var(--motion-ease),
+                    box-shadow var(--motion-base) var(--motion-ease),
+                    background var(--motion-base) var(--motion-ease),
+                    border-color var(--motion-base) var(--motion-ease);
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        text-align: left !important;
+        justify-content: flex-start !important;
     }
 
     .stButton > button:hover {
@@ -653,6 +1121,20 @@ st.markdown(
         background: transparent;
         border: 1px solid rgba(255, 255, 255, 0.2);
         color: #94a3b8;
+        text-align: left !important;
+        justify-content: flex-start !important;
+    }
+
+    /* Force sidebar buttons to left-align */
+    section[data-testid="stSidebar"] .stButton > button {
+        text-align: left !important;
+        justify-content: flex-start !important;
+        padding-left: 12px !important;
+    }
+    
+    section[data-testid="stSidebar"] .stButton > button p {
+        text-align: left !important;
+        width: 100%;
     }
 
     /* EXPANDER - Compact */
@@ -663,6 +1145,8 @@ st.markdown(
         font-weight: 600;
         font-size: 0.85rem;
         padding: 8px 12px !important;
+        transition: background var(--motion-base) var(--motion-ease),
+                    color var(--motion-base) var(--motion-ease);
     }
 
     .streamlit-expanderHeader:hover {
@@ -673,6 +1157,23 @@ st.markdown(
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         margin-bottom: 6px;
+        transition: border-color var(--motion-base) var(--motion-ease),
+                    box-shadow var(--motion-base) var(--motion-ease);
+    }
+
+    /* Smooth chart/iframe appearance */
+    iframe,
+    .element-container iframe {
+        transition: opacity var(--motion-slow) var(--motion-ease),
+                    transform var(--motion-slow) var(--motion-ease);
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation: none !important;
+            transition: none !important;
+        }
     }
 
     /* SECTION HEADERS - Compact */
@@ -754,13 +1255,68 @@ st.markdown(
     /* Touch-friendly for mobile */
     @media (max-width: 768px) {
         .filter-btn {
-            padding: 10px 14px;
+            padding: 12px 14px;
             font-size: 0.85rem;
+            min-height: 44px;
         }
 
         .stButton > button {
             padding: 10px 18px;
             font-size: 0.85rem;
+            min-height: 44px;
+        }
+
+        /* Better form controls on mobile */
+        div[data-baseweb="select"] > div {
+            min-height: 44px !important;
+            font-size: 16px !important; /* Prevents iOS zoom on focus */
+        }
+
+        input[type="text"],
+        input[type="search"],
+        textarea {
+            font-size: 16px !important; /* Prevents iOS zoom */
+        }
+
+        /* Expander touch targets */
+        .streamlit-expanderHeader {
+            padding: 12px 14px !important;
+            min-height: 44px;
+        }
+
+        /* Make multiselect tags bigger on mobile */
+        div[data-baseweb="tag"] {
+            padding: 6px 10px !important;
+            font-size: 0.8rem !important;
+        }
+
+        /* Improve readability of small text */
+        .stat-label,
+        .legend-text,
+        .info-text {
+            line-height: 1.4;
+        }
+
+        /* Prevent horizontal overflow */
+        .stApp {
+            overflow-x: hidden !important;
+        }
+
+        /* Better plotly chart sizing */
+        .js-plotly-plot,
+        .plotly {
+            width: 100% !important;
+        }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 360px) {
+        .stRadio div[role="radiogroup"] label p {
+            font-size: 0.6rem !important;
+        }
+
+        .stRadio div[role="radiogroup"] label {
+            padding: 4px 8px !important;
         }
     }
     </style>
@@ -926,6 +1482,8 @@ fsgc_logo = get_base64_image("logos/fsgc.png")
 # Render sticky header with HTML and logos
 st.markdown(f"""
 <div class="sticky-header-container">
+    <label class="mobile-menu-btn" for="sidebar-toggle" aria-label="Toggle filters">☰</label>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-checkbox">
     <div class="header-logo">
         <a href="https://www.dsu.mai.gov.ro/" target="_blank" style="display: flex; align-items: center;">
             <img src="data:image/png;base64,{dsu_logo}" alt="DSU" style="height: 50px; width: auto; border-radius: 4px; cursor: pointer;">
@@ -945,6 +1503,66 @@ st.markdown(f"""
     </div>
 </div>
 <div class="sticky-header-spacer"></div>
+""", unsafe_allow_html=True)
+
+# Desktop-only: force sidebar visible
+st.markdown("""
+<style>
+/* Checkbox hack for mobile sidebar toggle */
+.sidebar-checkbox {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    /* When checkbox is checked, show sidebar */
+    .sidebar-checkbox:checked ~ .sticky-header-spacer ~ div section[data-testid="stSidebar"],
+    body:has(.sidebar-checkbox:checked) section[data-testid="stSidebar"] {
+        transform: translateX(0) !important;
+        visibility: visible !important;
+    }
+    
+    /* Add overlay when sidebar is open */
+    body:has(.sidebar-checkbox:checked)::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999997;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Force sidebar visible with JavaScript (desktop only)
+st.markdown("""
+<script>
+// Desktop-only: force sidebar visible
+(function forceSidebarDesktop() {
+    if (window.innerWidth > 768) {
+        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+        if (sidebar) {
+            sidebar.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; width: 21rem !important; margin-left: 0 !important; transform: none !important; position: relative !important;';
+            sidebar.removeAttribute('aria-hidden');
+            sidebar.removeAttribute('data-collapsed');
+            
+            // Hide ALL buttons in sidebar header area
+            const buttons = sidebar.querySelectorAll('button');
+            buttons.forEach(btn => {
+                const parent = btn.parentElement;
+                if (parent && (parent.tagName === 'HEADER' || btn.getAttribute('kind') === 'header')) {
+                    btn.style.display = 'none';
+                    btn.style.visibility = 'hidden';
+                    btn.style.pointerEvents = 'none';
+                }
+            });
+        }
+    }
+    setTimeout(forceSidebarDesktop, 100);
+})();
+</script>
 """, unsafe_allow_html=True)
 
 # Hidden radio for page selection (styled to appear in header area)
@@ -994,16 +1612,16 @@ if page == "Rețea parteneri":
     <div class="stats-overlay">
         <h4>Statistici Rețea</h4>
         <div class="stat-card">
-            <div class="stat-label">Parteneri</div>
             <div class="stat-value">{total_partners}</div>
+            <div class="stat-label">Parteneri</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Domenii</div>
             <div class="stat-value">{total_domains}</div>
+            <div class="stat-label">Domenii</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Conexiuni</div>
             <div class="stat-value">{total_connections}</div>
+            <div class="stat-label">Conexiuni</div>
         </div>
         <div class="legend-section">
             <div class="legend-title">Legendă</div>
@@ -1041,164 +1659,14 @@ if page == "Rețea parteneri":
 
     # Use Streamlit sidebar for filters
     with st.sidebar:
-        # ============================================
-        # INFO SECTION - App description at top
-        # ============================================
-        st.markdown("""
-        <div class="glass-card" style="margin-bottom: 16px;">
-            <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
-                Rețeaua de Parteneri DSU
-            </div>
-            <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 12px;">
-                Vizualizare interactivă a parteneriatelor dintre Departamentul pentru Situații de Urgență
-                și organizațiile care contribuie la răspunsul național în caz de urgență.
-            </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; line-height: 1.6;">
-                <b>Ce puteți afla?</b><br>
-                • Cine sunt partenerii DSU<br>
-                • În ce domenii activează<br>
-                • Care sunt partenerii strategici<br>
-                • Cine ajută în criza din Ucraina
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="info-box" style="margin-bottom: 16px;">
-            <div class="info-title">Cum navigați</div>
-            <div class="info-text">
-                <b>Click</b> pe un nod pentru detalii<br>
-                <b>Scroll</b> pentru zoom<br>
-                <b>Drag</b> pentru a muta vizualizarea
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("---")
-
-        # ============================================
-        # SEARCH SECTION
-        # ============================================
-        st.markdown('<div class="filter-section-title">Caută partener</div>', unsafe_allow_html=True)
-
-        def on_search_change():
-            selected_name = st.session_state["search_box"]
-            found_id = None
-            for nid, info in nodes_data.items():
-                if info["label"] == selected_name:
-                    found_id = nid
-                    break
-            st.session_state["selected_id"] = found_id
-
-        current_idx = None
-        if st.session_state["selected_id"] and st.session_state["selected_id"] in nodes_data:
-            node = nodes_data[st.session_state["selected_id"]]
-            if node["type"] == "Partner" and node.get("parent_id") is None and node["label"] in partner_names:
-                current_idx = partner_names.index(node["label"])
-
-        st.selectbox(
-            "Caută partener:",
-            options=partner_names,
-            index=current_idx,
-            key="search_box",
-            on_change=on_search_change,
-            placeholder="Selectează organizație...",
-            label_visibility="collapsed"
-        )
-
-        st.markdown("---")
-
-        # ============================================
-        # ENTITY TYPE FILTER - Uniform buttons
-        # ============================================
-        st.markdown('<div class="filter-section-title">Sortează după tip</div>', unsafe_allow_html=True)
-
-        if st.session_state.get("entity_filter"):
-            if st.button("✕ Resetează filtrul", key="reset_entity", type="secondary", use_container_width=True):
-                st.session_state["entity_filter"] = None
-                st.rerun()
-
-        for etype, config in ENTITY_TYPES.items():
-            count = entity_counts.get(etype, 0)
-            is_active = st.session_state.get("entity_filter") == etype
-            btn_type = "primary" if is_active else "secondary"
-
-            if st.button(f"{etype} ({count})", key=f"etype_{etype}", type=btn_type, use_container_width=True):
-                if is_active:
-                    st.session_state["entity_filter"] = None
-                else:
-                    st.session_state["entity_filter"] = etype
-                    st.session_state["selected_id"] = None
-                st.rerun()
-
-        st.markdown("---")
-
-        # ============================================
-        # DOMAIN FILTER
-        # ============================================
-        st.markdown('<div class="filter-section-title">Sortează după domeniu</div>', unsafe_allow_html=True)
-
-        c1, c2 = st.columns(2)
-        if c1.button("Toate", use_container_width=True, key="sel_all"):
-            st.session_state["filter_domains"] = all_domain_labels
-            st.rerun()
-        if c2.button("Nimic", use_container_width=True, key="sel_none"):
-            st.session_state["filter_domains"] = []
-            st.rerun()
-
-        current_selection = set(st.session_state["filter_domains"])
-        new_selection = set()
-
-        for group_name, group_domains in DOMAIN_GROUPS.items():
-            available_in_group = [d for d in group_domains if d in all_domain_labels]
-            if available_in_group:
-                with st.expander(f"{group_name}", expanded=False):
-                    sel = st.multiselect(
-                        "Selectează:",
-                        options=available_in_group,
-                        default=[d for d in available_in_group if d in current_selection],
-                        key=f"group_{group_name}",
-                        label_visibility="collapsed"
-                    )
-                    new_selection.update(sel)
-        st.session_state["filter_domains"] = list(new_selection)
-
-        st.markdown("---")
-
-        # ============================================
-        # SPECIAL FILTERS - Strategic & Ukraine
-        # ============================================
-        st.markdown('<div class="filter-section-title">Parteneri speciali</div>', unsafe_allow_html=True)
-
-        is_strat_active = st.session_state.get("special_filter") == "strategic"
-        is_ukr_active = st.session_state.get("special_filter") == "ukraine"
-
-        strat_type = "primary" if is_strat_active else "secondary"
-        if st.button(f"⭐ Parteneri strategici ({strategic_count})", key="btn_strategic", type=strat_type, use_container_width=True):
-            if is_strat_active:
-                st.session_state["special_filter"] = None
-            else:
-                st.session_state["special_filter"] = "strategic"
-                st.session_state["selected_id"] = None
-            st.rerun()
-
-        ukr_type = "primary" if is_ukr_active else "secondary"
-        if st.button(f"🇺🇦 Sprijin Ucraina ({ukraine_count})", key="btn_ukraine", type=ukr_type, use_container_width=True):
-            if is_ukr_active:
-                st.session_state["special_filter"] = None
-            else:
-                st.session_state["special_filter"] = "ukraine"
-                st.session_state["selected_id"] = None
-            st.rerun()
-
-        st.markdown("---")
-
-        # ============================================
-        # SELECTED PARTNER INFO
-        # ============================================
+        # Get selected partner info first
         selected_id = st.session_state["selected_id"]
-
+        
+        # ============================================
+        # CONDITIONAL INFO SECTION
+        # ============================================
         if selected_id and selected_id in nodes_data:
+            # Show "Partener selectat" card when a partner is selected
             st.markdown('<div class="filter-section-title">Partener selectat</div>', unsafe_allow_html=True)
             info = nodes_data[selected_id]
 
@@ -1244,66 +1712,159 @@ if page == "Rețea parteneri":
                 </div>
                 """, unsafe_allow_html=True)
 
-            if st.button("← Înapoi la rețea", use_container_width=True, key="back_btn"):
+            if st.button("← Înapoi la rețea", width="stretch", key="back_btn"):
                 st.session_state["selected_id"] = None
                 st.rerun()
-
-        # ============================================
-        # EXPORT SECTION
-        # ============================================
-        st.markdown("---")
-        st.markdown('<div class="filter-section-title">Exportă date</div>', unsafe_allow_html=True)
-
-        # Get filtered partners based on current filters
-        special_filter = st.session_state.get("special_filter")
-        entity_filter = st.session_state.get("entity_filter")
-        domain_filter = st.session_state.get("filter_domains", all_domain_labels)
-
-        filtered_partners = []
-        for nid, info in nodes_data.items():
-            if info["type"] == "Partner" and info.get("parent_id") is None:
-                # Check special filter
-                if special_filter == "strategic" and not info.get("strategic"):
-                    continue
-                if special_filter == "ukraine" and not info.get("ukraine"):
-                    continue
-
-                # Check entity filter
-                if entity_filter:
-                    if classify_entity_type(info["label"]) != entity_filter:
-                        continue
-
-                # Check domain filter
-                partner_domains = [nodes_data[t]["label"] for s, t in edges_data if s == nid and t in nodes_data and nodes_data[t]["type"] == "Domain"]
-                if domain_filter and not any(d in domain_filter for d in partner_domains):
-                    continue
-
-                filtered_partners.append({
-                    "Nume": info["label"],
-                    "Tip": classify_entity_type(info["label"]),
-                    "Strategic": "Da" if info.get("strategic") else "Nu",
-                    "Sprijin Ucraina": "Da" if info.get("ukraine") else "Nu",
-                    "Domenii": ", ".join(partner_domains),
-                    "Descriere": info.get("description", "")
-                })
-
-        # Create DataFrame for export
-        if filtered_partners:
-            export_df = pd.DataFrame(filtered_partners)
-
-            # CSV Export
-            csv_data = export_df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label=f"📥 Descarcă CSV ({len(filtered_partners)} parteneri)",
-                data=csv_data,
-                file_name="parteneri_dsu.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-
-            st.caption("Descarcă lista partenerilor afișați în format CSV.")
+                
+            st.markdown("---")
         else:
-            st.caption("Niciun partener de exportat cu filtrele curente.")
+            # Show default info cards when no partner is selected
+            st.markdown("""
+            <div class="glass-card" style="margin-bottom: 16px;">
+                <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
+                    Rețeaua de Parteneri DSU
+                </div>
+                <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 12px;">
+                    Vizualizare interactivă a parteneriatelor dintre Departamentul pentru Situații de Urgență
+                    și organizațiile care contribuie la răspunsul național în caz de urgență.
+                </div>
+                <div style="font-size: 0.75rem; color: #94a3b8; line-height: 1.6;">
+                    <b>Ce puteți afla?</b><br>
+                    • Cine sunt partenerii DSU<br>
+                    • În ce domenii activează<br>
+                    • Care sunt partenerii strategici<br>
+                    • Cine ajută în criza din Ucraina
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("""
+            <div class="info-box" style="margin-bottom: 16px;">
+                <div class="info-title">Cum navigați</div>
+                <div class="info-text">
+                    <b>Click</b> pe un nod pentru detalii<br>
+                    <b>Scroll</b> pentru zoom<br>
+                    <b>Drag</b> pentru a muta vizualizarea
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("---")
+
+        # ============================================
+        # SEARCH SECTION
+        # ============================================
+        st.markdown('<div class="filter-section-title">Caută partener</div>', unsafe_allow_html=True)
+
+        def on_search_change():
+            selected_name = st.session_state["search_box"]
+            found_id = None
+            for nid, info in nodes_data.items():
+                if info["label"] == selected_name:
+                    found_id = nid
+                    break
+            st.session_state["selected_id"] = found_id
+
+        current_idx = None
+        if st.session_state["selected_id"] and st.session_state["selected_id"] in nodes_data:
+            node = nodes_data[st.session_state["selected_id"]]
+            if node["type"] == "Partner" and node.get("parent_id") is None and node["label"] in partner_names:
+                current_idx = partner_names.index(node["label"])
+
+        st.selectbox(
+            "Caută partener:",
+            options=partner_names,
+            index=current_idx,
+            key="search_box",
+            on_change=on_search_change,
+            placeholder="Selectează organizație...",
+            label_visibility="collapsed"
+        )
+
+        st.markdown("---")
+
+        # ============================================
+        # ENTITY TYPE FILTER - Uniform buttons
+        # ============================================
+        st.markdown('<div class="filter-section-title">Sortează după tip</div>', unsafe_allow_html=True)
+
+        if st.session_state.get("entity_filter"):
+            if st.button("✕ Resetează filtrul", key="reset_entity", type="secondary", width="stretch"):
+                st.session_state["entity_filter"] = None
+                st.rerun()
+
+        for etype, config in ENTITY_TYPES.items():
+            count = entity_counts.get(etype, 0)
+            is_active = st.session_state.get("entity_filter") == etype
+            btn_type = "primary" if is_active else "secondary"
+
+            if st.button(f"{etype} ({count})", key=f"etype_{etype}", type=btn_type, width="stretch"):
+                if is_active:
+                    st.session_state["entity_filter"] = None
+                else:
+                    st.session_state["entity_filter"] = etype
+                    st.session_state["selected_id"] = None
+                st.rerun()
+
+        st.markdown("---")
+
+        # ============================================
+        # DOMAIN FILTER
+        # ============================================
+        st.markdown('<div class="filter-section-title">Sortează după domeniu</div>', unsafe_allow_html=True)
+
+        c1, c2 = st.columns(2)
+        if c1.button("Toate", width="stretch", key="sel_all"):
+            st.session_state["filter_domains"] = all_domain_labels
+            st.rerun()
+        if c2.button("Nimic", width="stretch", key="sel_none"):
+            st.session_state["filter_domains"] = []
+            st.rerun()
+
+        current_selection = set(st.session_state["filter_domains"])
+        new_selection = set()
+
+        for group_name, group_domains in DOMAIN_GROUPS.items():
+            available_in_group = [d for d in group_domains if d in all_domain_labels]
+            if available_in_group:
+                with st.expander(f"{group_name}", expanded=False):
+                    sel = st.multiselect(
+                        "Selectează:",
+                        options=available_in_group,
+                        default=[d for d in available_in_group if d in current_selection],
+                        key=f"group_{group_name}",
+                        label_visibility="collapsed"
+                    )
+                    new_selection.update(sel)
+        st.session_state["filter_domains"] = list(new_selection)
+
+        st.markdown("---")
+
+        # ============================================
+        # SPECIAL FILTERS - Strategic & Ukraine
+        # ============================================
+        st.markdown('<div class="filter-section-title">Parteneri speciali</div>', unsafe_allow_html=True)
+
+        is_strat_active = st.session_state.get("special_filter") == "strategic"
+        is_ukr_active = st.session_state.get("special_filter") == "ukraine"
+
+        strat_type = "primary" if is_strat_active else "secondary"
+        if st.button(f"⭐ Parteneri strategici ({strategic_count})", key="btn_strategic", type=strat_type, width="stretch"):
+            if is_strat_active:
+                st.session_state["special_filter"] = None
+            else:
+                st.session_state["special_filter"] = "strategic"
+                st.session_state["selected_id"] = None
+            st.rerun()
+
+        ukr_type = "primary" if is_ukr_active else "secondary"
+        if st.button(f"🇺🇦 Sprijin Ucraina ({ukraine_count})", key="btn_ukraine", type=ukr_type, width="stretch"):
+            if is_ukr_active:
+                st.session_state["special_filter"] = None
+            else:
+                st.session_state["special_filter"] = "ukraine"
+                st.session_state["selected_id"] = None
+            st.rerun()
 
     # Main content - Full width graph (outside sidebar)
     final_nodes = []
@@ -1438,7 +1999,7 @@ if page == "Rețea parteneri":
         domain_list = list(visible_domain_ids)
         num_domains = len(domain_list)
         cols = 1
-        spacing = 400
+        spacing = 250
 
         if num_domains > 0:
             cols = math.ceil(math.sqrt(num_domains))
@@ -1469,11 +2030,11 @@ if page == "Rețea parteneri":
                 col = domain_idx % cols
                 base_x = (col - cols / 2) * spacing
                 base_y = (row - rows / 2) * spacing
-                x = base_x + random.uniform(-150, 150)
-                y = base_y + random.uniform(-150, 150)
+                x = base_x + random.uniform(-100, 100)
+                y = base_y + random.uniform(-100, 100)
             else:
-                x = random.uniform(-400, 400)
-                y = random.uniform(-400, 400)
+                x = random.uniform(-250, 250)
+                y = random.uniform(-250, 250)
 
             label = info["label"][:20] + "..." if len(info["label"]) > 20 else info["label"]
 
@@ -1522,7 +2083,16 @@ if page == "Rețea parteneri":
 
 elif page == "Statistici":
     # Add padding class for this page
-    st.markdown('<style>.stApp .main .block-container { padding-left: 2rem !important; padding-right: 2rem !important; max-width: 1400px !important; margin: 0 auto !important; }</style>', unsafe_allow_html=True)
+    st.markdown('''
+    <style>
+    [data-testid="stMainBlockContainer"] {
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+    }
+    </style>
+    ''', unsafe_allow_html=True)
 
     st.markdown("### DSU în cifre")
     st.markdown("""
@@ -1624,7 +2194,7 @@ elif page == "Statistici":
                 fig_main.add_trace(go.Scatter(x=D["interv"]['An'], y=D["interv"]['Interventii'], name='Intervenții Reale', line=dict(color='#dc2626', width=3), mode='lines+markers'))
                 fig_main.add_trace(go.Scatter(x=D["apeluri"]['An'], y=D["apeluri"]['Apeluri'], name='Apeluri 112', line=dict(color='#3b82f6', width=3), mode='lines+markers'))
                 fig_main.update_layout(height=380, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"), legend=dict(orientation="h", y=1.1))
-                st.plotly_chart(fig_main, use_container_width=True)
+                st.plotly_chart(fig_main, width="stretch")
                 
             with c2:
                 st.subheader("Distribuția misiunilor IGSU")
@@ -1634,7 +2204,7 @@ elif page == "Statistici":
                     fig_pie = px.pie(D["igsu"], values="Număr", names="Subcategorie", hole=0.5, color_discrete_sequence=px.colors.sequential.RdBu)
                     fig_pie.update_traces(textposition='outside', textinfo='percent+label')
                     fig_pie.update_layout(height=380, paper_bgcolor="rgba(0,0,0,0)", showlegend=False, font=dict(color="white"))
-                    st.plotly_chart(fig_pie, use_container_width=True)
+                    st.plotly_chart(fig_pie, width="stretch")
 
         # ==========================================
         # TAB 2: MEDICAL & AVIAȚIE
@@ -1658,7 +2228,7 @@ elif page == "Statistici":
                     fig_upu = px.area(D["upu"], x="An", y="Prezentări în UPU")
                     fig_upu.update_traces(line_color="#10b981", fillcolor="rgba(16, 185, 129, 0.2)")
                     fig_upu.update_layout(height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
-                    st.plotly_chart(fig_upu, use_container_width=True)
+                    st.plotly_chart(fig_upu, width="stretch")
             
             with m2:
                 st.subheader("Activitatea aeriană de salvare")
@@ -1668,7 +2238,7 @@ elif page == "Statistici":
                     fig_zbor = px.bar(D["zbor"], x="An", y="Ore de zbor", text="Ore de zbor")
                     fig_zbor.update_traces(marker_color="#f59e0b", textposition='outside')
                     fig_zbor.update_layout(height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"), yaxis=dict(showgrid=False))
-                    st.plotly_chart(fig_zbor, use_container_width=True)
+                    st.plotly_chart(fig_zbor, width="stretch")
 
         # ==========================================
         # TAB 3: PREVENIRE & PARTENERI
@@ -1734,7 +2304,7 @@ elif page == "Statistici":
                         font=dict(color="white"),
                         margin={"r":0,"t":0,"l":0,"b":0}
                     )
-                    st.plotly_chart(fig_choropleth, use_container_width=True)
+                    st.plotly_chart(fig_choropleth, width="stretch")
             
             with p2:
                 # --- REDESIGN: Arii de expertiza (Bar Chart in loc de Pie) ---
@@ -1764,7 +2334,7 @@ elif page == "Statistici":
                         showlegend=False,
                         coloraxis_showscale=False
                     )
-                    st.plotly_chart(fig_exp, use_container_width=True)
+                    st.plotly_chart(fig_exp, width="stretch")
                 
                 st.divider()
 
@@ -1789,7 +2359,7 @@ elif page == "Statistici":
                         yaxis_title="Protocoale Noi",
                         margin={"l":0, "r":0, "b":0, "t":10}
                     )
-                    st.plotly_chart(fig_proto, use_container_width=True)
+                    st.plotly_chart(fig_proto, width="stretch")
 
 
 # ---------------------------------
@@ -1798,7 +2368,16 @@ elif page == "Statistici":
 
 elif page == "Despre proiect":
     # Add padding class for this page
-    st.markdown('<style>.stApp .main .block-container { padding-left: 2rem !important; padding-right: 2rem !important; max-width: 1400px !important; margin: 0 auto !important; }</style>', unsafe_allow_html=True)
+    st.markdown('''
+    <style>
+    [data-testid="stMainBlockContainer"] {
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+    }
+    </style>
+    ''', unsafe_allow_html=True)
 
     st.markdown("### Despre acest proiect")
 
