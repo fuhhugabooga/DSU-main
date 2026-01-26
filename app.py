@@ -579,15 +579,15 @@ st.markdown(
     .stats-overlay {
         position: fixed;
         top: 80px;
-        right: 20px;
-        width: 200px;
+        right: 16px;
+        width: 180px;
         background: rgba(10, 14, 26, 0.92);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 16px;
-        padding: 14px;
+        border-radius: 14px;
+        padding: 10px;
         z-index: 1000;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
         transition: transform var(--motion-base) var(--motion-ease),
                     opacity var(--motion-base) var(--motion-ease),
                     box-shadow var(--motion-base) var(--motion-ease);
@@ -595,23 +595,31 @@ st.markdown(
 
     .stats-overlay h4 {
         color: #ffffff;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
         text-align: center;
-        padding-bottom: 8px;
+        padding-bottom: 6px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stats-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
     }
 
     .stat-card {
         background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(153, 27, 27, 0.08) 100%);
         border: 1px solid rgba(220, 38, 38, 0.2);
-        border-radius: 10px;
-        padding: 10px;
-        margin-bottom: 8px;
+        border-radius: 9px;
+        padding: 8px 9px;
+        margin-bottom: 0;
         text-align: left;
+        flex: 1 1 72px;
+        min-width: 72px;
     }
 
     .stat-card:last-of-type {
@@ -628,12 +636,12 @@ st.markdown(
 
     .stat-value {
         color: #ffffff;
-        font-size: 1.4rem;
+        font-size: 1.1rem;
         font-weight: 700;
         background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        line-height: 1.2;
+        line-height: 1.1;
     }
 
     .legend-section {
@@ -1417,10 +1425,6 @@ nodes_data, edges_data, df, all_domain_labels, fonss_id = load_data()
 # 3. NAVIGATION - Sticky Header with Navigation
 # ---------------------------------
 
-# Initialize page state
-if "current_page" not in st.session_state:
-    st.session_state["current_page"] = "Ecosistem parteneri"
-
 # Load logos as base64
 dsu_logo = get_base64_image("logos/dsu.png")
 uvt_logo = get_base64_image("logos/uvt.png")
@@ -1494,17 +1498,19 @@ if page == "Rețea parteneri":
     st.markdown(f"""
     <div class="stats-overlay">
         <h4>Statistici Rețea</h4>
-        <div class="stat-card">
-            <div class="stat-value">{total_partners}</div>
-            <div class="stat-label">Parteneri</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value">{total_domains}</div>
-            <div class="stat-label">Domenii</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value">{total_connections}</div>
-            <div class="stat-label">Conexiuni</div>
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value">{total_partners}</div>
+                <div class="stat-label">Parteneri</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{total_domains}</div>
+                <div class="stat-label">Domenii</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{total_connections}</div>
+                <div class="stat-label">Conexiuni</div>
+            </div>
         </div>
         <div class="legend-section">
             <div class="legend-title">Legendă</div>
@@ -1571,17 +1577,120 @@ if page == "Rețea parteneri":
     </div>
     """, unsafe_allow_html=True)
 
-    # Use Streamlit sidebar for filters (desktop)
-    with st.sidebar:
-        # Get selected partner info first
-        selected_id = st.session_state["selected_id"]
-        
-        # ============================================
-        # CONDITIONAL INFO SECTION
-        # ============================================
-        if selected_id and selected_id in nodes_data:
-            # Show "Partener selectat" card when a partner is selected
-            st.markdown('<div class="filter-section-title">Partener selectat</div>', unsafe_allow_html=True)
+    # Filters bar (under the menu)
+    st.markdown('<div class="filter-section-title">Filtre</div>', unsafe_allow_html=True)
+
+    def on_search_change():
+        selected_name = st.session_state["search_box"]
+        found_id = None
+        for nid, info in nodes_data.items():
+            if info["label"] == selected_name:
+                found_id = nid
+                break
+        st.session_state["selected_id"] = found_id
+
+    def on_entity_change():
+        selected = st.session_state["entity_filter_select"]
+        st.session_state["entity_filter"] = None if selected == "Toate tipurile" else selected
+        st.session_state["selected_id"] = None
+
+    def on_special_change():
+        selected = st.session_state["special_filter_select"]
+        mapping = {
+            "Toți partenerii": None,
+            "⭐ Parteneri strategici": "strategic",
+            "🇺🇦 Sprijin Ucraina": "ukraine"
+        }
+        st.session_state["special_filter"] = mapping.get(selected)
+        st.session_state["selected_id"] = None
+
+    def on_domains_change():
+        st.session_state["filter_domains"] = st.session_state["domain_filter_select"]
+
+    current_idx = None
+    if st.session_state["selected_id"] and st.session_state["selected_id"] in nodes_data:
+        node = nodes_data[st.session_state["selected_id"]]
+        if node["type"] == "Partner" and node.get("parent_id") is None and node["label"] in partner_names:
+            current_idx = partner_names.index(node["label"])
+
+    entity_options = ["Toate tipurile"] + list(ENTITY_TYPES.keys())
+    default_entity = st.session_state.get("entity_filter") or "Toate tipurile"
+    entity_index = entity_options.index(default_entity) if default_entity in entity_options else 0
+
+    special_options = ["Toți partenerii", "⭐ Parteneri strategici", "🇺🇦 Sprijin Ucraina"]
+    current_special = st.session_state.get("special_filter")
+    if current_special == "strategic":
+        special_index = 1
+    elif current_special == "ukraine":
+        special_index = 2
+    else:
+        special_index = 0
+
+    c_search, c_entity, c_special, c_domains = st.columns([1.3, 1.1, 1.1, 1.5])
+
+    with c_search:
+        st.markdown('<div class="filter-section-title" style="margin-top: 0;">Caută partener</div>', unsafe_allow_html=True)
+        st.selectbox(
+            "Caută partener:",
+            options=partner_names,
+            index=current_idx,
+            key="search_box",
+            on_change=on_search_change,
+            placeholder="Selectează organizație...",
+            label_visibility="collapsed"
+        )
+
+    with c_entity:
+        st.markdown('<div class="filter-section-title" style="margin-top: 0;">Tip organizație</div>', unsafe_allow_html=True)
+        st.selectbox(
+            "Tip organizație:",
+            options=entity_options,
+            index=entity_index,
+            key="entity_filter_select",
+            on_change=on_entity_change,
+            format_func=lambda x: x if x == "Toate tipurile" else f"{x} ({entity_counts.get(x, 0)})",
+            label_visibility="collapsed"
+        )
+
+    with c_special:
+        st.markdown('<div class="filter-section-title" style="margin-top: 0;">Parteneri speciali</div>', unsafe_allow_html=True)
+        st.selectbox(
+            "Parteneri speciali:",
+            options=special_options,
+            index=special_index,
+            key="special_filter_select",
+            on_change=on_special_change,
+            label_visibility="collapsed"
+        )
+
+    with c_domains:
+        st.markdown('<div class="filter-section-title" style="margin-top: 0;">Domenii</div>', unsafe_allow_html=True)
+        with st.expander("Selectează domenii", expanded=False):
+            d1, d2 = st.columns(2)
+            if d1.button("Toate", use_container_width=True, key="sel_all"):
+                st.session_state["filter_domains"] = all_domain_labels
+                st.session_state["domain_filter_select"] = all_domain_labels
+                st.rerun()
+            if d2.button("Nimic", use_container_width=True, key="sel_none"):
+                st.session_state["filter_domains"] = []
+                st.session_state["domain_filter_select"] = []
+                st.rerun()
+
+            st.multiselect(
+                "Domenii:",
+                options=all_domain_labels,
+                default=st.session_state["filter_domains"],
+                key="domain_filter_select",
+                on_change=on_domains_change,
+                label_visibility="collapsed"
+            )
+
+    st.divider()
+
+    # Selected info and guidance section
+    selected_id = st.session_state["selected_id"]
+    if selected_id and selected_id in nodes_data:
+        with st.expander("Detalii selecție", expanded=True):
             info = nodes_data[selected_id]
 
             if info["type"] == "Partner":
@@ -1599,7 +1708,6 @@ if page == "Rețea parteneri":
                     my_domains = [nodes_data[t]["label"] for s, t in edges_data if s == selected_id and t in nodes_data]
                     tags_html = "".join([f'<span class="tag-domain">{d}</span>' for d in sorted(set(my_domains))])
 
-                # Get entity type for display
                 entity_type = classify_entity_type(info['label'])
 
                 st.markdown(f"""
@@ -1629,10 +1737,9 @@ if page == "Rețea parteneri":
             if st.button("← Înapoi la rețea", use_container_width=True, key="back_btn"):
                 st.session_state["selected_id"] = None
                 st.rerun()
-                
-            st.markdown("---")
-        else:
-            # Show default info cards when no partner is selected
+    else:
+        c_info, c_help = st.columns([1.4, 1])
+        with c_info:
             st.markdown("""
             <div class="glass-card" style="margin-bottom: 16px;">
                 <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
@@ -1652,133 +1759,19 @@ if page == "Rețea parteneri":
             </div>
             """, unsafe_allow_html=True)
 
+        with c_help:
             st.markdown("""
             <div class="info-box" style="margin-bottom: 16px;">
                 <div class="info-title">Cum navigați</div>
                 <div class="info-text">
                     <b>Click</b> pe un nod pentru detalii<br>
-                    <b>Scroll</b> pentru zoom<br>
-                    <b>Drag</b> pentru a muta vizualizarea
+                    <b>Hover</b> pentru conexiuni<br>
+                    Vizualizarea este adaptată automat la ecran
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            st.markdown("---")
-
-        # ============================================
-        # SEARCH SECTION
-        # ============================================
-        st.markdown('<div class="filter-section-title">Caută partener</div>', unsafe_allow_html=True)
-
-        def on_search_change():
-            selected_name = st.session_state["search_box"]
-            found_id = None
-            for nid, info in nodes_data.items():
-                if info["label"] == selected_name:
-                    found_id = nid
-                    break
-            st.session_state["selected_id"] = found_id
-
-        current_idx = None
-        if st.session_state["selected_id"] and st.session_state["selected_id"] in nodes_data:
-            node = nodes_data[st.session_state["selected_id"]]
-            if node["type"] == "Partner" and node.get("parent_id") is None and node["label"] in partner_names:
-                current_idx = partner_names.index(node["label"])
-
-        st.selectbox(
-            "Caută partener:",
-            options=partner_names,
-            index=current_idx,
-            key="search_box",
-            on_change=on_search_change,
-            placeholder="Selectează organizație...",
-            label_visibility="collapsed"
-        )
-
-        st.markdown("---")
-
-        # ============================================
-        # ENTITY TYPE FILTER - Uniform buttons
-        # ============================================
-        st.markdown('<div class="filter-section-title">Sortează după tip</div>', unsafe_allow_html=True)
-
-        if st.session_state.get("entity_filter"):
-            if st.button("✕ Resetează filtrul", key="reset_entity", type="secondary", use_container_width=True):
-                st.session_state["entity_filter"] = None
-                st.rerun()
-
-        for etype, config in ENTITY_TYPES.items():
-            count = entity_counts.get(etype, 0)
-            is_active = st.session_state.get("entity_filter") == etype
-            btn_type = "primary" if is_active else "secondary"
-
-            if st.button(f"{etype} ({count})", key=f"etype_{etype}", type=btn_type, use_container_width=True):
-                if is_active:
-                    st.session_state["entity_filter"] = None
-                else:
-                    st.session_state["entity_filter"] = etype
-                    st.session_state["selected_id"] = None
-                st.rerun()
-
-        st.markdown("---")
-
-        # ============================================
-        # DOMAIN FILTER
-        # ============================================
-        st.markdown('<div class="filter-section-title">Sortează după domeniu</div>', unsafe_allow_html=True)
-
-        c1, c2 = st.columns(2)
-        if c1.button("Toate", use_container_width=True, key="sel_all"):
-            st.session_state["filter_domains"] = all_domain_labels
-            st.rerun()
-        if c2.button("Nimic", use_container_width=True, key="sel_none"):
-            st.session_state["filter_domains"] = []
-            st.rerun()
-
-        current_selection = set(st.session_state["filter_domains"])
-        new_selection = set()
-
-        for group_name, group_domains in DOMAIN_GROUPS.items():
-            available_in_group = [d for d in group_domains if d in all_domain_labels]
-            if available_in_group:
-                with st.expander(f"{group_name}", expanded=False):
-                    sel = st.multiselect(
-                        "Selectează:",
-                        options=available_in_group,
-                        default=[d for d in available_in_group if d in current_selection],
-                        key=f"group_{group_name}",
-                        label_visibility="collapsed"
-                    )
-                    new_selection.update(sel)
-        st.session_state["filter_domains"] = list(new_selection)
-
-        st.markdown("---")
-
-        # ============================================
-        # SPECIAL FILTERS - Strategic & Ukraine
-        # ============================================
-        st.markdown('<div class="filter-section-title">Parteneri speciali</div>', unsafe_allow_html=True)
-
-        is_strat_active = st.session_state.get("special_filter") == "strategic"
-        is_ukr_active = st.session_state.get("special_filter") == "ukraine"
-
-        strat_type = "primary" if is_strat_active else "secondary"
-        if st.button(f"⭐ Parteneri strategici ({strategic_count})", key="btn_strategic", type=strat_type, use_container_width=True):
-            if is_strat_active:
-                st.session_state["special_filter"] = None
-            else:
-                st.session_state["special_filter"] = "strategic"
-                st.session_state["selected_id"] = None
-            st.rerun()
-
-        ukr_type = "primary" if is_ukr_active else "secondary"
-        if st.button(f"🇺🇦 Sprijin Ucraina ({ukraine_count})", key="btn_ukraine", type=ukr_type, use_container_width=True):
-            if is_ukr_active:
-                st.session_state["special_filter"] = None
-            else:
-                st.session_state["special_filter"] = "ukraine"
-                st.session_state["selected_id"] = None
-            st.rerun()
+    st.divider()
 
     # Main content - Full width graph (outside sidebar)
     final_nodes = []
@@ -1829,6 +1822,7 @@ if page == "Rețea parteneri":
             shape="dot" if info_hub["type"] == "Partner" else "diamond",
             color="#dc2626",
             font=hub_font_style,
+            title=info_hub["label"],
             x=0, y=0, fixed=True
         ))
 
@@ -1854,6 +1848,7 @@ if page == "Rețea parteneri":
                 id=nid, label=label, size=22,
                 shape="dot" if info["type"] == "Partner" else "diamond",
                 color=color, font=common_font_style,
+                title=info["label"],
                 x=pos_x, y=pos_y, fixed=True
             ))
 
@@ -1869,7 +1864,10 @@ if page == "Rețea parteneri":
             height=850,
             directed=False,
             physics=False,
-            hierarchical=False
+            hierarchical=False,
+            nodeHighlightBehavior=True,
+            highlightColor="#dc2626",
+            interaction={"dragView": False, "zoomView": False, "dragNodes": False}
         )
 
     else:
@@ -1930,6 +1928,7 @@ if page == "Rețea parteneri":
                 final_nodes.append(Node(
                     id=nid, label=label, size=30,
                     shape="diamond", color="#dc2626", font=hub_font_style,
+                    title=nodes_data[nid]["label"],
                     x=x, y=y
                 ))
 
@@ -1955,6 +1954,7 @@ if page == "Rețea parteneri":
             final_nodes.append(Node(
                 id=nid, label=label, size=20,
                 shape="dot", color=color, font=common_font_style,
+                title=info["label"],
                 x=x, y=y
             ))
 
@@ -1970,7 +1970,10 @@ if page == "Rețea parteneri":
             height=850,
             directed=False,
             physics=True,
-            hierarchical=False
+            hierarchical=False,
+            nodeHighlightBehavior=True,
+            highlightColor="#dc2626",
+            interaction={"dragView": False, "zoomView": False, "dragNodes": False}
         )
 
     # Check if a node is selected for mobile layout
@@ -2096,7 +2099,7 @@ if page == "Rețea parteneri":
 
         /* Add touch hint below the graph */
         .stElementContainer:has(iframe[title="streamlit_agraph.agraph"])::after {
-            content: "Ciupiți pentru zoom • Trageți pentru a muta";
+            content: "Atingeți un nod pentru detalii";
             position: absolute;
             bottom: 8px;
             left: 50%;
@@ -2491,7 +2494,6 @@ elif page == "Statistici":
                 )])
 
                 # Adăugăm hover customizat pentru link-uri
-                hover_texts = [f"{row['Sursa']} → {row['Destinatar']}<br><b>{row['Actiune']}</b>" for _, row in df_flux.iterrows()]
                 fig_sankey.data[0].link.customdata = df_flux['Actiune'].tolist()
                 fig_sankey.data[0].link.hovertemplate = '%{source.label} → %{target.label}<br><b>%{customdata}</b><extra></extra>'
 
@@ -2534,7 +2536,6 @@ elif page == "Statistici":
                     fig_timpi = go.Figure()
 
                     # Stacked horizontal bar - fiecare etapă este un segment
-                    cumsum = 0
                     for _, row in df_timpi.iterrows():
                         etapa = row['Etapa']
                         durata = row['Durata_Min']

@@ -1,27 +1,27 @@
 # Copilot instructions for DSU
 
 ## Project overview
-- This is a single-page Streamlit app in `app.py` that renders three pages via a header `st.radio`: **Rețea parteneri**, **Statistici**, **Despre proiect**.
-- The app is highly CSS‑driven: large inline `<style>` blocks shape layout, mobile behavior, and a sticky header.
+- Single-file Streamlit app: [app.py](app.py) renders **Rețea parteneri**, **Statistici**, **Despre proiect** via a header `st.radio`.
+- The UI is CSS-driven with large inline `<style>` blocks for sticky header, responsive layout, and mobile behavior. Preserve these blocks unless asked to redesign.
 
 ## Data & assets
-- Partner network data loads from root `data.csv` (not the `data/` folder). The `load_data()` function expects columns like `Partner`, `Domain_Raw`, `Ukraine`, `Strategic`, `Description`.
-- Optional enrichment: `membrii_fonss.csv` is used to attach FONSS members under `FONSS_PARENT_NAME` in `load_data()`.
-- Statistics pages read CSVs from `data/` (e.g. `interventii_ambulanta.csv`, `apeluri_urgenta.csv`, `timp_raspuns.csv`, `situatii_igsu.csv`, `arii_expertiza.csv`, etc.) via `load_all_stats()`.
-- Logos are loaded as base64 from `logos/dsu.png`, `logos/uvt.png`, `logos/fsgc.png` using `get_base64_image()`.
+- Network data loads from root [data.csv](data.csv) in `load_data()` (not the [data/](data/) folder). Expected columns: `Partner`, `Domain_Raw`, `Ukraine`, `Strategic`, `Description`.
+- Optional enrichment from [membrii_fonss.csv](membrii_fonss.csv): members attach under `FONSS_PARENT_NAME` with `parent_id`.
+- Statistics read multiple CSVs under [data/](data/) via `load_all_stats()` (e.g., `interventii_ambulanta.csv`, `apeluri_urgenta.csv`, `timp_raspuns.csv`, `situatii_igsu.csv`, `arii_expertiza.csv`).
+- Logos are embedded as base64 from [logos/](logos/) using `get_base64_image()`.
 
 ## Key flows & patterns
-- Network graph nodes/edges are computed in `load_data()` and cached with `@st.cache_data`; domains are normalized via `clean_domains()` + `map_domain_category()`.
-- Partner type coloring is derived from name patterns in `ENTITY_TYPES`; keep this logic in `classify_entity_type()` / `get_entity_color()`.
-- Filters and selected state live in `st.session_state` (`selected_id`, `filter_domains`, `special_filter`, `entity_filter`).
-- The Stats page uses Plotly (`px`/`go`) and a remote Romania GeoJSON URL in `get_romania_geojson()`.
+- Graph nodes/edges are computed once in `load_data()` with `@st.cache_data`. Domains are normalized by `clean_domains()` and `map_domain_category()`.
+- Partner type coloring is driven by `ENTITY_TYPES` keywords via `classify_entity_type()` and `get_entity_color()`.
+- Filters and selection live in `st.session_state` (`selected_id`, `filter_domains`, `special_filter`, `entity_filter`). Actions typically set state then call `st.rerun()`.
+- Two graph modes: focused radial view when a node is selected; clustered view by domain otherwise. See the agraph setup in [app.py](app.py).
+- Stats page uses Plotly (`px`/`go`) and a remote Romania GeoJSON in `get_romania_geojson()`.
 
 ## Developer workflow
-- Install dependencies from `requirements.txt` (`streamlit`, `pandas`, `streamlit-agraph`).
-- Run from repo root so relative data paths resolve:
-  - `streamlit run app.py`
+- Install deps from [requirements.txt](requirements.txt): `streamlit`, `pandas`, `streamlit-agraph`, `plotly`.
+- Run from repo root so relative data paths resolve: `streamlit run app.py`.
 
-## Conventions specific to this repo
-- Keep the app as a single-file Streamlit script (`app.py`) unless explicitly asked to refactor.
-- Preserve the inline CSS blocks; many layout behaviors rely on specific selectors and media queries.
-- When editing data logic, ensure `data.csv` and `data/` paths remain relative (no absolute paths).
+## Repo-specific conventions
+- Keep the app as a single Streamlit script unless explicitly asked to refactor.
+- Preserve existing CSS selectors; many layout behaviors depend on them (sticky header, mobile overlays, agraph sizing).
+- Keep `data.csv` and [data/](data/) paths relative (no absolute paths).
