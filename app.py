@@ -1197,6 +1197,40 @@ st.markdown(
         flex-shrink: 0;
     }
 
+    /* FILTER BAR (top) */
+    .filter-bar {
+        background: rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 14px 14px 10px 14px;
+        margin: 10px 12px 12px 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .filter-bar .filter-section-title {
+        margin-top: 0 !important;
+        margin-bottom: 6px !important;
+        font-size: 0.7rem;
+        letter-spacing: 0.6px;
+    }
+
+    .filter-bar div[data-baseweb="select"] > div {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        border-radius: 12px !important;
+        min-height: 42px !important;
+    }
+
+    .filter-bar details[data-testid="stExpander"] {
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        background: rgba(255, 255, 255, 0.03) !important;
+    }
+
+    .filter-bar .streamlit-expanderHeader {
+        font-size: 0.8rem !important;
+        padding: 8px 10px !important;
+    }
+
     /* Multiselect compact */
     div[data-baseweb="select"] {
         font-size: 0.8rem !important;
@@ -1578,6 +1612,7 @@ if page == "Rețea parteneri":
     """, unsafe_allow_html=True)
 
     # Filters bar (under the menu)
+    st.markdown('<div class="filter-bar">', unsafe_allow_html=True)
     st.markdown('<div class="filter-section-title">Filtre</div>', unsafe_allow_html=True)
 
     def on_search_change():
@@ -1685,6 +1720,7 @@ if page == "Rețea parteneri":
                 label_visibility="collapsed"
             )
 
+    st.markdown('</div>', unsafe_allow_html=True)
     st.divider()
 
     # Selected info and guidance section
@@ -1818,7 +1854,7 @@ if page == "Rețea parteneri":
         final_nodes.append(Node(
             id=hub_id,
             label=info_hub["label"][:30] + "..." if len(info_hub["label"]) > 30 else info_hub["label"],
-            size=40,
+            size=48,
             shape="dot" if info_hub["type"] == "Partner" else "diamond",
             color="#dc2626",
             font=hub_font_style,
@@ -1827,7 +1863,7 @@ if page == "Rețea parteneri":
         ))
 
         count = len(leaf_ids)
-        radius = 300
+        radius = 220
 
         for i, nid in enumerate(leaf_ids):
             info = nodes_data[nid]
@@ -1845,7 +1881,7 @@ if page == "Rețea parteneri":
             label = info["label"][:25] + "..." if len(info["label"]) > 25 else info["label"]
 
             final_nodes.append(Node(
-                id=nid, label=label, size=22,
+                id=nid, label=label, size=26,
                 shape="dot" if info["type"] == "Partner" else "diamond",
                 color=color, font=common_font_style,
                 title=info["label"],
@@ -1867,7 +1903,25 @@ if page == "Rețea parteneri":
             hierarchical=False,
             nodeHighlightBehavior=True,
             highlightColor="#dc2626",
-            interaction={"dragView": False, "zoomView": False, "dragNodes": False}
+            interaction={
+                "dragView": False,
+                "zoomView": False,
+                "dragNodes": False,
+                "hover": True,
+                "hoverConnectedEdges": True
+            },
+            nodes={
+                "color": {
+                    "highlight": "#f87171",
+                    "hover": "#f87171"
+                }
+            },
+            edges={
+                "color": {
+                    "highlight": "#f87171",
+                    "hover": "rgba(248, 113, 113, 0.9)"
+                }
+            }
         )
 
     else:
@@ -1911,7 +1965,7 @@ if page == "Rețea parteneri":
         domain_list = list(visible_domain_ids)
         num_domains = len(domain_list)
         cols = 1
-        spacing = 250
+        spacing = 180
 
         if num_domains > 0:
             cols = math.ceil(math.sqrt(num_domains))
@@ -1926,7 +1980,7 @@ if page == "Rețea parteneri":
                 label = nodes_data[nid]["label"][:20] + "..." if len(nodes_data[nid]["label"]) > 20 else nodes_data[nid]["label"]
 
                 final_nodes.append(Node(
-                    id=nid, label=label, size=30,
+                    id=nid, label=label, size=34,
                     shape="diamond", color="#dc2626", font=hub_font_style,
                     title=nodes_data[nid]["label"],
                     x=x, y=y
@@ -1943,16 +1997,16 @@ if page == "Rețea parteneri":
                 col = domain_idx % cols
                 base_x = (col - cols / 2) * spacing
                 base_y = (row - rows / 2) * spacing
-                x = base_x + random.uniform(-100, 100)
-                y = base_y + random.uniform(-100, 100)
+                x = base_x + random.uniform(-70, 70)
+                y = base_y + random.uniform(-70, 70)
             else:
-                x = random.uniform(-250, 250)
-                y = random.uniform(-250, 250)
+                x = random.uniform(-160, 160)
+                y = random.uniform(-160, 160)
 
             label = info["label"][:20] + "..." if len(info["label"]) > 20 else info["label"]
 
             final_nodes.append(Node(
-                id=nid, label=label, size=20,
+                id=nid, label=label, size=24,
                 shape="dot", color=color, font=common_font_style,
                 title=info["label"],
                 x=x, y=y
@@ -1973,7 +2027,25 @@ if page == "Rețea parteneri":
             hierarchical=False,
             nodeHighlightBehavior=True,
             highlightColor="#dc2626",
-            interaction={"dragView": False, "zoomView": False, "dragNodes": False}
+            interaction={
+                "dragView": False,
+                "zoomView": False,
+                "dragNodes": False,
+                "hover": True,
+                "hoverConnectedEdges": True
+            },
+            nodes={
+                "color": {
+                    "highlight": "#f87171",
+                    "hover": "#f87171"
+                }
+            },
+            edges={
+                "color": {
+                    "highlight": "#f87171",
+                    "hover": "rgba(248, 113, 113, 0.9)"
+                }
+            }
         )
 
     # Check if a node is selected for mobile layout
