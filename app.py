@@ -2049,7 +2049,6 @@ if page == "Rețea parteneri":
             width="100%",
             height=850,
             directed=False,
-            physics=True,
             hierarchical=False,
             nodeHighlightBehavior=True,
             highlightColor="#dc2626",
