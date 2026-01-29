@@ -439,8 +439,8 @@ function showDetailCard(d) {
         html += `<div class="detail-type">${d.entityType}</div>`;
 
         let badges = '';
-        if (d.data.strategic) badges += '<span class="badge badge-strategic">Strategic</span>';
-        if (d.data.ukraine) badges += '<span class="badge badge-ukraine">Ucraina</span>';
+        if (d.data.strategic) badges += '<span class="badge badge-strategic">Partener strategic</span>';
+        if (d.data.ukraine) badges += '<span class="badge badge-ukraine">Sprijin în criza ucraineană</span>';
         if (d.data.isFonssMember) badges += '<span class="badge badge-fonss">FONSS</span>';
         if (badges) html += `<div class="detail-badges">${badges}</div>`;
 
@@ -1012,7 +1012,13 @@ function setupNavHelp() {
     helpCard.className = 'nav-help-card';
     helpCard.innerHTML = `
         <button id="nav-help-close" class="nav-help-close" title="Inchide">&times;</button>
-        <div class="nav-help-title">Cum navigati reteaua</div>
+        <div class="nav-help-title">Bun venit!</div>
+        <div class="nav-help-intro">
+            Aceasta aplicatie vizualizeaza <strong>ecosistemul de parteneriate</strong> ale Departamentului pentru
+            Situatii de Urgenta (DSU). Exploreaza reteaua pentru a descoperi organizatiile partenere,
+            domeniile de activitate si conexiunile dintre ele.
+        </div>
+        <div class="nav-help-subtitle">Cum navigati</div>
         <div class="nav-help-content">
             <div class="nav-help-item"><strong>Hover</strong> pe un nod &ndash; vezi conexiunile</div>
             <div class="nav-help-item"><strong>Click</strong> pe un nod &ndash; vezi detaliile partenerului</div>

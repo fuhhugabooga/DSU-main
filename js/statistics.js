@@ -179,13 +179,16 @@ function renderMedical(D) {
 
         Plotly.newPlot('chart-flight', [{
             x: years, y: vals, type: 'bar',
-            text: vals.map(v => v.toString()),
+            text: vals.map(v => formatNumber(v)),
             textposition: 'outside',
+            textfont: { size: 11 },
+            cliponaxis: false,
             marker: { color: '#f59e0b' }
         }], {
             ...PLOTLY_LAYOUT_BASE,
             height: 380,
-            yaxis: { showgrid: false }
+            yaxis: { showgrid: false, automargin: true },
+            margin: { l: 50, r: 20, t: 40, b: 50 }
         }, PLOTLY_CONFIG);
     }
 }
@@ -250,17 +253,34 @@ function renderPrevention(D) {
             z: values,
             featureidkey: 'properties.name',
             colorscale: 'Reds',
-            marker: { line: { width: 0.5, color: 'rgba(255,255,255,0.3)' } },
-            colorbar: { title: 'Persoane', font: { color: '#cbd5e1' } }
+            marker: { line: { width: 1, color: 'rgba(255,255,255,0.5)' } },
+            colorbar: {
+                title: 'Persoane',
+                font: { color: '#cbd5e1' },
+                tickfont: { color: '#cbd5e1' },
+                len: 0.6,
+                thickness: 15,
+                x: 1.02
+            }
         }], {
             ...PLOTLY_LAYOUT_BASE,
             height: 500,
             geo: {
                 fitbounds: 'locations',
-                visible: false,
-                bgcolor: 'rgba(0,0,0,0)',
+                visible: true,
+                bgcolor: 'rgba(15, 23, 42, 0.5)',
                 scope: 'europe',
-                center: { lat: 46.0, lon: 25.0 }
+                center: { lat: 46.0, lon: 25.0 },
+                showframe: true,
+                framecolor: 'rgba(220, 38, 38, 0.3)',
+                showcoastlines: true,
+                coastlinecolor: 'rgba(255, 255, 255, 0.2)',
+                showland: true,
+                landcolor: 'rgba(30, 41, 59, 0.8)',
+                showlakes: false,
+                showcountries: true,
+                countrycolor: 'rgba(255, 255, 255, 0.15)',
+                projection: { type: 'mercator' }
             },
             margin: { l: 0, r: 0, t: 0, b: 0 }
         }, PLOTLY_CONFIG);
@@ -276,6 +296,8 @@ function renderPrevention(D) {
             orientation: 'h',
             text: sorted.map(r => r['Număr organizații']),
             textposition: 'outside',
+            textfont: { size: 11 },
+            cliponaxis: false,
             marker: {
                 color: sorted.map(r => parseFloat(r['Număr organizații'])),
                 colorscale: 'Reds'
@@ -283,10 +305,10 @@ function renderPrevention(D) {
         }], {
             ...PLOTLY_LAYOUT_BASE,
             height: 250,
-            xaxis: { title: '' },
-            yaxis: { title: '' },
+            xaxis: { title: '', automargin: true },
+            yaxis: { title: '', automargin: true },
             showlegend: false,
-            margin: { l: 160, r: 40, t: 10, b: 30 }
+            margin: { l: 160, r: 60, t: 10, b: 30 }
         }, PLOTLY_CONFIG);
     }
 
@@ -467,8 +489,10 @@ function renderSanctions(D) {
         y: sorted.map(r => r.Tip_Incalcare),
         type: 'bar',
         orientation: 'h',
-        text: sorted.map(r => r.Numar),
+        text: sorted.map(r => formatNumber(r.Numar)),
         textposition: 'outside',
+        textfont: { size: 11 },
+        cliponaxis: false,
         marker: {
             color: sorted.map(r => parseFloat(r.Numar)),
             colorscale: [['0', '#fecaca'], ['0.33', '#f87171'], ['0.66', '#dc2626'], ['1', '#991b1b']]
@@ -478,10 +502,10 @@ function renderSanctions(D) {
     }], {
         ...PLOTLY_LAYOUT_BASE,
         height: 320,
-        xaxis: { title: 'Număr sancțiuni' },
-        yaxis: { title: '' },
+        xaxis: { title: 'Număr sancțiuni', automargin: true },
+        yaxis: { title: '', automargin: true },
         showlegend: false,
-        margin: { l: 180, r: 40, t: 10, b: 50 }
+        margin: { l: 180, r: 80, t: 10, b: 50 }
     }, PLOTLY_CONFIG);
 }
 
