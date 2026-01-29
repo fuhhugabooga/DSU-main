@@ -644,6 +644,11 @@ function setupDomainDropdown() {
         }
     });
 
+    // Prevent clicks inside the panel from closing it
+    panel.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
     overlay?.addEventListener('click', () => {
         panel.classList.add('hidden');
         overlay.classList.add('hidden');

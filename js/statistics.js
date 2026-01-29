@@ -121,14 +121,26 @@ function renderOperational(D) {
             values: igsuVals,
             labels: igsuNames,
             type: 'pie',
-            hole: 0.5,
-            textposition: 'outside',
-            textinfo: 'percent+label',
-            marker: { colors: ['#dc2626', '#f97316', '#f59e0b', '#3b82f6', '#10b981'] }
+            hole: 0.45,
+            textposition: 'inside',
+            textinfo: 'percent',
+            insidetextorientation: 'horizontal',
+            marker: {
+                colors: ['#dc2626', '#f97316', '#f59e0b', '#3b82f6', '#10b981'],
+                line: { color: 'rgba(0,0,0,0.3)', width: 1 }
+            }
         }], {
             ...PLOTLY_LAYOUT_BASE,
             height: 380,
-            showlegend: false
+            showlegend: true,
+            legend: {
+                orientation: 'h',
+                y: -0.15,
+                x: 0.5,
+                xanchor: 'center',
+                font: { color: '#cbd5e1', size: 11 }
+            },
+            margin: { l: 20, r: 20, t: 20, b: 60 }
         }, PLOTLY_CONFIG);
     }
 }
@@ -252,37 +264,33 @@ function renderPrevention(D) {
             locations: judete,
             z: values,
             featureidkey: 'properties.name',
-            colorscale: 'Reds',
-            marker: { line: { width: 1, color: 'rgba(255,255,255,0.5)' } },
+            colorscale: [
+                [0, 'rgba(254, 226, 226, 0.6)'],
+                [0.25, 'rgba(252, 165, 165, 0.7)'],
+                [0.5, 'rgba(248, 113, 113, 0.8)'],
+                [0.75, 'rgba(220, 38, 38, 0.9)'],
+                [1, 'rgba(153, 27, 27, 1)']
+            ],
+            marker: { line: { width: 1, color: 'rgba(255,255,255,0.4)' } },
             colorbar: {
                 title: 'Persoane',
                 font: { color: '#cbd5e1' },
                 tickfont: { color: '#cbd5e1' },
-                len: 0.6,
-                thickness: 15,
-                x: 1.02
+                len: 0.5,
+                thickness: 12,
+                x: 1.0,
+                bgcolor: 'rgba(0,0,0,0)'
             }
         }], {
             ...PLOTLY_LAYOUT_BASE,
-            height: 500,
+            height: 420,
             geo: {
                 fitbounds: 'locations',
-                visible: true,
-                bgcolor: 'rgba(15, 23, 42, 0.5)',
-                scope: 'europe',
-                center: { lat: 46.0, lon: 25.0 },
-                showframe: true,
-                framecolor: 'rgba(220, 38, 38, 0.3)',
-                showcoastlines: true,
-                coastlinecolor: 'rgba(255, 255, 255, 0.2)',
-                showland: true,
-                landcolor: 'rgba(30, 41, 59, 0.8)',
-                showlakes: false,
-                showcountries: true,
-                countrycolor: 'rgba(255, 255, 255, 0.15)',
+                visible: false,
+                bgcolor: 'rgba(0,0,0,0)',
                 projection: { type: 'mercator' }
             },
-            margin: { l: 0, r: 0, t: 0, b: 0 }
+            margin: { l: 0, r: 60, t: 10, b: 10 }
         }, PLOTLY_CONFIG);
     }
 

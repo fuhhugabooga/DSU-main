@@ -331,10 +331,9 @@ body {
 
 .search-results {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 2px);
     left: 0;
     right: 0;
-    margin-top: 4px;
     background: rgba(10, 14, 26, 0.98);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
@@ -471,9 +470,8 @@ body {
 
 .fb-dropdown-panel {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 2px);
     left: 0;
-    margin-top: 8px;
     width: 320px;
     max-height: 400px;
     overflow-y: auto;
