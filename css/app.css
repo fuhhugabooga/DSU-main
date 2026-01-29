@@ -895,7 +895,7 @@ body {
    ========================================= */
 #stats-overlay {
     position: absolute;
-    top: 16px;
+    bottom: 16px;
     right: 16px;
     width: 180px;
     background: rgba(10, 14, 26, 0.88);
@@ -1745,7 +1745,7 @@ body {
     /* Stats overlay on mobile */
     #stats-overlay {
         position: absolute;
-        top: 8px;
+        bottom: 8px;
         right: 8px;
         width: auto;
         padding: 8px 10px;
