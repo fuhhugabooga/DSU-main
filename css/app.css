@@ -274,6 +274,13 @@ body {
     overflow: visible;
 }
 
+/* When filter bar is hidden, adjust app container */
+#filter-bar[style*="display: none"] ~ #app-container,
+#filter-bar.hidden ~ #app-container {
+    height: calc(100vh - var(--header-height));
+    margin-top: var(--header-height);
+}
+
 .fb-inner {
     display: flex;
     align-items: center;
@@ -1648,17 +1655,10 @@ body {
 }
 
 /* =========================================
-   DROPDOWN OVERLAY
+   DROPDOWN OVERLAY (disabled - not used)
    ========================================= */
 #dropdown-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 15000;
-    background: transparent;
-}
-
-#dropdown-overlay.hidden {
-    display: none;
+    display: none !important;
 }
 
 /* =========================================

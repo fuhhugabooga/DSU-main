@@ -126,7 +126,7 @@ export function initAbout() {
                     <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; margin-top: 14px;">
                         <div style="font-weight: 600; color: var(--accent-light); margin-bottom: 8px;">Proiect realizat de:</div>
                         <div class="card-text">
-                            <a href="https://connectm.uvt.ro" target="_blank">Social Fabrics Research Lab</a> (ConnecTM)
+                            <a href="https://connectm.uvt.ro" target="_blank">Social Fabrics Research Lab</a> (FabLab)
                         </div>
                     </div>
 
@@ -134,9 +134,9 @@ export function initAbout() {
                         <div style="font-weight: 600; color: var(--accent-light); margin-bottom: 8px;">Echipa:</div>
                         <div class="card-text">
                             <strong>Silvia Fierăscu</strong> (coordonator)<br>
-                            <strong>Bogdan Doboșeru</strong> (data & legal)<br>
-                            <strong>Laurențiu Florea</strong> (data & legal)<br>
-                            <strong>Andrei Galescu</strong> (data & legal)<br>
+                            <strong>Bogdan Doboșeru</strong> (date)<br>
+                            <strong>Laurențiu Florea</strong> (date)<br>
+                            <strong>Andrei Galescu</strong> (date)<br>
                             <strong>Alexandru Poliac-Seres</strong> (webdev)<br>
                             <strong>Briana Toader</strong> (grafică)
                         </div>

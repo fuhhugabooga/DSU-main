@@ -137,13 +137,25 @@ function setupFilterBarVisibility() {
 function updateFilterBarVisibility(page) {
     const filterBar = document.getElementById('filter-bar');
     const mobileFilterPanel = document.getElementById('mobile-filter-panel');
+    const appContainer = document.getElementById('app-container');
 
     if (page === 'network') {
         filterBar.style.display = '';
+        document.body.classList.remove('no-filter-bar');
+        if (appContainer) {
+            appContainer.style.height = '';
+            appContainer.style.marginTop = '';
+        }
     } else {
         filterBar.style.display = 'none';
+        document.body.classList.add('no-filter-bar');
         if (mobileFilterPanel) {
             mobileFilterPanel.classList.add('hidden');
+        }
+        // Adjust app container when filter bar is hidden
+        if (appContainer) {
+            appContainer.style.height = 'calc(100vh - var(--header-height))';
+            appContainer.style.marginTop = 'var(--header-height)';
         }
     }
 }

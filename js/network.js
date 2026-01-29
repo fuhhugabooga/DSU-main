@@ -652,33 +652,55 @@ function setupDropdowns() {
         { btn: 'special-dropdown-btn', panel: 'special-panel' }
     ];
 
+    // Close all panels function
+    const closeAllPanels = (exceptPanelId = null) => {
+        dropdowns.forEach(({ panel: panelId }) => {
+            if (panelId !== exceptPanelId) {
+                document.getElementById(panelId)?.classList.add('hidden');
+            }
+        });
+    };
+
     dropdowns.forEach(({ btn: btnId, panel: panelId }) => {
         const btn = document.getElementById(btnId);
         const panel = document.getElementById(panelId);
         if (!btn || !panel) return;
 
+        // Button click - toggle panel
         btn.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
-            // Close other dropdowns first
-            dropdowns.forEach(other => {
-                if (other.panel !== panelId) {
-                    document.getElementById(other.panel)?.classList.add('hidden');
-                }
-            });
-            panel.classList.toggle('hidden');
+            e.stopImmediatePropagation();
+
+            const isHidden = panel.classList.contains('hidden');
+            closeAllPanels(); // Close all first
+
+            if (isHidden) {
+                panel.classList.remove('hidden');
+            }
         });
 
         // Prevent clicks inside the panel from closing it
         panel.addEventListener('click', (e) => {
             e.stopPropagation();
+            e.stopImmediatePropagation();
+        });
+
+        // Also handle mousedown to prevent any early closing
+        panel.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
         });
     });
 
-    // Close all on outside click
-    document.addEventListener('click', () => {
-        dropdowns.forEach(({ panel: panelId }) => {
-            document.getElementById(panelId)?.classList.add('hidden');
-        });
+    // Close all on outside click (use setTimeout to ensure it runs after other handlers)
+    document.addEventListener('click', (e) => {
+        // Don't close if clicking on a dropdown button or inside a panel
+        const isDropdownBtn = e.target.closest('.fb-dropdown-btn');
+        const isDropdownPanel = e.target.closest('.fb-dropdown-panel');
+
+        if (!isDropdownBtn && !isDropdownPanel) {
+            closeAllPanels();
+        }
     });
 }
 
