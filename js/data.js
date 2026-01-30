@@ -244,7 +244,7 @@ export async function loadStatsData() {
     const entries = Object.entries(files);
     const [csvResults, romaniaGeoJSON] = await Promise.all([
         Promise.all(entries.map(([, path]) => fetchCSV(path))),
-        fetchJSON("data/romania.geojson")
+        fetchJSON("data/romania.json")
     ]);
 
     const data = {};
