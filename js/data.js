@@ -209,6 +209,17 @@ export async function loadNetworkData() {
     };
 }
 
+// Fetch and parse a JSON file
+async function fetchJSON(path) {
+    try {
+        const resp = await fetch(path);
+        if (!resp.ok) return null;
+        return await resp.json();
+    } catch {
+        return null;
+    }
+}
+
 // Load all statistics data
 export async function loadStatsData() {
     const files = {
@@ -231,12 +242,18 @@ export async function loadStatsData() {
     };
 
     const entries = Object.entries(files);
-    const results = await Promise.all(entries.map(([, path]) => fetchCSV(path)));
+    const [csvResults, romaniaGeoJSON] = await Promise.all([
+        Promise.all(entries.map(([, path]) => fetchCSV(path))),
+        fetchJSON("data/romania.geojson")
+    ]);
 
     const data = {};
     entries.forEach(([key], i) => {
-        data[key] = results[i].length > 0 ? results[i] : null;
+        data[key] = csvResults[i].length > 0 ? csvResults[i] : null;
     });
+
+    // Add GeoJSON for choropleth map
+    data.romaniaGeoJSON = romaniaGeoJSON;
 
     return data;
 }
