@@ -533,20 +533,29 @@ function buildEntityFilters(networkData) {
     let html = '';
     for (const [type, config] of Object.entries(ENTITY_TYPES)) {
         const count = counts[type] || 0;
-        html += `<label class="filter-checkbox">
-            <input type="checkbox" value="${type}">
-            <span class="filter-dot" style="background:${config.color}"></span>
-            <span class="filter-label">${type}</span>
-            <span class="filter-count">${count}</span>
-        </label>`;
+        html += `<button class="entity-pill" data-type="${type}">
+            <span class="entity-dot" style="background:${config.color}"></span>
+            <span class="entity-pill-label">${type}</span>
+            <span class="entity-pill-count">${count}</span>
+        </button>`;
     }
     container.innerHTML = html;
 
     // Event listeners
-    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => {
-            filterState.entityTypes = [...container.querySelectorAll('input[type="checkbox"]:checked')]
-                .map(c => c.value);
+    container.querySelectorAll('.entity-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            const isActive = btn.classList.contains('active');
+            
+            // Toggle selection (allow multiple)
+            if (isActive) {
+                btn.classList.remove('active');
+                filterState.entityTypes = filterState.entityTypes.filter(t => t !== type);
+            } else {
+                btn.classList.add('active');
+                filterState.entityTypes.push(type);
+            }
+            
             updateEntityCountLabel();
             deselectNode();
             rebuildGraph();
@@ -556,10 +565,9 @@ function buildEntityFilters(networkData) {
 }
 
 function updateEntityCountLabel() {
+    // No longer needed as count is shown in each pill, but keep for compatibility
     const label = document.getElementById('entity-count-label');
-    if (!label) return;
-    const count = filterState.entityTypes.length;
-    label.textContent = count > 0 ? count : '';
+    if (label) label.textContent = '';
 }
 
 function buildDomainFilters(networkData) {
@@ -645,11 +653,9 @@ function updateDomainCountLabel() {
 }
 
 function setupDropdowns() {
-    // Setup all filter dropdowns
+    // Setup remaining filter dropdowns (entity and special are now inline pills)
     const dropdowns = [
-        { btn: 'entity-dropdown-btn', panel: 'entity-panel' },
-        { btn: 'domain-dropdown-btn', panel: 'domain-panel' },
-        { btn: 'special-dropdown-btn', panel: 'special-panel' }
+        { btn: 'domain-dropdown-btn', panel: 'domain-panel' }
     ];
 
     // Close all panels function
@@ -718,26 +724,36 @@ function buildSpecialFilters(networkData) {
     }
 
     container.innerHTML = `
-        <label class="filter-checkbox" title="Parteneri strategici - parteneri cu care DSU are protocoale extinse de colaborare">
-            <input type="checkbox" value="strategic">
-            <span class="filter-icon">&#9733;</span>
-            <span class="filter-label">Parteneri strategici</span>
-            <span class="filter-count">${strategicCount}</span>
-        </label>
-        <label class="filter-checkbox" title="Parteneri implicati in gestionarea crizei din Ucraina">
-            <input type="checkbox" value="ukraine">
-            <span class="filter-icon filter-icon-ua">UA</span>
-            <span class="filter-label">Sprijin Ucraina</span>
-            <span class="filter-count">${ukraineCount}</span>
-        </label>
+        <button class="special-pill" data-filter="strategic" title="Parteneri strategici - parteneri cu care DSU are protocoale extinse de colaborare">
+            <span class="special-pill-icon">&#9733;</span>
+            <span class="special-pill-label">Strategici</span>
+            <span class="special-pill-count">${strategicCount}</span>
+        </button>
+        <button class="special-pill" data-filter="ukraine" title="Parteneri implicati in gestionarea crizei din Ucraina">
+            <span class="special-pill-icon special-pill-icon-ua">UA</span>
+            <span class="special-pill-label">Ucraina</span>
+            <span class="special-pill-count">${ukraineCount}</span>
+        </button>
     `;
 
-    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => {
-            const checked = [...container.querySelectorAll('input[type="checkbox"]:checked')].map(c => c.value);
-            // For special filters, we'll use an array now
-            filterState.specialFilters = checked;
-            filterState.specialFilter = checked.length > 0 ? checked[0] : null; // backward compat
+    container.querySelectorAll('.special-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.dataset.filter;
+            const isActive = btn.classList.contains('active');
+            
+            // Toggle selection (allow multiple)
+            if (isActive) {
+                btn.classList.remove('active');
+                filterState.specialFilters = filterState.specialFilters.filter(f => f !== filter);
+            } else {
+                btn.classList.add('active');
+                if (!filterState.specialFilters) filterState.specialFilters = [];
+                filterState.specialFilters.push(filter);
+            }
+            
+            // Backward compat
+            filterState.specialFilter = filterState.specialFilters.length > 0 ? filterState.specialFilters[0] : null;
+            
             updateSpecialCountLabel();
             deselectNode();
             rebuildGraph();
@@ -747,12 +763,9 @@ function buildSpecialFilters(networkData) {
 }
 
 function updateSpecialCountLabel() {
+    // No longer needed as count is shown in each pill, but keep for compatibility
     const label = document.getElementById('special-count-label');
-    if (!label) return;
-    const container = document.getElementById('special-filters');
-    if (!container) return;
-    const count = container.querySelectorAll('input[type="checkbox"]:checked').length;
-    label.textContent = count > 0 ? count : '';
+    if (label) label.textContent = '';
 }
 
 function buildSearch(networkData) {
@@ -908,14 +921,19 @@ function setupMobileFilters(networkData) {
             btn.addEventListener('click', () => {
                 const filter = btn.dataset.filter;
                 const isActive = btn.classList.contains('active');
-                mobileSpecial.querySelectorAll('.special-pill').forEach(b => b.classList.remove('active'));
 
+                // Toggle selection (allow multiple)
                 if (isActive) {
-                    filterState.specialFilter = null;
+                    btn.classList.remove('active');
+                    filterState.specialFilters = (filterState.specialFilters || []).filter(f => f !== filter);
                 } else {
                     btn.classList.add('active');
-                    filterState.specialFilter = filter;
+                    if (!filterState.specialFilters) filterState.specialFilters = [];
+                    filterState.specialFilters.push(filter);
                 }
+
+                // Backward compat
+                filterState.specialFilter = filterState.specialFilters.length > 0 ? filterState.specialFilters[0] : null;
 
                 syncDesktopSpecialFilters();
                 deselectNode();
@@ -937,8 +955,9 @@ function syncMobileFilters() {
     // Sync special filter state to mobile
     const mobileSpecial = document.getElementById('mobile-special-filters');
     if (mobileSpecial) {
+        const activeFilters = filterState.specialFilters || [];
         mobileSpecial.querySelectorAll('.special-pill').forEach(btn => {
-            btn.classList.toggle('active', filterState.specialFilter === btn.dataset.filter);
+            btn.classList.toggle('active', activeFilters.includes(btn.dataset.filter));
         });
     }
 }
@@ -955,8 +974,9 @@ function syncDesktopEntityFilters() {
 function syncDesktopSpecialFilters() {
     const desktop = document.getElementById('special-filters');
     if (desktop) {
+        const activeFilters = filterState.specialFilters || [];
         desktop.querySelectorAll('.special-pill').forEach(btn => {
-            btn.classList.toggle('active', filterState.specialFilter === btn.dataset.filter);
+            btn.classList.toggle('active', activeFilters.includes(btn.dataset.filter));
         });
     }
 }
