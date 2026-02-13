@@ -9,6 +9,7 @@ import {
 
 let simulation = null;
 let svg, g, linkGroup, nodeGroup, labelGroup;
+let zoomBehavior = null;
 let width, height;
 let currentNodes = [];
 let currentLinks = [];
@@ -79,13 +80,13 @@ function setupSVG() {
     labelGroup = g.append('g').attr('class', 'labels');
 
     // Zoom behavior
-    const zoom = d3.zoom()
+    zoomBehavior = d3.zoom()
         .scaleExtent([0.2, 5])
         .on('zoom', (event) => {
             g.attr('transform', event.transform);
         });
 
-    svg.call(zoom);
+    svg.call(zoomBehavior);
 
     // Click on background to deselect
     svg.on('click', (event) => {
@@ -427,6 +428,91 @@ function resetHighlight(linkSel, nodeSel, labelSel) {
         .style('filter', null);
 }
 
+// ---- ZOOM FOCUS ----
+
+function zoomToFocus(d) {
+    if (!zoomBehavior || !svg) return;
+
+    // Find connected nodes
+    const connectedIds = new Set([d.id]);
+    currentLinks.forEach(l => {
+        const sId = typeof l.source === 'object' ? l.source.id : l.source;
+        const tId = typeof l.target === 'object' ? l.target.id : l.target;
+        if (sId === d.id) connectedIds.add(tId);
+        if (tId === d.id) connectedIds.add(sId);
+    });
+
+    const connectedNodes = currentNodes.filter(n => connectedIds.has(n.id) && n.x !== undefined);
+    if (connectedNodes.length === 0) return;
+
+    // Calculate bounding box of selected node + neighbors
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    connectedNodes.forEach(n => {
+        minX = Math.min(minX, n.x);
+        maxX = Math.max(maxX, n.x);
+        minY = Math.min(minY, n.y);
+        maxY = Math.max(maxY, n.y);
+    });
+
+    // Add padding around the cluster
+    const padding = 100;
+    minX -= padding;
+    maxX += padding;
+    minY -= padding;
+    maxY += padding;
+
+    const dx = maxX - minX;
+    const dy = maxY - minY;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    // Scale to fit, capped so we don't zoom in too far
+    const scale = Math.min(width / dx, height / dy, 2.5);
+    const tx = width / 2 - cx * scale;
+    const ty = height / 2 - cy * scale;
+
+    svg.transition()
+        .duration(750)
+        .ease(d3.easeCubicInOut)
+        .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+function zoomReset() {
+    if (!zoomBehavior || !svg || currentNodes.length === 0) return;
+
+    // Fit all visible nodes
+    const positioned = currentNodes.filter(n => n.x !== undefined);
+    if (positioned.length === 0) return;
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    positioned.forEach(n => {
+        minX = Math.min(minX, n.x);
+        maxX = Math.max(maxX, n.x);
+        minY = Math.min(minY, n.y);
+        maxY = Math.max(maxY, n.y);
+    });
+
+    const padding = 60;
+    minX -= padding;
+    maxX += padding;
+    minY -= padding;
+    maxY += padding;
+
+    const dx = maxX - minX;
+    const dy = maxY - minY;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    const scale = Math.min(width / dx, height / dy, 1);
+    const tx = width / 2 - cx * scale;
+    const ty = height / 2 - cy * scale;
+
+    svg.transition()
+        .duration(750)
+        .ease(d3.easeCubicInOut)
+        .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
 // ---- TOOLTIP ----
 
 function showTooltip(event, d, el) {
@@ -490,6 +576,14 @@ function selectNode(d) {
         if (fonssNode && currentLinkSel && currentNodeSel && currentLabelSel) {
             highlightConnections(fonssNode, currentLinkSel, currentNodeSel, currentLabelSel);
         }
+        // Zoom to FONSS cluster after expansion settles
+        setTimeout(() => {
+            const fn = currentNodes.find(n => n.id === d.id);
+            if (fn) zoomToFocus(fn);
+        }, 300);
+    } else {
+        // Zoom to focus on selected node and its neighbors
+        zoomToFocus(d);
     }
 }
 
@@ -506,6 +600,9 @@ function deselectNode() {
     if (fonssExpanded) {
         collapseFonss();
     }
+
+    // Zoom back to show full graph
+    zoomReset();
 }
 
 // ---- FONSS EXPANSION ----
@@ -896,15 +993,6 @@ function buildSearch(networkData) {
                 const node = currentNodes.find(n => n.id === id);
                 if (node) {
                     selectNode(node);
-                    if (node.x !== undefined) {
-                        const transform = d3.zoomTransform(svg.node());
-                        const tx = width / 2 - node.x * transform.k;
-                        const ty = height / 2 - node.y * transform.k;
-                        svg.transition().duration(500).call(
-                            d3.zoom().transform,
-                            d3.zoomIdentity.translate(tx, ty).scale(transform.k)
-                        );
-                    }
                 }
                 input.value = '';
                 resultsEl.classList.add('hidden');
