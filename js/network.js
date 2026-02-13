@@ -20,6 +20,8 @@ let currentLinkSel = null;
 let currentNodeSel = null;
 let currentLabelSel = null;
 let fonssExpanded = false;
+let initialLoadComplete = false;
+let keyboardFocusIndex = -1;
 
 // Filter state
 let filterState = {
@@ -39,11 +41,25 @@ export function initNetwork(networkData) {
     buildFilters(networkData);
     rebuildGraph();
     setupNavHelp();
+    setupGraphToolbar();
+    setupKeyboard();
+    setupSwipeDismiss();
 
     window.addEventListener('resize', () => {
         resizeSVG();
         if (simulation) simulation.alpha(0.3).restart();
     });
+}
+
+export function selectNodeByName(name) {
+    if (!allNetworkData || !name) return;
+    const node = currentNodes.find(n =>
+        n.data?.label === name || n.data?.label === decodeURIComponent(name)
+    );
+    if (node) {
+        // Wait for simulation to settle a bit first
+        setTimeout(() => selectNode(node), 100);
+    }
 }
 
 export function getFilterState() {
@@ -230,11 +246,13 @@ function rebuildGraph() {
 function renderGraph(nodes, links) {
     if (simulation) simulation.stop();
 
+    const shouldAnimate = initialLoadComplete;
+
     linkGroup.selectAll('*').remove();
     nodeGroup.selectAll('*').remove();
     labelGroup.selectAll('*').remove();
 
-    if (nodes.length === 0) return;
+    if (nodes.length === 0) { initialLoadComplete = true; return; }
 
     // Create links
     const linkSel = linkGroup.selectAll('line')
@@ -286,6 +304,14 @@ function renderGraph(nodes, links) {
         .attr('font-family', 'Nunito, Inter, sans-serif')
         .attr('pointer-events', 'none');
     currentLabelSel = labelSel;
+
+    // Animated enter transitions (skip on initial load)
+    if (shouldAnimate) {
+        linkSel.style('opacity', 0).transition().duration(300).style('opacity', 1);
+        nodeSel.style('opacity', 0).transition().duration(400).style('opacity', 1);
+        labelSel.style('opacity', 0).transition().duration(400).delay(100).style('opacity', 1);
+    }
+    initialLoadComplete = true;
 
     // Interaction
     const tooltip = document.getElementById('tooltip');
@@ -562,7 +588,13 @@ function selectNode(d) {
     }
 
     selectedNodeId = d.id;
+    keyboardFocusIndex = currentNodes.indexOf(d);
     showDetailCard(d);
+
+    // Update URL hash
+    if (d.data?.label) {
+        history.replaceState(null, '', '#network/' + encodeURIComponent(d.data.label));
+    }
 
     // Highlight selected node and its connections
     if (currentLinkSel && currentNodeSel && currentLabelSel) {
@@ -589,7 +621,12 @@ function selectNode(d) {
 
 function deselectNode() {
     selectedNodeId = null;
+    keyboardFocusIndex = -1;
     document.getElementById('partner-detail').classList.add('hidden');
+    document.getElementById('partner-detail').style.transform = '';
+
+    // Update URL hash
+    history.replaceState(null, '', '#network');
 
     // Reset highlight
     if (currentLinkSel && currentNodeSel && currentLabelSel) {
@@ -1307,6 +1344,144 @@ function setupNavHelp() {
     helpBtn.addEventListener('click', () => {
         helpCard.style.display = '';
         helpBtn.style.display = 'none';
+    });
+}
+
+// ---- GRAPH TOOLBAR (Reset View + Export) ----
+
+function setupGraphToolbar() {
+    const container = document.getElementById('graph-container');
+    if (!container) return;
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'graph-toolbar';
+    toolbar.innerHTML = `
+        <button class="graph-toolbar-btn" id="reset-zoom-btn" title="Resetare zoom (Home)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+        <button class="graph-toolbar-btn" id="export-graph-btn" title="Descarcă graful (SVG)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+    `;
+    container.appendChild(toolbar);
+
+    document.getElementById('reset-zoom-btn').addEventListener('click', () => {
+        deselectNode();
+        zoomReset();
+    });
+
+    document.getElementById('export-graph-btn').addEventListener('click', exportGraph);
+}
+
+function exportGraph() {
+    const svgEl = svg.node();
+    const clone = svgEl.cloneNode(true);
+
+    // Add background rect
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('width', width);
+    bg.setAttribute('height', height);
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    bg.setAttribute('fill', isDark ? '#0a0e1a' : '#f8fafc');
+    clone.insertBefore(bg, clone.firstChild);
+
+    // Inline font family on text elements
+    clone.querySelectorAll('text').forEach(el => {
+        if (!el.style.fontFamily) el.style.fontFamily = 'sans-serif';
+    });
+
+    // Serialize and download
+    const serializer = new XMLSerializer();
+    let svgString = '<?xml version="1.0" encoding="UTF-8"?>' + serializer.serializeToString(clone);
+
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'retea-parteneri-dsu.svg';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ---- KEYBOARD NAVIGATION ----
+
+function setupKeyboard() {
+    document.addEventListener('keydown', (e) => {
+        // Only handle when on network page
+        if (!document.getElementById('page-network')?.classList.contains('active')) return;
+
+        // Don't capture when typing in an input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (e.key === 'Escape') {
+            if (selectedNodeId) {
+                deselectNode();
+            }
+            // Close search results and filter panels
+            document.getElementById('search-results')?.classList.add('hidden');
+            document.querySelectorAll('.fb-dropdown-panel').forEach(p => p.classList.add('hidden'));
+        }
+
+        if (e.key === 'Tab' && currentNodes.length > 0) {
+            e.preventDefault();
+            const partners = currentNodes.filter(n => n.type === 'Partner');
+            if (partners.length === 0) return;
+
+            if (e.shiftKey) {
+                keyboardFocusIndex = keyboardFocusIndex <= 0 ? partners.length - 1 : keyboardFocusIndex - 1;
+            } else {
+                keyboardFocusIndex = (keyboardFocusIndex + 1) % partners.length;
+            }
+
+            selectNode(partners[keyboardFocusIndex]);
+        }
+    });
+}
+
+// ---- MOBILE SWIPE TO DISMISS ----
+
+function setupSwipeDismiss() {
+    const detail = document.getElementById('partner-detail');
+    if (!detail) return;
+
+    // Add swipe indicator for mobile
+    const indicator = document.createElement('div');
+    indicator.className = 'swipe-indicator';
+    detail.insertBefore(indicator, detail.firstChild);
+
+    let startY = 0;
+    let currentTouchY = 0;
+    let isDragging = false;
+
+    detail.addEventListener('touchstart', (e) => {
+        if (detail.scrollTop > 0) return;
+        startY = e.touches[0].clientY;
+        currentTouchY = startY;
+        isDragging = true;
+        detail.style.transition = 'none';
+    }, { passive: true });
+
+    detail.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        currentTouchY = e.touches[0].clientY;
+        const dy = currentTouchY - startY;
+        if (dy > 0) {
+            detail.style.transform = `translateY(${dy}px)`;
+        }
+    }, { passive: true });
+
+    detail.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        const dy = currentTouchY - startY;
+        detail.style.transition = '';
+
+        if (dy > 80) {
+            detail.style.transform = `translateY(100%)`;
+            setTimeout(() => deselectNode(), 250);
+        } else {
+            detail.style.transform = '';
+        }
     });
 }
 
