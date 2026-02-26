@@ -25,6 +25,7 @@
 
         <nav id="main-nav">
             <a class="nav-link active" data-page="network">Rețea parteneri</a>
+            <a class="nav-link" data-page="knowledgegraph">Graf cunoaștere</a>
             <a class="nav-link" data-page="statistics">Statistici</a>
             <a class="nav-link" data-page="about">Despre proiect</a>
         </nav>
@@ -46,6 +47,7 @@
     <!-- ====== MOBILE NAV DROPDOWN ====== -->
     <div id="mobile-nav-dropdown" class="mobile-nav-dropdown hidden">
         <a class="mobile-nav-link active" data-page="network">Rețea parteneri</a>
+        <a class="mobile-nav-link" data-page="knowledgegraph">Graf cunoaștere</a>
         <a class="mobile-nav-link" data-page="statistics">Statistici</a>
         <a class="mobile-nav-link" data-page="about">Despre proiect</a>
     </div>
@@ -177,6 +179,77 @@
                 </div>
             </div>
 
+            <!-- ====== KNOWLEDGE GRAPH PAGE ====== -->
+            <div id="page-knowledgegraph" class="page">
+                <div class="kg-layout">
+                    <!-- Top bar -->
+                    <div class="kg-topbar">
+                        <div class="kg-topbar-title">
+                            <div class="kg-topbar-subtitle">SNMSU &middot; UCPM</div>
+                            <div class="kg-topbar-heading">&#x27F6; Graf Direcțional de Cunoaștere</div>
+                        </div>
+                        <div class="kg-topbar-controls">
+                            <span class="kg-controls-label">NODURI:</span>
+                            <div id="kg-node-toggles"></div>
+                            <div class="kg-controls-sep"></div>
+                            <button id="kg-reset-btn" class="kg-reset-btn">&#x21BA; Reinițializează</button>
+                        </div>
+                    </div>
+
+                    <div class="kg-body">
+                        <!-- SVG Canvas -->
+                        <div class="kg-canvas" id="kg-container">
+                            <svg id="kg-svg"></svg>
+                            <div class="kg-zoom-hint">Scroll = zoom &middot; Drag nod = mutare &middot; Click = selecție &middot; Drag fundal = pan</div>
+                            <div class="kg-zoom-pct" id="kg-zoom-pct">85%</div>
+                        </div>
+
+                        <!-- Right sidebar -->
+                        <div class="kg-sidebar">
+                            <!-- Edge type toggles -->
+                            <div class="kg-sidebar-section">
+                                <div class="kg-sidebar-title">Tipuri relații</div>
+                                <div id="kg-edge-toggles"></div>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="kg-sidebar-section">
+                                <div class="kg-sidebar-title">Statistici graf</div>
+                                <div class="kg-stats-grid">
+                                    <div class="kg-stat-box" style="--stat-color:#38bdf8">
+                                        <div class="kg-stat-val" id="kg-stat-nodes">0</div>
+                                        <div class="kg-stat-lbl">Noduri</div>
+                                    </div>
+                                    <div class="kg-stat-box" style="--stat-color:#f59e0b">
+                                        <div class="kg-stat-val" id="kg-stat-edges">0</div>
+                                        <div class="kg-stat-lbl">Relații</div>
+                                    </div>
+                                    <div class="kg-stat-box" style="--stat-color:#34d399">
+                                        <div class="kg-stat-val" id="kg-stat-visible">0</div>
+                                        <div class="kg-stat-lbl">Vizibile</div>
+                                    </div>
+                                    <div class="kg-stat-box" style="--stat-color:#f87171">
+                                        <div class="kg-stat-val" id="kg-stat-active">0</div>
+                                        <div class="kg-stat-lbl">Rel. active</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Node detail -->
+                            <div class="kg-sidebar-detail" id="kg-detail-panel">
+                                <div class="kg-detail-empty">
+                                    <div class="kg-detail-empty-icon">&#x2B21;</div>
+                                    Click pe un nod<br>pentru detalii și relații
+                                </div>
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="kg-sidebar-legend" id="kg-legend"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ====== STATISTICS PAGE ====== -->
             <div id="page-statistics" class="page">
                 <div class="page-padded">
@@ -218,6 +291,7 @@
     <!-- Scripts -->
     <script type="module" src="js/data.js"></script>
     <script type="module" src="js/network.js"></script>
+    <script type="module" src="js/knowledge-graph.js"></script>
     <script type="module" src="js/statistics.js"></script>
     <script type="module" src="js/about.js"></script>
     <script type="module" src="js/app.js"></script>

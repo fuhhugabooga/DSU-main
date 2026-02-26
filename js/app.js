@@ -6,12 +6,14 @@ import { loadNetworkData, loadStatsData } from './data.js';
 import { initNetwork, selectNodeByName } from './network.js';
 import { initStatistics } from './statistics.js';
 import { initAbout } from './about.js';
+import { initKnowledgeGraph } from './knowledge-graph.js';
 
 // Current page state
 let currentPage = 'network';
 let networkInitialized = false;
 let statsInitialized = false;
 let aboutInitialized = false;
+let kgInitialized = false;
 
 // ---- INITIALIZATION ----
 
@@ -161,6 +163,14 @@ function finishNavigation(page, nextEl) {
     // Trigger resize for Plotly charts
     if (page === 'statistics') {
         setTimeout(() => window.dispatchEvent(new Event('resize')), 150);
+    }
+
+    // Lazy init knowledge graph
+    if (page === 'knowledgegraph' && !kgInitialized) {
+        setTimeout(() => {
+            initKnowledgeGraph();
+            kgInitialized = true;
+        }, 100);
     }
 }
 
