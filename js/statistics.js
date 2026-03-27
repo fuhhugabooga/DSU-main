@@ -244,7 +244,7 @@ function renderPrevention(D) {
     `;
 
     // Choropleth map
-    if (D.instruire) {
+    if (D.instruire && D.romaniaGeoJSON) {
         const mapData = {};
         D.instruire.forEach(row => {
             const parts = (row.Unitate || '').split(' ');
@@ -260,7 +260,7 @@ function renderPrevention(D) {
 
         Plotly.newPlot('chart-map', [{
             type: 'choropleth',
-            geojson: 'https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/romania.geojson',
+            geojson: D.romaniaGeoJSON,
             locations: judete,
             z: values,
             featureidkey: 'properties.name',
