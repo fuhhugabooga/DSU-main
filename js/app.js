@@ -7,6 +7,7 @@ import { initNetwork, selectNodeByName } from './network.js';
 import { initStatistics } from './statistics.js';
 import { initAbout } from './about.js';
 import { initKnowledgeGraph } from './knowledge-graph.js';
+import { initNetwork2, resizeNetwork2 } from './network2.js';
 
 // Current page state
 let currentPage = 'network';
@@ -14,6 +15,7 @@ let networkInitialized = false;
 let statsInitialized = false;
 let aboutInitialized = false;
 let kgInitialized = false;
+let net2Initialized = false;
 
 // ---- INITIALIZATION ----
 
@@ -163,6 +165,18 @@ function finishNavigation(page, nextEl) {
     // Trigger resize for Plotly charts
     if (page === 'statistics') {
         setTimeout(() => window.dispatchEvent(new Event('resize')), 150);
+    }
+
+    // Lazy init network 2 (ONG <-> ISU); resize on every visit
+    if (page === 'network2') {
+        setTimeout(() => {
+            if (!net2Initialized) {
+                initNetwork2();
+                net2Initialized = true;
+            } else {
+                resizeNetwork2();
+            }
+        }, net2Initialized ? 50 : 400);
     }
 
     // Lazy init knowledge graph

@@ -2,12 +2,11 @@
    DATA LOADING & PROCESSING
    ========================================= */
 
-// Domain groups (matches original Streamlit app)
+// Domain groups — domains are now standardized directly in data.csv,
+// so these only define how the standardized tokens are grouped in the filter UI.
 export const DOMAIN_GROUPS = {
-    "Intervenții, urgențe": ["Intervenție", "Căutare-salvare", "Dezastre chimice", "Răspuns"],
-    "Educație, prevenire": ["Prevenire", "Pregătire", "Cercetare", "Prevenirea si combaterea dezinformării"],
-    "Logistică, tehnologie": ["IT & C", "Sprijin logistic", "Restabilirea stării de normalitate", "Sprijin tehnic logistic"],
-    "Social, medical": ["Servicii sociale", "Prevenire (trafic persoane)"]
+    "Intervenții, urgențe": ["Intervenție", "Reconstrucție"],
+    "Educație, prevenire": ["Prevenire", "Pregătire", "Cercetare"]
 };
 
 // Entity type definitions
@@ -46,69 +45,53 @@ function cleanDomains(domainStr) {
         .split("/").map(s => s.trim()).filter(Boolean);
 }
 
-// Map raw domain text to category
-function mapDomainCategory(raw) {
-    const t = raw.toLowerCase();
-    if (t.includes("dezastre chimice")) return "Dezastre chimice";
-    if (t.includes("smart city") || t.includes("it & c")) return "IT & C";
-    if (t.includes("căutare") || t.includes("caini") || t.includes("câini")) return "Căutare-salvare";
-    if (t.includes("restabilirea")) return "Restabilirea stării de normalitate";
-    if (t.includes("sociale")) return "Servicii sociale";
-    if (t.includes("logistic")) return "Sprijin logistic";
-    if (t.includes("răspuns") || t.includes("traum") || t.includes("psiholog")) return "Răspuns";
-    if (t.includes("trafic")) return "Prevenire (trafic persoane)";
-    if (t.includes("prevenire")) return "Prevenire";
-    if (t.includes("pregătire") || t.includes("practică") || t.includes("training")) return "Pregătire";
-    if (t.includes("cercetare")) return "Cercetare";
-    if (t.includes("intervenție")) return "Intervenție";
-    return raw.trim();
-}
-
-// Parse CSV text into array of objects
+// Parse CSV text into array of objects.
+// Full tokenizer that correctly handles quoted fields containing commas,
+// escaped quotes ("") and embedded newlines (used in retea2 descriptions).
 function parseCSV(text) {
-    const lines = text.trim().split("\n");
-    if (lines.length < 2) return [];
-
-    // Parse header
-    const headers = parseCSVLine(lines[0]);
     const rows = [];
-
-    for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        const values = parseCSVLine(lines[i]);
-        const row = {};
-        headers.forEach((h, idx) => {
-            row[h.trim()] = values[idx]?.trim() || "";
-        });
-        rows.push(row);
-    }
-    return rows;
-}
-
-// Parse a single CSV line handling quoted fields
-function parseCSVLine(line) {
-    const result = [];
-    let current = "";
+    let field = "";
+    let record = [];
     let inQuotes = false;
 
-    for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') {
-            if (inQuotes && line[i + 1] === '"') {
-                current += '"';
-                i++;
+    const pushRecord = () => {
+        record.push(field);
+        field = "";
+        // Skip blank trailing lines
+        if (record.length > 1 || record[0] !== "") rows.push(record);
+        record = [];
+    };
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (inQuotes) {
+            if (ch === '"') {
+                if (text[i + 1] === '"') { field += '"'; i++; }
+                else inQuotes = false;
             } else {
-                inQuotes = !inQuotes;
+                field += ch;
             }
-        } else if (ch === ',' && !inQuotes) {
-            result.push(current);
-            current = "";
+        } else if (ch === '"') {
+            inQuotes = true;
+        } else if (ch === ',') {
+            record.push(field);
+            field = "";
+        } else if (ch === '\n' || ch === '\r') {
+            if (ch === '\r' && text[i + 1] === '\n') i++;
+            pushRecord();
         } else {
-            current += ch;
+            field += ch;
         }
     }
-    result.push(current);
-    return result;
+    if (field !== "" || record.length > 0) pushRecord();
+
+    if (rows.length < 2) return [];
+    const headers = rows[0].map(h => h.trim());
+    return rows.slice(1).map(values => {
+        const row = {};
+        headers.forEach((h, idx) => { row[h] = (values[idx] ?? "").trim(); });
+        return row;
+    });
 }
 
 // Fetch and parse a CSV file
@@ -161,10 +144,9 @@ export async function loadNetworkData() {
             isFonssMember: false
         };
 
-        // Process domains
+        // Process domains (already standardized in data.csv — used as-is)
         const domainParts = cleanDomains(row.Domain_Raw);
-        domainParts.forEach(raw => {
-            const cat = mapDomainCategory(raw);
+        domainParts.forEach(cat => {
             allDomains.add(cat);
             const dId = `d_${cat}`;
             if (!nodes[dId]) {
@@ -206,6 +188,118 @@ export async function loadNetworkData() {
         edges,
         allDomains: [...allDomains].sort(),
         fonssId
+    };
+}
+
+// ==========================================
+// NETWORK 2 — bipartite ONG <-> ISU (operational collaborations)
+// ==========================================
+
+// Actor type ontology (branch 4) -> Romanian label + node color
+export const ACTOR_TYPES = {
+    "community_orgs":    { label: "Asociație locală",            color: "#3b82f6" },
+    "humanitarian_ngos": { label: "ONG umanitar",               color: "#10b981" },
+    "faith_based":       { label: "Organizație religioasă",     color: "#8b5cf6" },
+    "private_sector":    { label: "Sector privat",              color: "#f59e0b" },
+    "volunteer_groups":  { label: "Grup de voluntari",          color: "#ef4444" },
+    "professional_assoc":{ label: "Asociație profesională",     color: "#14b8a6" },
+    "international":      { label: "Organizație internațională", color: "#ec4899" },
+    "diaspora_support":  { label: "Sprijin diasporă",           color: "#a3e635" },
+    "academia":          { label: "Mediu academic",             color: "#f97316" }
+};
+
+export function getActorColor(tip) {
+    return ACTOR_TYPES[tip]?.color || "#94a3b8";
+}
+export function getActorLabel(tip) {
+    return ACTOR_TYPES[tip]?.label || tip || "Altele";
+}
+
+// Context (criza) -> Romanian label + color (used for the legend/filter)
+export const NET2_CONTEXTS = {
+    "Aflux refugiați": { label: "Aflux refugiați", color: "#3b82f6" },
+    "Pandemie":        { label: "Pandemie",        color: "#f59e0b" },
+    "Ambele":          { label: "Ambele",          color: "#a855f7" }
+};
+
+// Full county names for the 34 ISU hub codes (BIF = București-Ilfov)
+export const ISU_CODE_TO_NAME = {
+    "AB": "Alba", "AR": "Arad", "BC": "Bacău", "BH": "Bihor", "BIF": "București-Ilfov",
+    "BN": "Bistrița-Năsăud", "BR": "Brăila", "BT": "Botoșani", "BV": "Brașov", "CJ": "Cluj",
+    "CL": "Călărași", "CS": "Caraș-Severin", "CT": "Constanța", "CV": "Covasna", "DB": "Dâmbovița",
+    "DJ": "Dolj", "GL": "Galați", "HD": "Hunedoara", "IL": "Ialomița", "IS": "Iași",
+    "MH": "Mehedinți", "MM": "Maramureș", "MS": "Mureș", "NT": "Neamț", "OT": "Olt",
+    "SB": "Sibiu", "SJ": "Sălaj", "SM": "Satu Mare", "SV": "Suceava", "TL": "Tulcea",
+    "TM": "Timiș", "VL": "Vâlcea", "VN": "Vrancea", "VS": "Vaslui"
+};
+
+// Load network 2 data (ONG <-> ISU bipartite graph)
+export async function loadNetwork2Data() {
+    const ongRows = await fetchCSV("data_retea2_isu.csv");
+
+    const nodes = {};          // id -> node
+    const edges = [];          // { source, target }
+    const isuIds = {};         // code -> node id
+    const allActorTypes = new Set();
+    const allContexts = new Set();
+    let totalColaborari = 0;
+
+    ongRows.forEach((row, idx) => {
+        const label = (row.ONG || "").trim();
+        if (!label) return;
+
+        const tipActor = (row.Tip_actor || "").trim();
+        const context = (row.Context || "").trim();
+        const nrColaborari = parseInt(row.Nr_colaborari) || 1;
+        const nrISU = parseInt(row.Nr_ISU) || 0;
+
+        allActorTypes.add(tipActor);
+        if (context) allContexts.add(context);
+        totalColaborari += nrColaborari;
+
+        const ongId = `o_${idx}`;
+        nodes[ongId] = {
+            id: ongId,
+            label,
+            type: "ONG",
+            tipActor,
+            context,
+            nrColaborari,
+            nrISU,
+            color: getActorColor(tipActor),
+            description: (row.Descriere || "").trim() || "Descriere indisponibilă."
+        };
+
+        // Split ISU codes -> hub nodes + edges
+        const codes = (row.ISU || "").split("/").map(c => c.trim()).filter(Boolean);
+        codes.forEach(code => {
+            let isuId = isuIds[code];
+            if (!isuId) {
+                isuId = `i_${code}`;
+                isuIds[code] = isuId;
+                nodes[isuId] = {
+                    id: isuId,
+                    label: code,
+                    fullName: ISU_CODE_TO_NAME[code] || code,
+                    type: "ISU",
+                    color: "#dc2626"
+                };
+            }
+            edges.push({ source: ongId, target: isuId });
+        });
+    });
+
+    return {
+        nodes,
+        edges,
+        allActorTypes: [...allActorTypes].filter(Boolean),
+        allContexts: [...allContexts],
+        stats: {
+            ongCount: Object.values(nodes).filter(n => n.type === "ONG").length,
+            isuCount: Object.keys(isuIds).length,
+            colaborari: totalColaborari,
+            conexiuni: edges.length
+        }
     };
 }
 

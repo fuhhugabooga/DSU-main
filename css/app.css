@@ -2483,3 +2483,260 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* =========================================
+   NETWORK 2 PAGE (ONG <-> ISU)
+   Reuses network-1 visual language with its own elements.
+   ========================================= */
+#page-network2.active {
+    display: block;
+}
+
+#graph-container2 {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+#network2-svg {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+#network2-svg:active { cursor: grabbing; }
+
+/* Stats overlay (mirror of #stats-overlay) */
+#stats-overlay2 {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 180px;
+    background: rgba(10, 14, 26, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    z-index: 100;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Floating legend (mirror of #floating-legend) */
+#floating-legend2 {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+}
+
+.legend-section-title {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+/* Detail card (mirror of #partner-detail) */
+#partner-detail2 {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 540px;
+    background: rgba(10, 14, 26, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    z-index: 200;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(220, 38, 38, 0.1);
+    animation: slideUp var(--motion-base) var(--ease) both;
+    max-height: 60%;
+    overflow-y: auto;
+}
+#partner-detail2.hidden { display: none; }
+
+#detail-content2 .detail-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    padding-right: 30px;
+}
+#detail-content2 .detail-type {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 3px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+#detail-content2 .detail-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+#detail-content2 .detail-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 14px;
+}
+#detail-content2 .detail-domains-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+}
+#detail-content2 .detail-domains {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+#detail-content2 .domain-partner-count {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Tooltip (mirror of #tooltip) */
+#tooltip2 {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(10, 14, 26, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    z-index: 500;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    max-width: 280px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    transition: opacity 0.1s ease;
+}
+#tooltip2.hidden { opacity: 0; visibility: hidden; }
+
+/* Floating controls: search + context chips (top-left) */
+#net2-controls {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 240px;
+    max-width: calc(100vw - 32px);
+    background: rgba(10, 14, 26, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    z-index: 120;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+
+.net2-intro {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+.net2-intro strong { color: var(--text-secondary); }
+
+.net2-search-wrap {
+    position: relative;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.net2-chips-label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.net2-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.net2-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--motion-fast) ease;
+}
+.net2-chip .net2-chip-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--chip-color, #94a3b8);
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity var(--motion-fast) ease;
+}
+.net2-chip.active {
+    color: var(--text-primary);
+    border-color: var(--chip-color, var(--border-accent));
+    background: color-mix(in srgb, var(--chip-color, #94a3b8) 16%, transparent);
+}
+.net2-chip.active .net2-chip-dot { opacity: 1; }
+
+#net2-toolbar { top: 16px; }
+
+/* Light theme parity */
+[data-theme="light"] #partner-detail2,
+[data-theme="light"] #tooltip2,
+[data-theme="light"] #stats-overlay2,
+[data-theme="light"] #net2-controls,
+[data-theme="light"] #legend-panel2,
+[data-theme="light"] #floating-legend2 .legend-toggle-btn {
+    background: rgba(248, 250, 252, 0.96);
+}
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+    #net2-controls {
+        width: 200px;
+        padding: 10px;
+        top: 10px;
+        left: 10px;
+    }
+    .net2-intro { display: none; }
+    #stats-overlay2 {
+        width: auto;
+        display: flex;
+        gap: 6px;
+        bottom: 10px;
+        right: 10px;
+        padding: 8px;
+    }
+    #stats-overlay2 .stat-card { margin-bottom: 0; padding: 6px 8px; }
+    #stats-overlay2 .stat-value { font-size: 1rem; }
+}
