@@ -26,15 +26,11 @@
         <nav id="main-nav">
             <a class="nav-link active" data-page="network">Rețea parteneri</a>
             <a class="nav-link" data-page="network2">Rețea operațională</a>
-            <a class="nav-link" data-page="knowledgegraph">Graf cunoaștere</a>
             <a class="nav-link" data-page="statistics">Statistici</a>
             <a class="nav-link" data-page="about">Despre proiect</a>
         </nav>
 
         <div class="header-right">
-            <button id="theme-toggle" class="theme-toggle" aria-label="Schimbă tema" title="Schimbă tema">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            </button>
             <div class="header-partner-logos">
                 <a href="https://www.uvt.ro/" target="_blank"><img src="logos/uvt.png" alt="UVT"></a>
                 <a href="https://connectm.uvt.ro/" target="_blank"><img src="logos/S_Logo Fablab (All White) Horizontal.png" alt="Social Fabrics Research Lab"></a>
@@ -49,7 +45,6 @@
     <div id="mobile-nav-dropdown" class="mobile-nav-dropdown hidden">
         <a class="mobile-nav-link active" data-page="network">Rețea parteneri</a>
         <a class="mobile-nav-link" data-page="network2">Rețea operațională</a>
-        <a class="mobile-nav-link" data-page="knowledgegraph">Graf cunoaștere</a>
         <a class="mobile-nav-link" data-page="statistics">Statistici</a>
         <a class="mobile-nav-link" data-page="about">Despre proiect</a>
     </div>
@@ -128,6 +123,35 @@
         <div id="mobile-special-filters" class="mfp-section"></div>
     </div>
 
+    <!-- ====== FILTER BAR 2 (operational network page only) ====== -->
+    <div id="filter-bar2" style="display:none">
+        <div class="fb-inner">
+            <!-- Help button (populated by network2.js) -->
+            <div id="net2-help-btn-container"></div>
+
+            <!-- Search -->
+            <div class="fb-search">
+                <svg class="fb-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" id="net2-search" placeholder="Caută ONG..." autocomplete="off">
+                <div id="net2-search-results" class="search-results hidden"></div>
+            </div>
+
+            <div class="fb-separator"></div>
+
+            <!-- Context (crisis) dropdown -->
+            <div class="fb-dropdown-wrap">
+                <button class="fb-dropdown-btn" id="net2-context-btn">
+                    Context (criză)
+                    <span class="fb-dropdown-count" id="net2-context-count"></span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="fb-dropdown-panel hidden" id="net2-context-panel">
+                    <div id="net2-context-filters"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ====== APP SHELL ====== -->
     <div id="app-container">
         <main id="main-content">
@@ -186,20 +210,6 @@
                 <div id="graph-container2">
                     <svg id="network2-svg"></svg>
 
-                    <!-- Floating controls (top-left): search + context filter -->
-                    <div id="net2-controls">
-                        <div class="net2-intro">
-                            <strong>ONG&nbsp;↔&nbsp;ISU județean</strong> — colaborări operaționale în pandemie și criza refugiaților
-                        </div>
-                        <div class="fb-search net2-search-wrap">
-                            <svg class="fb-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                            <input type="text" id="net2-search" placeholder="Caută ONG..." autocomplete="off">
-                            <div id="net2-search-results" class="search-results hidden"></div>
-                        </div>
-                        <div class="net2-chips-label">Context</div>
-                        <div id="net2-context-chips" class="net2-chips"></div>
-                    </div>
-
                     <!-- Toolbar (reset zoom) -->
                     <div class="graph-toolbar" id="net2-toolbar">
                         <button class="graph-toolbar-btn" id="net2-reset-btn" title="Resetare zoom">
@@ -231,89 +241,6 @@
                             Legendă
                         </button>
                         <div id="legend-panel2" class="legend-panel hidden"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== KNOWLEDGE GRAPH PAGE ====== -->
-            <div id="page-knowledgegraph" class="page">
-                <div class="kg-layout">
-                    <!-- Top bar -->
-                    <div class="kg-topbar">
-                        <div class="kg-topbar-title">
-                            <div class="kg-topbar-subtitle">SNMSU &middot; UCPM</div>
-                            <div class="kg-topbar-heading">&#x27F6; Graf Direcțional de Cunoaștere</div>
-                        </div>
-                        <div class="kg-topbar-controls">
-                            <span class="kg-controls-label">NODURI:</span>
-                            <div id="kg-node-toggles"></div>
-                            <div class="kg-controls-sep"></div>
-                            <button id="kg-reset-btn" class="kg-reset-btn">&#x21BA; Reinițializează</button>
-                        </div>
-                    </div>
-
-                    <div class="kg-body">
-                        <!-- SVG Canvas -->
-                        <div class="kg-canvas" id="kg-container">
-                            <svg id="kg-svg"></svg>
-                            <div class="kg-zoom-hint">Scroll = zoom &middot; Drag nod = mutare &middot; Click = selecție &middot; Drag fundal = pan</div>
-                            <div class="kg-zoom-pct" id="kg-zoom-pct">85%</div>
-                        </div>
-
-                        <!-- Right sidebar -->
-                        <div class="kg-sidebar">
-                            <!-- Explainer -->
-                            <div class="kg-explainer" id="kg-explainer">
-                                <div class="kg-explainer-title">Ce arată acest graf?</div>
-                                Responsabilitățile din sistemul USAR al României: care echipe de salvare acoperă fiecare tip de dezastru, cine le conduce și cine le sprijină.
-                                <br><br>
-                                <strong style="color:#f59e0b">Hexagoane</strong> = capabilități de salvare &middot;
-                                <strong style="color:#38bdf8">Cercuri</strong> = autorități responsabile &middot;
-                                <strong style="color:#f87171">Romburi</strong> = tipuri de risc
-                                <br>
-                                <button class="kg-explainer-dismiss" onclick="this.closest('.kg-explainer').style.display='none'">&times; ascunde</button>
-                            </div>
-
-                            <!-- Edge type toggles -->
-                            <div class="kg-sidebar-section">
-                                <div class="kg-sidebar-title">Tipuri relații</div>
-                                <div id="kg-edge-toggles"></div>
-                            </div>
-
-                            <!-- Stats -->
-                            <div class="kg-sidebar-section">
-                                <div class="kg-sidebar-title">Statistici graf</div>
-                                <div class="kg-stats-grid">
-                                    <div class="kg-stat-box" style="--stat-color:#38bdf8">
-                                        <div class="kg-stat-val" id="kg-stat-nodes">0</div>
-                                        <div class="kg-stat-lbl">Noduri</div>
-                                    </div>
-                                    <div class="kg-stat-box" style="--stat-color:#f59e0b">
-                                        <div class="kg-stat-val" id="kg-stat-edges">0</div>
-                                        <div class="kg-stat-lbl">Relații</div>
-                                    </div>
-                                    <div class="kg-stat-box" style="--stat-color:#34d399">
-                                        <div class="kg-stat-val" id="kg-stat-visible">0</div>
-                                        <div class="kg-stat-lbl">Vizibile</div>
-                                    </div>
-                                    <div class="kg-stat-box" style="--stat-color:#f87171">
-                                        <div class="kg-stat-val" id="kg-stat-active">0</div>
-                                        <div class="kg-stat-lbl">Rel. active</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Node detail -->
-                            <div class="kg-sidebar-detail" id="kg-detail-panel">
-                                <div class="kg-detail-empty">
-                                    <div class="kg-detail-empty-icon">&#x2B21;</div>
-                                    Click pe un nod<br>pentru detalii și relații
-                                </div>
-                            </div>
-
-                            <!-- Legend -->
-                            <div class="kg-sidebar-legend" id="kg-legend"></div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -360,7 +287,6 @@
     <script type="module" src="js/data.js?v=2"></script>
     <script type="module" src="js/network.js?v=2"></script>
     <script type="module" src="js/network2.js?v=2"></script>
-    <script type="module" src="js/knowledge-graph.js?v=2"></script>
     <script type="module" src="js/statistics.js?v=2"></script>
     <script type="module" src="js/about.js?v=2"></script>
     <script type="module" src="js/app.js?v=2"></script>
