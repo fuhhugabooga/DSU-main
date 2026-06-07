@@ -26,12 +26,15 @@ No npm, no bundler, no build process. All dependencies are loaded via CDN in `in
 ├── js/
 │   ├── app.js                 # Routing, initialization, navigation events
 │   ├── data.js                # CSV loading, parsing, entity classification
-│   ├── network.js             # D3 force graph, filters, search, detail cards
+│   ├── network.js             # D3 force graph (partners ↔ domains), filters, search
+│   ├── network2.js            # D3 bipartite force graph (ONG ↔ ISU județean)
 │   ├── statistics.js          # Plotly charts across 4 tabs
 │   └── about.js               # About page HTML generation
 ├── css/
 │   └── app.css                # All styles (dark theme, responsive, animations)
-├── data.csv                   # Main partner data (64 partners)
+├── data.csv                   # Main partner data (64 partners; domains standardized)
+├── data_retea2_isu.csv        # Network 2 data (256 ONGs ↔ 34 ISU județene)
+├── muchii_operational_bipartit.csv # Optional per-edge context for network 2
 ├── membrii_fonss.csv          # FONSS organization members (45 members)
 ├── data/                      # 18 statistics CSV files
 │   ├── interventii_ambulanta.csv
@@ -80,8 +83,9 @@ Then open `http://localhost:8000`.
 ### Pages (SPA routing via `app.js`)
 
 1. **Rețea parteneri** (`#page-network`) — Interactive D3.js force-directed graph of DSU partners. Includes search, multi-filter dropdowns (entity type, domain, special flags), a floating legend, stats overlay, and partner detail cards.
-2. **Statistici** (`#page-statistics`) — Four tabbed views (Operational, Medical, Prevention, Advanced) with Plotly charts. Lazily initialized on first visit.
-3. **Despre proiect** (`#page-about`) — Project information, team, data sources. Generated dynamically by `about.js`.
+2. **Rețea operațională** (`#page-network2`) — Bipartite D3.js force graph of operational collaborations during the pandemic and refugee crisis: 256 NGOs ↔ 34 county emergency inspectorates (ISU). ISU hubs render as diamonds; NGO nodes are colored by actor type (`Tip_actor`) and sized by collaboration count (`Nr_colaborari`). Filterable by crisis context (Pandemie / Aflux refugiați / Ambele). Lazily initialized on first visit (`network2.js`, data via `loadNetwork2Data()`).
+3. **Statistici** (`#page-statistics`) — Four tabbed views (Operational, Medical, Prevention, Advanced) with Plotly charts. Lazily initialized on first visit.
+4. **Despre proiect** (`#page-about`) — Project information, team, data sources. Generated dynamically by `about.js`.
 
 ### Module Dependency Graph
 

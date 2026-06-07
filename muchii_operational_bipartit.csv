@@ -1,0 +1,316 @@
+Source,Target,Type,Weight,context
+ONG::Crucea Roșie Română (SNCRR),ISU::AB,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::AR,Undirected,1,Pandemie
+ONG::Crucea Roșie Română (SNCRR),ISU::BC,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::BH,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::BT,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::BV,Undirected,2,Ambele
+ONG::Crucea Roșie Română (SNCRR),ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::CL,Undirected,2,Ambele
+ONG::Crucea Roșie Română (SNCRR),ISU::CS,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::CV,Undirected,1,Pandemie
+ONG::Crucea Roșie Română (SNCRR),ISU::DB,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::DJ,Undirected,2,Ambele
+ONG::Crucea Roșie Română (SNCRR),ISU::HD,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::IS,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::MH,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::MM,Undirected,1,Pandemie
+ONG::Crucea Roșie Română (SNCRR),ISU::MS,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::NT,Undirected,1,Pandemie
+ONG::Crucea Roșie Română (SNCRR),ISU::OT,Undirected,1,Ambele
+ONG::Crucea Roșie Română (SNCRR),ISU::SJ,Undirected,1,Pandemie
+ONG::Crucea Roșie Română (SNCRR),ISU::SM,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::SV,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::TL,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::TM,Undirected,1,Pandemie
+ONG::Crucea Roșie Română (SNCRR),ISU::VL,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Română (SNCRR),ISU::VN,Undirected,2,Ambele
+ONG::Crucea Roșie Română (SNCRR),ISU::VS,Undirected,1,Aflux refugiați
+ONG::UNHCR,ISU::BT,Undirected,1,Aflux refugiați
+ONG::UNHCR,ISU::CT,Undirected,1,Aflux refugiați
+ONG::UNHCR,ISU::GL,Undirected,1,Aflux refugiați
+ONG::UNHCR,ISU::SV,Undirected,1,Aflux refugiați
+ONG::UNHCR,ISU::TL,Undirected,1,Aflux refugiați
+ONG::UNHCR,ISU::VS,Undirected,1,Aflux refugiați
+ONG::Salvați Copiii (Save the Children),ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Salvați Copiii (Save the Children),ISU::MM,Undirected,1,Aflux refugiați
+ONG::Salvați Copiii (Save the Children),ISU::MS,Undirected,1,Aflux refugiați
+ONG::Salvați Copiii (Save the Children),ISU::SV,Undirected,1,Aflux refugiați
+ONG::Salvați Copiii (Save the Children),ISU::TL,Undirected,1,Aflux refugiați
+ONG::World Central Kitchen,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::World Central Kitchen,ISU::IS,Undirected,1,Aflux refugiați
+ONG::World Central Kitchen,ISU::SV,Undirected,1,Aflux refugiați
+ONG::World Central Kitchen,ISU::TL,Undirected,1,Aflux refugiați
+ONG::World Central Kitchen,ISU::VS,Undirected,1,Aflux refugiați
+"ONG::Asociatia ""O Masa Calda""",ISU::CJ,Undirected,3,Ambele
+"ONG::Asociatia ""O Masa Calda""",ISU::SM,Undirected,1,Aflux refugiați
+ONG::Star of Hope,ISU::BT,Undirected,1,Aflux refugiați
+ONG::Star of Hope,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Star of Hope,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Star of Hope,ISU::VS,Undirected,1,Aflux refugiați
+ONG::FUNDAȚIA PENTRU SMURD,ISU::SV,Undirected,1,Aflux refugiați
+ONG::FUNDAȚIA PENTRU SMURD,ISU::TL,Undirected,1,Aflux refugiați
+ONG::FUNDAȚIA PENTRU SMURD,ISU::TM,Undirected,1,Pandemie
+ONG::OIM / IOM,ISU::SV,Undirected,1,Aflux refugiați
+ONG::OIM / IOM,ISU::TL,Undirected,1,Aflux refugiați
+ONG::OIM / IOM,ISU::VS,Undirected,1,Aflux refugiați
+ONG::Organizatia Patronala HORECA Cluj,ISU::CJ,Undirected,3,Ambele
+ONG::Rescue and Response 4x4,ISU::CJ,Undirected,3,Ambele
+ONG::Serviciul de Ajutor Maltez,ISU::MM,Undirected,1,Aflux refugiați
+ONG::Serviciul de Ajutor Maltez,ISU::SM,Undirected,1,Aflux refugiați
+ONG::Serviciul de Ajutor Maltez,ISU::SV,Undirected,1,Aflux refugiați
+ONG::SOS Satele Copiilor,ISU::BC,Undirected,1,Aflux refugiați
+ONG::SOS Satele Copiilor,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::SOS Satele Copiilor,ISU::SB,Undirected,1,Aflux refugiați
+ONG::UNICEF,ISU::SV,Undirected,1,Aflux refugiați
+ONG::UNICEF,ISU::TL,Undirected,1,Aflux refugiați
+ONG::UNICEF,ISU::VS,Undirected,1,Aflux refugiați
+"ONG::Asociatia ""Caravana Cu Medici""-Filiala Cluj",ISU::CJ,Undirected,2,Aflux refugiați
+ONG::Asociatia CERT,ISU::CJ,Undirected,2,Aflux refugiați
+ONG::Asociatia Ruscovan,ISU::CJ,Undirected,2,Aflux refugiați
+ONG::Caritas,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Caritas,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Consiliul Național Român pentru Refugiați (CNRR),ISU::SV,Undirected,1,Aflux refugiați
+ONG::Consiliul Național Român pentru Refugiați (CNRR),ISU::TL,Undirected,1,Aflux refugiați
+ONG::Fundatia Parinti din Romania-PEDITEL,ISU::CJ,Undirected,2,Aflux refugiați
+ONG::Habitat for Humanity,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Habitat for Humanity,ISU::TL,Undirected,1,Aflux refugiați
+ONG::Terre des Hommes,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Terre des Hommes,ISU::BT,Undirected,1,Aflux refugiați
+ONG::World Vision,ISU::IS,Undirected,1,Aflux refugiați
+ONG::World Vision,ISU::VS,Undirected,1,Aflux refugiați
+ONG::A.D.R.A. (Biserica Adventistă),ISU::TL,Undirected,1,Aflux refugiați
+ONG::A.F.A.D,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Acociația ELIEZER,ISU::SM,Undirected,1,Aflux refugiați
+ONG::ACTED,ISU::VS,Undirected,1,Aflux refugiați
+ONG::ADRA,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::AMURTEL,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Anim ALL Delta Tulcea,ISU::TL,Undirected,1,Aflux refugiați
+ONG::Animal Life,ISU::SB,Undirected,1,Aflux refugiați
+ONG::ARHIEPISCOPIA SUCEVEI ȘI RĂDĂUȚILOR,ISU::SV,Undirected,1,Aflux refugiați
+ONG::ARMATA SALVĂRII,ISU::SV,Undirected,1,Aflux refugiați
+ONG::As.Inimi Deschise spre manute intinse-Biserica Creștină Baptistă Emanuel Carei,ISU::SM,Undirected,1,Aflux refugiați
+"ONG::Asociatia ""Sf. Nectarie"" Cluj",ISU::CJ,Undirected,1,Pandemie
+ONG::Asociatia Beard Brothers,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Asociatia Casuta Bucuriei,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociatia Civic Suport,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Asociatia Daisler,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Asociatia Jugendzentrum Seligstadt,ISU::BV,Undirected,1,Aflux refugiați
+ONG::ASOCIATIA KIWANIS CLUB CLUJ,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociatia Lions Club Genesis,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Asociatia Medical International Rescue,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociatia Medical International Rescue-Medicala Internationala de Salvare,ISU::CJ,Undirected,1,Aflux refugiați
+"ONG::Asociatia Misionarilor Padre Pio, Cluj Napoca, str. Eroilor, nr 43",ISU::CJ,Undirected,1,Aflux refugiați
+"ONG::Asociatia Mustars Seed Jersey, România",ISU::BH,Undirected,1,Aflux refugiați
+ONG::Asociatia Nationala a Interpretilor Autorizati in Limbaj Mimico-Gestual,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociatia pentru Caini de Salvare Transilvania,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociatia Pentru Integrarea Imigrantilor Si Refugiatilor din MENA (AIR-MENA),ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Asociatia SOLIS,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociatia Stejarul Pitic,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociaţia Profesională Neguvernamentală de Asistenţă Socială ASSOC,ISU::MM,Undirected,1,Aflux refugiați
+"ONG::Asociația ,,Afterhills”",ISU::IS,Undirected,1,Aflux refugiați
+"ONG::Asociația ,,Civica""",ISU::IS,Undirected,1,Aflux refugiați
+"ONG::ASOCIAȚIA ,,EDUCAT""",ISU::BN,Undirected,1,Pandemie
+"ONG::ASOCIAȚIA ,,IMPACT""",ISU::BN,Undirected,1,Pandemie
+"ONG::Asociația ,,Industrii creative""",ISU::IS,Undirected,1,Aflux refugiați
+"ONG::Asociația ,,ParentIS”",ISU::IS,Undirected,1,Aflux refugiați
+"ONG::ASOCIAȚIA ,,SALVATORII SUFLETELOR NIMĂNUI""",ISU::BN,Undirected,1,Pandemie
+"ONG::ASOCIAȚIA ,,TINERI PENTRU COMUNITATE""",ISU::BN,Undirected,1,Pandemie
+"ONG::Asociația ,,Zi de Bine”",ISU::IS,Undirected,1,Aflux refugiați
+"ONG::Asociația ,,Zâmbetul Nostru”",ISU::IS,Undirected,1,Aflux refugiați
+ONG::Asociația Adonai,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Asociația Ajutorul Creștin din România,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Asociația ANAID,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Asociația Apha Smart Food,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Ascotid,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Blondie,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Asociația Bunul samaritean Nicorești,ISU::GL,Undirected,1,Aflux refugiați
+ONG::Asociația Caradja Cantacuzino,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Asociația Casa Bătrâneții Liniștite,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Asociația CASA SHALOM,ISU::BIF,Undirected,1,Aflux refugiați
+"ONG::Asociația Centre of Hope, Dorohoi",ISU::BT,Undirected,1,Aflux refugiați
+ONG::Asociația Centrul Creștin Brașov,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Asociația Cetatea Voluntarilor,ISU::AR,Undirected,1,Pandemie
+ONG::Asociația Cltura în Mișcare,ISU::BH,Undirected,1,Aflux refugiați
+"ONG::Asociația Creștină ”Pentru Tine”, Botoșani",ISU::BT,Undirected,1,Aflux refugiați
+ONG::Asociația Divers,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Educația te Salvează Brașov,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Asociația Educație Europeană,ISU::MH,Undirected,1,Aflux refugiați
+ONG::ASOCIAȚIA FILANTROPIA HUȘI,ISU::VS,Undirected,1,Aflux refugiați
+ONG::Asociația Gateway to Hope Romania,ISU::CL,Undirected,1,Aflux refugiați
+ONG::Asociația Gospel for Eastern Europe Brașov,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Asociația Happy Rădeni Frumușica,ISU::BT,Undirected,1,Aflux refugiați
+ONG::Asociația Help4Change,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Icelanding BHBL România,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Integra România,ISU::SB,Undirected,1,Aflux refugiați
+ONG::Asociația JCI Tg. Mureș,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Kairos - Uniunea crestinilor dupa Evanghelie,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Asociația Kasper Daniela Brașov,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Asociația KINDER IN NOT-CON I BIMBI Pomârla,ISU::BT,Undirected,1,Aflux refugiați
+ONG::Asociația Little People România,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociația Lumina Lumii,ISU::MS,Undirected,1,Aflux refugiați
+"ONG::Asociația Lumina pentru Copii, Șendriceni",ISU::BT,Undirected,1,Aflux refugiați
+ONG::Asociația Maria Andrea,ISU::TL,Undirected,1,Aflux refugiați
+ONG::ASOCIAȚIA MGM,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Asociația Militarilor Veterani Galați,ISU::GL,Undirected,1,Aflux refugiați
+ONG::Asociația Mișcare de Tabără Yuppi,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociația Mâini întinse,ISU::TL,Undirected,1,Aflux refugiați
+"ONG::Asociația Neemia –Casa Neemia (fundația Trestiana), Dorohoi",ISU::BT,Undirected,1,Aflux refugiați
+ONG::Asociația pentru promovarea Afacerilor în România,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Asociația pentru promovarea turismului in ORADEA si Regiune,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Asociația Perspective Daneș,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Pompierul Arad,ISU::AR,Undirected,1,Pandemie
+ONG::ASOCIAȚIA RĂDĂUȚIUL CIVIC,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Asociația Salvatori Voluntari pentru Situații de Urgență,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Asociația Samaritanus,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Save the Dog,ISU::TL,Undirected,1,Aflux refugiați
+ONG::Asociația SMILE,ISU::VL,Undirected,1,Aflux refugiați
+ONG::Asociația Smiles,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Asociația Solitudinea,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Speranța Șuncuiuș,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Asociația Sport Reginea Centru,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Suryam,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Asociația Umanitara Dreptul la viata Huedin,ISU::CJ,Undirected,1,Pandemie
+ONG::Asociația Umanitară LAHAI ROI,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Asociația Zâmbete colorate,ISU::VL,Undirected,1,Aflux refugiați
+ONG::Asociația ȘANSA TA,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Asociația ”Salvează o inimă”,ISU::BT,Undirected,1,Aflux refugiați
+ONG::Asociația „Adi Hădean”,ISU::IS,Undirected,1,Aflux refugiați
+ONG::ASOCIAȚIA „COMUNITATEA NOASTRĂ”,ISU::NT,Undirected,1,Pandemie
+ONG::Asociația „Congregația Slujitorii Carității”,ISU::IS,Undirected,1,Aflux refugiați
+ONG::ASOCIAȚIA „CULIȚĂ TĂRÂȚĂ”,ISU::NT,Undirected,1,Pandemie
+ONG::Asociația „Glasul Vieții”,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Asociația „Justiție pentru Minori”,ISU::IS,Undirected,1,Aflux refugiați
+ONG::ASOCIAȚIA „LUMINA”,ISU::BC,Undirected,1,Aflux refugiați
+ONG::ASOCIAȚIA „PHRONESIS”,ISU::BC,Undirected,1,Aflux refugiați
+ONG::ASOCIAȚIA „SALVATORUL NEMȚEAN”,ISU::NT,Undirected,1,Pandemie
+ONG::Asociația „Împreună pentru Miroslava”,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Asociația „Ștergem o lacrimă”,ISU::IS,Undirected,1,Aflux refugiați
+"ONG::ASOCIȚIA ,,ÎMPARTE BUCURIE""",ISU::BN,Undirected,1,Pandemie
+ONG::ASproAS,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Beard Brothers,ISU::AR,Undirected,1,Pandemie
+ONG::BELLA ITALIA,ISU::BR,Undirected,1,Aflux refugiați
+ONG::BISERICA BAPTISTĂ CALAFINDEȘTI,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Biserica creștină Emanuel Galați,ISU::GL,Undirected,1,Aflux refugiați
+ONG::Biserica Evanghelica C.A. Fagaras,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Biserica Isus Lumina Lumii,ISU::SM,Undirected,1,Aflux refugiați
+ONG::Canache Miruna-Gabriela- Cabinet Individual de Psihologie,ISU::CJ,Undirected,1,Pandemie
+ONG::Casa Anca Zrinu,ISU::CJ,Undirected,1,Aflux refugiați
+"ONG::Casa de odihnă ”Sfântul Nicolae” , Botoșani",ISU::BT,Undirected,1,Aflux refugiați
+ONG::CASA DOMNEASCĂ,ISU::BR,Undirected,1,Aflux refugiați
+ONG::CASA LUI PATROCLE,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Centras,ISU::TL,Undirected,1,Aflux refugiați
+ONG::Centrul Creștin Betania Oradea,ISU::BH,Undirected,1,Aflux refugiați
+"ONG::Centrul de Educatie Rutiera, ONG",ISU::CJ,Undirected,1,Pandemie
+ONG::Centrul de Integrare pentru Migranți Brașov,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Cercetașii României,ISU::VL,Undirected,1,Aflux refugiați
+ONG::Club 30,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Colegiul Farmacistilor Cluj,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::COLEGIUL PSIHOLOGILOR DIN ROMÂNIA-FILIALA OLT,ISU::OT,Undirected,1,Ambele
+"ONG::Comunitatea Rușilor Lipoveni, Botoșani",ISU::BT,Undirected,1,Aflux refugiați
+ONG::CONCORDIA ACADEMIA,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Crucea Roșie Elenă (Greek Red Cross),ISU::SV,Undirected,1,Aflux refugiați
+ONG::DABOO DONER,ISU::BR,Undirected,1,Aflux refugiați
+ONG::DAS Turda,ISU::CJ,Undirected,1,Pandemie
+ONG::Domeniul Regilor,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Elphin Family,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Episcopia Romano Catolică,ISU::SM,Undirected,1,Aflux refugiați
+ONG::Federatia Comunitatilor Evreiesti din Romania - JDC,ISU::SV,Undirected,1,Aflux refugiați
+ONG::FIGHT FOR FREEDOM,ISU::SV,Undirected,1,Aflux refugiați
+ONG::FILANTROPIA ALBA IULIA,ISU::AB,Undirected,1,Aflux refugiați
+ONG::FONSS,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Forumul cetățenesc pentru actiune socială și educație civică,ISU::VL,Undirected,1,Aflux refugiați
+ONG::Fundatia FAST,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Fundatia inima copilului,ISU::CJ,Undirected,1,Pandemie
+ONG::Fundatia Regen,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Fundația Alfa Suflet și Energie,ISU::BT,Undirected,1,Aflux refugiați
+ONG::Fundația Baylor Marea Neagră,ISU::TL,Undirected,1,Aflux refugiați
+ONG::Fundația Betesda Galați,ISU::GL,Undirected,1,Aflux refugiați
+ONG::Fundația Bethany,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Fundația Buckner România,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Fundația Caritate Nonprofit Emanuel Speranța României,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Fundația Comunitară Iași,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Fundația Comunitară Mureș,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Fundația Comunitară Oradea,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Fundația Creștină Osana Brașov,ISU::BV,Undirected,1,Aflux refugiați
+ONG::FUNDAȚIA DE SPRIJIN COMUNITAR BACĂU,ISU::BC,Undirected,1,Aflux refugiați
+ONG::Fundația EEBC,ISU::BH,Undirected,1,Aflux refugiați
+"ONG::Fundația Hand of Help, Botoșani",ISU::BT,Undirected,1,Aflux refugiați
+ONG::Fundația Hans Linder Satu Mare,ISU::SM,Undirected,1,Aflux refugiați
+ONG::Fundația Inima de copil Galați,ISU::GL,Undirected,1,Aflux refugiați
+ONG::Fundația Inimi slujitoare Tecuci,ISU::GL,Undirected,1,Aflux refugiați
+ONG::Fundația pentru Dezvoltarea Societății Civile (Kaufland),ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Fundația Rebenciuc,ISU::VL,Undirected,1,Aflux refugiați
+ONG::Fundația ROMÂNIA PRO CULTURE,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Fundația Sfântul Blasius,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Fundația Tanner Romanian Mission Nicorești,ISU::GL,Undirected,1,Aflux refugiați
+ONG::Fundația Transilvană Alpha,ISU::MS,Undirected,1,Aflux refugiați
+ONG::Fundația ucrainenilor huțuli din România,ISU::MM,Undirected,1,Aflux refugiați
+ONG::Fundația Umanitară Omenia,ISU::IS,Undirected,1,Aflux refugiați
+ONG::Fundația Ușa Deschisă,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Fundația Viața Nouă pentru Copii,ISU::BH,Undirected,1,Aflux refugiați
+ONG::Fundația VIAȚA ȘI LUMINA,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Fundația Youth Cancer Europe,ISU::CJ,Undirected,1,Pandemie
+"ONG::Fundația ”Casa Ioana”, Botoșani",ISU::BT,Undirected,1,Aflux refugiați
+ONG::Fundația ”Floare Ialomițeană”,ISU::IL,Undirected,1,Aflux refugiați
+ONG::FUNDAȚIA „VICTORINE LE DIEU”,ISU::BC,Undirected,1,Aflux refugiați
+ONG::FUNDAȚIA „YANA”,ISU::BC,Undirected,1,Aflux refugiați
+ONG::Global Hope,ISU::SB,Undirected,1,Aflux refugiați
+ONG::Good Neighbors,ISU::TL,Undirected,1,Aflux refugiați
+ONG::Gorgeous Travel SRL,ISU::CJ,Undirected,1,Pandemie
+ONG::Grup de Inițiativă Civică Piatra de Jos,ISU::TL,Undirected,1,Aflux refugiați
+ONG::Heart of Hope,ISU::SB,Undirected,1,Aflux refugiați
+ONG::Hm roots srl,ISU::CJ,Undirected,1,Pandemie
+"ONG::Hope for the children International, Dorohoi",ISU::BT,Undirected,1,Aflux refugiați
+ONG::Hostel Vointa,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Hotel Beta,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Hotel Granata,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Hotel hamham,ISU::CJ,Undirected,1,Pandemie
+ONG::Hotel Hilton,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Hotel Liliacul,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Hotel Meteor,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::HUB PENTRU RECONSTRUCȚIE CIVICĂ,ISU::TL,Undirected,1,Aflux refugiați
+ONG::JW.ORG,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Kastel Youth Hub Brașov,ISU::BV,Undirected,1,Aflux refugiați
+ONG::Life Education for All,ISU::CJ,Undirected,1,Pandemie
+ONG::Life For Ukraine,ISU::CT,Undirected,1,Aflux refugiați
+ONG::Liga Navală Română,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::LIGA STUDENȚILOR - FILIALA BACĂU,ISU::BC,Undirected,1,Aflux refugiați
+ONG::Lupas Andreea PFA,ISU::CJ,Undirected,1,Pandemie
+ONG::MEDU,ISU::SV,Undirected,1,Aflux refugiați
+"ONG::Mobitex SRL, Loc. Dej, str. Valcele nr. 36",ISU::CJ,Undirected,1,Pandemie
+ONG::O.N.G Fundația Emanuel Speranța României,ISU::BH,Undirected,1,Aflux refugiați
+ONG::OESB din Cluj ( cavalerii templieri),ISU::BT,Undirected,1,Aflux refugiați
+"ONG::Organizatia Crestina Ecce Hom,o",ISU::CJ,Undirected,1,Pandemie
+ONG::PAROHIA REFORMATA JEBUCU,ISU::SJ,Undirected,1,Aflux refugiați
+ONG::PATRIR,ISU::CJ,Undirected,1,Pandemie
+ONG::Pensiunea BBS RESIDENCE,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Pensiunea Casa Zanelor,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Pensiunea CASA ZECE Turda,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Pensiunea Gabi,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Pensunea Pascalau,ISU::CJ,Undirected,1,Aflux refugiați
+"ONG::Protopopiatul Oas, Episcopia Ortodoxă a Maramureșului și Satmarului",ISU::SM,Undirected,1,Aflux refugiați
+ONG::RBC REAL ESTATE SRL,ISU::CJ,Undirected,1,Pandemie
+ONG::Refugee 4 Refugees,ISU::SV,Undirected,1,Aflux refugiați
+ONG::RESTAURANT PRIVIGHETOAREA,ISU::BR,Undirected,1,Aflux refugiați
+ONG::RZR SERVICE SRL,ISU::CJ,Undirected,1,Pandemie
+ONG::Sache Vet Clinic,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::SamCivica Satu Mare,ISU::SM,Undirected,1,Aflux refugiați
+ONG::SAMU Emergencias,ISU::TL,Undirected,1,Aflux refugiați
+ONG::sc chimirex co srl,ISU::CJ,Undirected,1,Pandemie
+"ONG::SC PERFECT DIAMOND EVENT SRL, Pensiunea Vila Dana Cluj",ISU::CJ,Undirected,1,Pandemie
+ONG::Sc roconfort srl,ISU::CJ,Undirected,1,Pandemie
+ONG::SC SORIANA DRIVE SRL,ISU::CJ,Undirected,1,Pandemie
+ONG::Simona Elena și Voluntarii,ISU::BT,Undirected,1,Aflux refugiați
+ONG::Societatea de Educație Contraceptivă și Sexuală - SECS,ISU::BIF,Undirected,1,Aflux refugiați
+ONG::Tabăra borokagyoker egyesulet Satu Mare,ISU::SM,Undirected,1,Aflux refugiați
+ONG::THE COSSY SPOT Hostel,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::The Love Van,ISU::TL,Undirected,1,Aflux refugiați
+ONG::Timpul Bibliei,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::Trucksif.srl,ISU::CJ,Undirected,1,Pandemie
+ONG::UNITIȚI PENTRU UCRAINA-ALBA,ISU::AB,Undirected,1,Aflux refugiați
+ONG::Vila Rao,ISU::CJ,Undirected,1,Aflux refugiați
+ONG::VOLUNTEER FOR LIFE,ISU::SV,Undirected,1,Aflux refugiați
+ONG::Webasig apahida,ISU::CJ,Undirected,1,Pandemie
+ONG::You Hub Association,ISU::TL,Undirected,1,Aflux refugiați
