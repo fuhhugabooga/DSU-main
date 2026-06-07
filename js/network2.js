@@ -56,9 +56,9 @@ function setupSVG() {
     width = container.clientWidth || 800;
     height = container.clientHeight || 600;
 
-    svg = d3.select('#network2-svg')
-        .attr('width', width)
-        .attr('height', height);
+    // Let CSS own the SVG size (width/height:100%); keep width/height vars
+    // only for the force-center math, re-measured on resize.
+    svg = d3.select('#network2-svg');
     svg.selectAll('*').remove();
 
     const defs = svg.append('defs');
@@ -87,7 +87,6 @@ function resizeSVG() {
     const container = document.getElementById('graph-container2');
     width = container.clientWidth || width;
     height = container.clientHeight || height;
-    svg.attr('width', width).attr('height', height);
 }
 
 // Called by app.js when the page becomes visible (container now has a size)
@@ -265,6 +264,7 @@ function renderGraph(nodes, links) {
             d.fx = null; d.fy = null;
         }));
 
+    resizeSVG(); // ensure width/height reflect the current container size
     const mobile = window.innerWidth < 768;
     simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links).id(d => d.id).distance(mobile ? 60 : 90))
@@ -641,5 +641,5 @@ function updateEmptyMessage(count) {
 function escapeHtml(str) {
     return String(str)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
