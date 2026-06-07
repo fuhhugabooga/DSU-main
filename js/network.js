@@ -73,9 +73,9 @@ function setupSVG() {
     width = container.clientWidth;
     height = container.clientHeight;
 
-    svg = d3.select('#network-svg')
-        .attr('width', width)
-        .attr('height', height);
+    // Let CSS own the SVG size (width/height:100%); keep width/height vars
+    // only for the force-center math, re-measured on resize.
+    svg = d3.select('#network-svg');
 
     svg.selectAll('*').remove();
 
@@ -116,7 +116,6 @@ function resizeSVG() {
     const container = document.getElementById('graph-container');
     width = container.clientWidth;
     height = container.clientHeight;
-    svg.attr('width', width).attr('height', height);
 }
 
 // ---- GRAPH BUILDING ----
@@ -371,6 +370,7 @@ function renderGraph(nodes, links) {
     );
 
     // Force simulation
+    resizeSVG(); // ensure width/height reflect the current container size
     const isMobile = window.innerWidth < 768;
     simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links).id(d => d.id).distance(isMobile ? 80 : 120))
@@ -1136,17 +1136,11 @@ function setupMobileFilters(networkData) {
 
         mobileSpecial.querySelectorAll('.special-pill').forEach(btn => {
             btn.addEventListener('click', () => {
-                const filter = btn.dataset.filter;
-                const isActive = btn.classList.contains('active');
-                mobileSpecial.querySelectorAll('.special-pill').forEach(b => b.classList.remove('active'));
-
-                if (isActive) {
-                    filterState.specialFilter = null;
-                } else {
-                    btn.classList.add('active');
-                    filterState.specialFilter = filter;
-                }
-
+                // Multi-select, mirroring the desktop dropdown
+                btn.classList.toggle('active');
+                filterState.specialFilters = [...mobileSpecial.querySelectorAll('.special-pill.active')]
+                    .map(b => b.dataset.filter);
+                filterState.specialFilter = filterState.specialFilters[0] || null; // backward compat
                 syncDesktopSpecialFilters();
                 deselectNode();
                 rebuildGraph();
@@ -1168,7 +1162,7 @@ function syncMobileFilters() {
     const mobileSpecial = document.getElementById('mobile-special-filters');
     if (mobileSpecial) {
         mobileSpecial.querySelectorAll('.special-pill').forEach(btn => {
-            btn.classList.toggle('active', filterState.specialFilter === btn.dataset.filter);
+            btn.classList.toggle('active', (filterState.specialFilters || []).includes(btn.dataset.filter));
         });
     }
 }
@@ -1176,18 +1170,20 @@ function syncMobileFilters() {
 function syncDesktopEntityFilters() {
     const desktop = document.getElementById('entity-filters');
     if (desktop) {
-        desktop.querySelectorAll('.entity-pill').forEach(btn => {
-            btn.classList.toggle('active', filterState.entityTypes.includes(btn.dataset.type));
+        desktop.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = filterState.entityTypes.includes(cb.value);
         });
+        updateEntityCountLabel();
     }
 }
 
 function syncDesktopSpecialFilters() {
     const desktop = document.getElementById('special-filters');
     if (desktop) {
-        desktop.querySelectorAll('.special-pill').forEach(btn => {
-            btn.classList.toggle('active', filterState.specialFilter === btn.dataset.filter);
+        desktop.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = (filterState.specialFilters || []).includes(cb.value);
         });
+        updateSpecialCountLabel();
     }
 }
 
@@ -1221,39 +1217,32 @@ function updateFilterCounts(visiblePartnerIds) {
     if (!allNetworkData) return;
     const { nodes } = allNetworkData;
 
-    // Count visible partners by entity type
+    // Count currently-visible partners by entity type + special flags
     const typeCounts = {};
+    let strategicVisible = 0, ukraineVisible = 0;
     for (const pId of visiblePartnerIds) {
         const node = nodes[pId];
         if (!node) continue;
         const t = classifyEntityType(node.label);
         typeCounts[t] = (typeCounts[t] || 0) + 1;
-    }
-
-    // Update desktop entity pills
-    document.querySelectorAll('#entity-filters .entity-pill').forEach(btn => {
-        const type = btn.dataset.type;
-        const countEl = btn.querySelector('.entity-pill-count');
-        if (countEl) {
-            countEl.textContent = typeCounts[type] || 0;
-        }
-    });
-
-    // Count visible strategic and ukraine
-    let strategicVisible = 0, ukraineVisible = 0;
-    for (const pId of visiblePartnerIds) {
-        const node = nodes[pId];
-        if (!node) continue;
         if (node.strategic) strategicVisible++;
         if (node.ukraine) ukraineVisible++;
     }
 
-    document.querySelectorAll('#special-filters .special-pill').forEach(btn => {
-        const countEl = btn.querySelector('.special-pill-count');
-        if (countEl) {
-            if (btn.dataset.filter === 'strategic') countEl.textContent = strategicVisible;
-            if (btn.dataset.filter === 'ukraine') countEl.textContent = ukraineVisible;
-        }
+    // Desktop entity filter counts (real markup uses .filter-checkbox/.filter-count)
+    document.querySelectorAll('#entity-filters .filter-checkbox').forEach(label => {
+        const input = label.querySelector('input[type="checkbox"]');
+        const countEl = label.querySelector('.filter-count');
+        if (input && countEl) countEl.textContent = typeCounts[input.value] || 0;
+    });
+
+    // Desktop special filter counts
+    document.querySelectorAll('#special-filters .filter-checkbox').forEach(label => {
+        const input = label.querySelector('input[type="checkbox"]');
+        const countEl = label.querySelector('.filter-count');
+        if (!input || !countEl) return;
+        if (input.value === 'strategic') countEl.textContent = strategicVisible;
+        if (input.value === 'ukraine') countEl.textContent = ukraineVisible;
     });
 }
 
