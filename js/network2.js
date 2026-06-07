@@ -123,7 +123,7 @@ function rebuildGraph() {
 
     for (const id of visibleIsu) {
         const n = nodes[id];
-        const d3Node = { id, label: n.label, type: 'ISU', color: n.color, radius: 16, data: n };
+        const d3Node = { id, label: n.label, type: 'ISU', color: n.color, radius: 19, data: n };
         d3Nodes.push(d3Node);
         nodeMap.set(id, d3Node);
     }
@@ -267,12 +267,14 @@ function renderGraph(nodes, links) {
     resizeSVG(); // ensure width/height reflect the current container size
     const mobile = window.innerWidth < 768;
     simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links).id(d => d.id).distance(mobile ? 60 : 90))
-        .force('charge', d3.forceManyBody().strength(mobile ? -90 : -170))
+        // ONGs sit close to their hub; hubs repel each other strongly so the
+        // county clusters spread out and overlap less.
+        .force('link', d3.forceLink(links).id(d => d.id).distance(mobile ? 55 : 75).strength(0.6))
+        .force('charge', d3.forceManyBody().strength(d => d.type === 'ISU' ? (mobile ? -260 : -520) : (mobile ? -60 : -110)))
         .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collision', d3.forceCollide().radius(d => d.radius + (d.type === 'ISU' ? 22 : 6)))
-        .force('x', d3.forceX(width / 2).strength(0.04))
-        .force('y', d3.forceY(height / 2).strength(0.04))
+        .force('collision', d3.forceCollide().radius(d => d.radius + (d.type === 'ISU' ? 30 : 4)))
+        .force('x', d3.forceX(width / 2).strength(0.03))
+        .force('y', d3.forceY(height / 2).strength(0.03))
         .alpha(1)
         .alphaDecay(0.022)
         .on('tick', () => {
@@ -361,7 +363,7 @@ function zoomToFocus(d) {
 function zoomReset() {
     const positioned = currentNodes.filter(n => n.x !== undefined);
     if (positioned.length === 0) return;
-    fitTo(positioned, 60, 1);
+    fitTo(positioned, 50, 1.3);
 }
 
 function fitTo(ns, padding, maxScale) {
@@ -480,83 +482,179 @@ function showDetailCard(d) {
     detail.classList.remove('hidden');
 }
 
-// ---- CONTROLS (search + context filter) ----
+// ---- CONTROLS (filter bar: search + context dropdown + help) ----
 
 function buildControls() {
-    // Context filter chips
-    const chipWrap = document.getElementById('net2-context-chips');
-    if (chipWrap) {
-        let html = '';
-        for (const [key, cfg] of Object.entries(NET2_CONTEXTS)) {
-            html += `<button class="net2-chip active" data-context="${escapeHtml(key)}" style="--chip-color:${cfg.color}">
-                <span class="net2-chip-dot"></span>${escapeHtml(cfg.label)}
-            </button>`;
-        }
-        chipWrap.innerHTML = html;
-        chipWrap.querySelectorAll('.net2-chip').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const ctx = btn.dataset.context;
-                if (activeContexts.has(ctx)) {
-                    // Don't allow disabling the last active chip
-                    if (activeContexts.size === 1) return;
-                    activeContexts.delete(ctx);
-                    btn.classList.remove('active');
-                } else {
-                    activeContexts.add(ctx);
-                    btn.classList.add('active');
-                }
-                deselectNode();
-                rebuildGraph();
-            });
-        });
+    buildContextFilter();
+    setupContextDropdown();
+    buildNet2Search();
+    buildNet2Help();
+}
+
+function buildContextFilter() {
+    const container = document.getElementById('net2-context-filters');
+    if (!container) return;
+
+    // Count ONGs per context (static totals shown next to each option)
+    const counts = {};
+    for (const n of Object.values(net2Data.nodes)) {
+        if (n.type === 'ONG') counts[n.context] = (counts[n.context] || 0) + 1;
     }
 
-    // Search
+    let html = '';
+    for (const [key, cfg] of Object.entries(NET2_CONTEXTS)) {
+        html += `<label class="filter-checkbox">
+            <input type="checkbox" value="${escapeHtml(key)}" checked>
+            <span class="filter-dot" style="background:${cfg.color}"></span>
+            <span class="filter-label">${escapeHtml(cfg.label)}</span>
+            <span class="filter-count">${counts[key] || 0}</span>
+        </label>`;
+    }
+    container.innerHTML = html;
+
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const checked = [...container.querySelectorAll('input[type="checkbox"]:checked')].map(c => c.value);
+            if (checked.length === 0) { cb.checked = true; return; } // keep at least one
+            activeContexts = new Set(checked);
+            updateContextCountLabel();
+            deselectNode();
+            rebuildGraph();
+        });
+    });
+    updateContextCountLabel();
+}
+
+function updateContextCountLabel() {
+    const label = document.getElementById('net2-context-count');
+    if (!label) return;
+    const total = Object.keys(NET2_CONTEXTS).length;
+    label.textContent = activeContexts.size < total ? `${activeContexts.size}/${total}` : '';
+}
+
+function setupContextDropdown() {
+    const btn = document.getElementById('net2-context-btn');
+    const panel = document.getElementById('net2-context-panel');
+    if (!btn || !panel) return;
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.classList.toggle('hidden');
+    });
+    panel.addEventListener('click', (e) => e.stopPropagation());
+    document.addEventListener('click', (e) => {
+        if (!btn.contains(e.target) && !panel.contains(e.target)) panel.classList.add('hidden');
+    });
+}
+
+function enableAllContexts() {
+    activeContexts = new Set(Object.keys(NET2_CONTEXTS));
+    document.querySelectorAll('#net2-context-filters input[type="checkbox"]').forEach(c => c.checked = true);
+    updateContextCountLabel();
+}
+
+function buildNet2Search() {
     const input = document.getElementById('net2-search');
     const resultsEl = document.getElementById('net2-search-results');
-    if (input && resultsEl) {
-        const ongs = Object.entries(net2Data.nodes)
-            .filter(([, n]) => n.type === 'ONG')
-            .map(([id, n]) => ({ id, label: n.label }))
-            .sort((a, b) => a.label.localeCompare(b.label));
+    if (!input || !resultsEl) return;
 
-        input.addEventListener('input', () => {
-            const q = input.value.toLowerCase().trim();
-            if (q.length < 2) { resultsEl.classList.add('hidden'); return; }
-            const matches = ongs.filter(o => o.label.toLowerCase().includes(q)).slice(0, 10);
-            if (matches.length === 0) {
-                resultsEl.innerHTML = '<div class="search-result-item" style="color:var(--text-dim)">Niciun rezultat</div>';
-                resultsEl.classList.remove('hidden');
-                return;
-            }
-            resultsEl.innerHTML = matches.map(m =>
-                `<div class="search-result-item" data-id="${m.id}">${escapeHtml(m.label)}</div>`).join('');
+    const ongs = Object.entries(net2Data.nodes)
+        .filter(([, n]) => n.type === 'ONG')
+        .map(([id, n]) => ({ id, label: n.label }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+    input.addEventListener('input', () => {
+        const q = input.value.toLowerCase().trim();
+        if (q.length < 2) { resultsEl.classList.add('hidden'); return; }
+        const matches = ongs.filter(o => o.label.toLowerCase().includes(q)).slice(0, 10);
+        if (matches.length === 0) {
+            resultsEl.innerHTML = '<div class="search-result-item" style="color:var(--text-dim)">Niciun rezultat</div>';
             resultsEl.classList.remove('hidden');
-            resultsEl.querySelectorAll('.search-result-item[data-id]').forEach(item => {
-                item.addEventListener('click', () => {
-                    const node = currentNodes.find(n => n.id === item.dataset.id);
-                    if (node) {
-                        selectNode(node);
-                    } else {
-                        // ONG hidden by current context filter — enable all and retry
-                        activeContexts = new Set(Object.keys(NET2_CONTEXTS));
-                        document.querySelectorAll('#net2-context-chips .net2-chip').forEach(b => b.classList.add('active'));
-                        rebuildGraph();
-                        setTimeout(() => {
-                            const n2 = currentNodes.find(n => n.id === item.dataset.id);
-                            if (n2) selectNode(n2);
-                        }, 200);
-                    }
-                    input.value = '';
-                    resultsEl.classList.add('hidden');
-                });
+            return;
+        }
+        resultsEl.innerHTML = matches.map(m =>
+            `<div class="search-result-item" data-id="${m.id}">${escapeHtml(m.label)}</div>`).join('');
+        resultsEl.classList.remove('hidden');
+        resultsEl.querySelectorAll('.search-result-item[data-id]').forEach(item => {
+            item.addEventListener('click', () => {
+                const node = currentNodes.find(n => n.id === item.dataset.id);
+                if (node) {
+                    selectNode(node);
+                } else {
+                    // ONG hidden by the current context filter — enable all and retry
+                    enableAllContexts();
+                    rebuildGraph();
+                    setTimeout(() => {
+                        const n2 = currentNodes.find(n => n.id === item.dataset.id);
+                        if (n2) selectNode(n2);
+                    }, 250);
+                }
+                input.value = '';
+                resultsEl.classList.add('hidden');
             });
         });
+    });
 
-        document.addEventListener('click', (e) => {
-            if (!resultsEl.contains(e.target) && e.target !== input) resultsEl.classList.add('hidden');
-        });
+    document.addEventListener('click', (e) => {
+        if (!resultsEl.contains(e.target) && e.target !== input) resultsEl.classList.add('hidden');
+    });
+}
+
+// ---- HELP / EXPLANATION CARD ----
+
+function buildNet2Help() {
+    const page = document.getElementById('graph-container2');
+    if (!page || document.getElementById('net2-help-card')) return;
+
+    const card = document.createElement('div');
+    card.id = 'net2-help-card';
+    card.className = 'nav-help-card';
+    card.innerHTML = `
+        <button id="net2-help-close" class="nav-help-close" title="Închide">&times;</button>
+        <div class="nav-help-title">Rețea operațională ONG&nbsp;↔&nbsp;ISU</div>
+        <div class="nav-help-intro">
+            Acest graf arată <strong>colaborările operaționale</strong> dintre organizațiile
+            neguvernamentale (ONG) și Inspectoratele Județene pentru Situații de Urgență (ISU)
+            în timpul <strong>pandemiei</strong> și al <strong>crizei refugiaților</strong> din Ucraina.
+        </div>
+        <div class="nav-help-subtitle">Ce vezi</div>
+        <div class="nav-help-content">
+            <div class="nav-help-item"><span class="legend-diamond" style="display:inline-block;width:9px;height:9px"></span> <strong>Romb roșu</strong> = un județ (ISU)</div>
+            <div class="nav-help-item"><span class="legend-dot" style="display:inline-block;width:9px;height:9px;background:#3b82f6"></span> <strong>Cerc</strong> = un ONG, colorat după tip; mărimea = nr. colaborări</div>
+            <div class="nav-help-item"><strong>Liniile</strong> leagă fiecare ONG de județele în care a colaborat</div>
+        </div>
+        <div class="nav-help-subtitle">Cum navighezi</div>
+        <div class="nav-help-content">
+            <div class="nav-help-item"><strong>Click</strong> pe un județ &ndash; vezi toate ONG-urile care au colaborat acolo</div>
+            <div class="nav-help-item"><strong>Click</strong> pe un ONG &ndash; vezi județele și descrierea acțiunii</div>
+            <div class="nav-help-item"><strong>Scroll</strong> &ndash; zoom &middot; <strong>Drag</strong> &ndash; mută</div>
+            <div class="nav-help-item"><strong>Context</strong> &ndash; filtrează după criză din bara de sus</div>
+        </div>
+    `;
+    page.appendChild(card);
+
+    const btn = document.createElement('button');
+    btn.id = 'net2-help-btn';
+    btn.className = 'nav-help-btn';
+    btn.innerHTML = '?';
+    btn.title = 'Cum citești această rețea';
+    btn.style.display = 'none';
+    const btnContainer = document.getElementById('net2-help-btn-container');
+    (btnContainer || page).appendChild(btn);
+
+    if (localStorage.getItem('dsu-net2-help-dismissed')) {
+        card.style.display = 'none';
+        btn.style.display = '';
     }
+
+    document.getElementById('net2-help-close').addEventListener('click', () => {
+        card.style.display = 'none';
+        btn.style.display = '';
+        localStorage.setItem('dsu-net2-help-dismissed', '1');
+    });
+    btn.addEventListener('click', () => {
+        card.style.display = '';
+        btn.style.display = 'none';
+    });
 }
 
 // ---- LEGEND ----

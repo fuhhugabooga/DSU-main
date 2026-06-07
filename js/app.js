@@ -6,15 +6,16 @@ import { loadNetworkData, loadStatsData } from './data.js?v=2';
 import { initNetwork, selectNodeByName } from './network.js?v=2';
 import { initStatistics } from './statistics.js?v=2';
 import { initAbout } from './about.js?v=2';
-import { initKnowledgeGraph } from './knowledge-graph.js?v=2';
 import { initNetwork2, resizeNetwork2 } from './network2.js?v=2';
+
+// Pages that show a filter bar pinned under the navbar
+const FILTER_BAR_PAGES = { network: 'filter-bar', network2: 'filter-bar2' };
 
 // Current page state
 let currentPage = 'network';
 let networkInitialized = false;
 let statsInitialized = false;
 let aboutInitialized = false;
-let kgInitialized = false;
 let net2Initialized = false;
 
 // ---- INITIALIZATION ----
@@ -38,17 +39,9 @@ async function init() {
         initAbout();
         aboutInitialized = true;
 
-        // Set up navigation
         setupNavigation();
-
-        // Set up mobile menu
         setupMobileNav();
-
-        // Set up filter bar visibility
         setupFilterBarVisibility();
-
-        // Set up theme toggle
-        setupTheme();
 
         // Hide loading screen
         document.getElementById('loading-screen').classList.add('hidden');
@@ -88,12 +81,10 @@ async function init() {
 // ---- NAVIGATION ----
 
 function setupNavigation() {
-    // Desktop nav links
     document.querySelectorAll('#main-nav .nav-link').forEach(link => {
         link.addEventListener('click', () => navigateTo(link.dataset.page));
     });
 
-    // Mobile nav links
     document.querySelectorAll('#mobile-nav-dropdown .mobile-nav-link').forEach(link => {
         link.addEventListener('click', () => {
             navigateTo(link.dataset.page);
@@ -105,7 +96,6 @@ function setupNavigation() {
 function navigateTo(page) {
     if (page === currentPage) return;
 
-    // Page exit animation
     const currentEl = document.getElementById(`page-${currentPage}`);
     const nextEl = document.getElementById(`page-${page}`);
 
@@ -123,46 +113,30 @@ function navigateTo(page) {
 function finishNavigation(page, nextEl) {
     currentPage = page;
 
-    // Update URL hash
     history.replaceState(null, '', `#${page}`);
 
-    // Update desktop nav links
     document.querySelectorAll('#main-nav .nav-link').forEach(link => {
         link.classList.toggle('active', link.dataset.page === page);
     });
-
-    // Update mobile nav links
     document.querySelectorAll('#mobile-nav-dropdown .mobile-nav-link').forEach(link => {
         link.classList.toggle('active', link.dataset.page === page);
     });
 
-    // Show new page
     if (nextEl) nextEl.classList.add('active');
 
-    // Show/hide filter bar (only on network page)
     updateFilterBarVisibility(page);
 
-    // Show/hide stats overlay
+    // Network-1 overlays (its stats/legend live outside its page element)
     const statsOverlay = document.getElementById('stats-overlay');
-    if (page === 'network') {
-        statsOverlay.style.display = '';
-    } else {
-        statsOverlay.style.display = 'none';
-    }
-
-    // Show/hide floating legend
+    if (statsOverlay) statsOverlay.style.display = page === 'network' ? '' : 'none';
     const legend = document.getElementById('floating-legend');
-    if (legend) {
-        legend.style.display = page === 'network' ? '' : 'none';
-    }
+    if (legend) legend.style.display = page === 'network' ? '' : 'none';
 
     // Lazy init statistics
     if (page === 'statistics' && !statsInitialized && window._statsData) {
         initStatistics(window._statsData);
         statsInitialized = true;
     }
-
-    // Trigger resize for Plotly charts
     if (page === 'statistics') {
         setTimeout(() => window.dispatchEvent(new Event('resize')), 150);
     }
@@ -178,15 +152,6 @@ function finishNavigation(page, nextEl) {
             }
         }, net2Initialized ? 50 : 400);
     }
-
-    // Lazy init knowledge graph
-    if (page === 'knowledgegraph' && !kgInitialized) {
-        // Wait for page transition + layout to settle before measuring container
-        setTimeout(() => {
-            initKnowledgeGraph();
-            kgInitialized = true;
-        }, 400);
-    }
 }
 
 // ---- FILTER BAR VISIBILITY ----
@@ -196,21 +161,19 @@ function setupFilterBarVisibility() {
 }
 
 function updateFilterBarVisibility(page) {
-    const filterBar = document.getElementById('filter-bar');
-    const mobileFilterPanel = document.getElementById('mobile-filter-panel');
+    const activeBar = FILTER_BAR_PAGES[page] || null;
 
-    // The app container fills the area below the header (+ filter bar on the
-    // network page). Sizing is handled purely in CSS via `body.no-filter-bar`
-    // and fixed positioning — no inline height/margin overrides here.
-    if (page === 'network') {
-        filterBar.style.display = '';
-        document.body.classList.remove('no-filter-bar');
-    } else {
-        filterBar.style.display = 'none';
-        document.body.classList.add('no-filter-bar');
-        if (mobileFilterPanel) {
-            mobileFilterPanel.classList.add('hidden');
-        }
+    // Show only the active page's filter bar, hide the others
+    Object.values(FILTER_BAR_PAGES).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (id === activeBar) ? '' : 'none';
+    });
+
+    // body.no-filter-bar drives the app-container top offset (CSS only)
+    document.body.classList.toggle('no-filter-bar', !activeBar);
+
+    if (!activeBar) {
+        document.getElementById('mobile-filter-panel')?.classList.add('hidden');
     }
 }
 
@@ -232,7 +195,6 @@ function setupMobileNav() {
         }
     });
 
-    // Close on outside click
     document.addEventListener('click', (e) => {
         if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
             closeMobileNav();
@@ -258,38 +220,6 @@ function parseHash() {
     const partner = parts.length > 1 ? decodeURIComponent(parts.slice(1).join('/')) : null;
 
     return { page, partner };
-}
-
-// ---- THEME TOGGLE ----
-
-function setupTheme() {
-    const saved = localStorage.getItem('dsu-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', saved);
-
-    const btn = document.getElementById('theme-toggle');
-    if (!btn) return;
-
-    updateThemeIcon(btn, saved);
-
-    btn.addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme') || 'dark';
-        const next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('dsu-theme', next);
-        updateThemeIcon(btn, next);
-    });
-}
-
-function updateThemeIcon(btn, theme) {
-    if (theme === 'dark') {
-        // Show sun icon (switch to light)
-        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
-        btn.title = 'Comută la tema deschisă';
-    } else {
-        // Show moon icon (switch to dark)
-        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-        btn.title = 'Comută la tema întunecată';
-    }
 }
 
 // ---- START ----
