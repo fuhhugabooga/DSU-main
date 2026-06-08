@@ -22,6 +22,20 @@ export function initStatistics(statsData) {
     renderMedical(statsData);
     renderPrevention(statsData);
     renderAdvanced(statsData);
+    finalizeEmptyStates();
+}
+
+// Any chart container still empty after rendering = missing data -> show a
+// consistent empty state (so the loading shimmer doesn't linger forever).
+function finalizeEmptyStates() {
+    setTimeout(() => {
+        document.querySelectorAll('#page-statistics [id^="chart-"]:empty').forEach(el => {
+            el.innerHTML = `<div class="chart-empty">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+                <span>Date indisponibile pentru acest grafic</span>
+            </div>`;
+        });
+    }, 900);
 }
 
 function setupTabs() {

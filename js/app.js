@@ -2,11 +2,11 @@
    MAIN APPLICATION - Routing, Init, Events
    ========================================= */
 
-import { loadNetworkData, loadStatsData } from './data.js?v=2';
-import { initNetwork, selectNodeByName } from './network.js?v=2';
-import { initStatistics } from './statistics.js?v=2';
-import { initAbout } from './about.js?v=2';
-import { initNetwork2, resizeNetwork2, selectNet2ByName } from './network2.js?v=2';
+import { loadNetworkData, loadStatsData } from './data.js?v=3';
+import { initNetwork, selectNodeByName } from './network.js?v=3';
+import { initStatistics } from './statistics.js?v=3';
+import { initAbout } from './about.js?v=3';
+import { initNetwork2, resizeNetwork2, selectNet2ByName } from './network2.js?v=3';
 
 // Pages that show a filter bar pinned under the navbar
 const FILTER_BAR_PAGES = { network: 'filter-bar', network2: 'filter-bar2' };

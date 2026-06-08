@@ -148,7 +148,15 @@ function rebuildGraph() {
 
     const d3Links = activeEdges
         .filter(e => nodeMap.has(e.source) && nodeMap.has(e.target))
-        .map(e => ({ source: e.source, target: e.target }));
+        .map(e => {
+            const ctx = nodes[e.source]?.context;
+            return {
+                source: e.source,
+                target: e.target,
+                context: ctx,
+                color: NET2_CONTEXTS[ctx]?.color || '#dc2626'
+            };
+        });
 
     currentNodes = d3Nodes;
     currentLinks = d3Links;
@@ -178,7 +186,8 @@ function renderGraph(nodes, links) {
     linkSel = linkGroup.selectAll('line')
         .data(links)
         .join('line')
-        .attr('stroke', 'rgba(220, 38, 38, 0.12)')
+        .attr('stroke', d => d.color)
+        .attr('stroke-opacity', 0.18)
         .attr('stroke-width', 1.2);
 
     nodeSel = nodeGroup.selectAll('g')
@@ -318,17 +327,15 @@ function highlightConnections(d) {
         // reveal ONG labels for connected nodes
         .style('display', n => (n.type === 'ISU' || ids.has(n.id)) ? null : 'none');
 
+    const isLinked = l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        return s === d.id || t === d.id;
+    };
     linkSel.transition().duration(150)
-        .attr('stroke', l => {
-            const s = typeof l.source === 'object' ? l.source.id : l.source;
-            const t = typeof l.target === 'object' ? l.target.id : l.target;
-            return (s === d.id || t === d.id) ? 'rgba(220, 38, 38, 0.6)' : 'rgba(220, 38, 38, 0.02)';
-        })
-        .attr('stroke-width', l => {
-            const s = typeof l.source === 'object' ? l.source.id : l.source;
-            const t = typeof l.target === 'object' ? l.target.id : l.target;
-            return (s === d.id || t === d.id) ? 2.2 : 0.5;
-        });
+        .attr('stroke', l => l.color) // keep context color, vary opacity for emphasis
+        .attr('stroke-opacity', l => isLinked(l) ? 0.8 : 0.03)
+        .attr('stroke-width', l => isLinked(l) ? 2.2 : 0.5);
 
     nodeSel.filter(n => n.id === d.id).select('circle, rect')
         .transition().duration(150)
@@ -343,7 +350,7 @@ function resetHighlight() {
         .style('opacity', 1)
         .style('display', n => n.type === 'ISU' ? null : 'none');
     linkSel.transition().duration(200)
-        .attr('stroke', 'rgba(220, 38, 38, 0.12)').attr('stroke-width', 1.2);
+        .attr('stroke', l => l.color).attr('stroke-opacity', 0.18).attr('stroke-width', 1.2);
     nodeSel.selectAll('circle').transition().duration(200)
         .attr('stroke', 'rgba(255,255,255,0.2)').attr('stroke-width', 1).style('filter', null);
     nodeSel.selectAll('rect').transition().duration(200)
@@ -691,8 +698,8 @@ function buildLegend() {
     const panel = document.getElementById('legend-panel2');
     if (!panel) return;
 
-    // Only show actor types that actually appear in the data
-    const present = new Set(Object.values(net2Data.nodes).filter(n => n.type === 'ONG').map(n => n.tipActor));
+    const ongNodes = Object.values(net2Data.nodes).filter(n => n.type === 'ONG');
+    const present = new Set(ongNodes.map(n => n.tipActor));
 
     let html = '<div class="legend-section-title">Tip organizație</div>';
     for (const [key, cfg] of Object.entries(ACTOR_TYPES)) {
@@ -700,8 +707,30 @@ function buildLegend() {
         html += `<div class="legend-item"><span class="legend-dot" style="background:${cfg.color}"></span><span>${cfg.label}</span></div>`;
     }
     html += '<div class="legend-item"><span class="legend-diamond"></span><span>ISU județean (hub)</span></div>';
-    html += '<div class="legend-section-title" style="margin-top:8px">Mărimea nodului = nr. colaborări</div>';
+    html += '<div class="legend-section-title" style="margin-top:10px">Culoarea muchiei = context</div>';
+    for (const [, cfg] of Object.entries(NET2_CONTEXTS)) {
+        html += `<div class="legend-item"><span class="legend-line" style="background:${cfg.color}"></span><span>${cfg.label}</span></div>`;
+    }
+    html += '<div class="legend-note">Mărimea nodului = nr. colaborări</div>';
+
+    // Top ONGs by county coverage — quick entry points
+    const top = [...ongNodes].sort((a, b) => b.nrISU - a.nrISU || b.nrColaborari - a.nrColaborari).slice(0, 6);
+    html += '<div class="legend-section-title" style="margin-top:10px">Cele mai active ONG-uri</div>';
+    html += '<div class="legend-top-list">';
+    for (const n of top) {
+        const short = n.label.length > 26 ? n.label.substring(0, 24) + '…' : n.label;
+        html += `<button class="legend-top-item" data-label="${escapeHtml(n.label)}" title="${escapeHtml(n.label)}">
+            <span class="legend-top-name">${escapeHtml(short)}</span>
+            <span class="legend-top-badge">${n.nrISU} jud.</span>
+        </button>`;
+    }
+    html += '</div>';
+
     panel.innerHTML = html;
+
+    panel.querySelectorAll('.legend-top-item').forEach(btn => {
+        btn.addEventListener('click', () => selectNet2ByName(btn.dataset.label));
+    });
 }
 
 // ---- TOOLBAR ----
