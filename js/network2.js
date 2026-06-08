@@ -312,9 +312,9 @@ function highlightConnections(d) {
     if (!nodeSel) return;
     const ids = connectedIdSet(d);
 
-    nodeSel.transition().duration(150).style('opacity', n => ids.has(n.id) ? 1 : 0.08);
+    nodeSel.transition().duration(150).style('opacity', n => ids.has(n.id) ? 1 : 0.04);
     labelSel.transition().duration(150)
-        .style('opacity', n => ids.has(n.id) ? 1 : 0.05)
+        .style('opacity', n => ids.has(n.id) ? 1 : 0.03)
         // reveal ONG labels for connected nodes
         .style('display', n => (n.type === 'ISU' || ids.has(n.id)) ? null : 'none');
 
@@ -376,6 +376,7 @@ function fitTo(ns, padding, maxScale) {
     const dx = maxX - minX, dy = maxY - minY;
     const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
     const scale = Math.min(width / dx, height / dy, maxScale);
+    if (!isFinite(scale) || scale <= 0 || !width || !height) return;
     const tx = width / 2 - cx * scale, ty = height / 2 - cy * scale;
     svg.transition().duration(700).ease(d3.easeCubicInOut)
         .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
@@ -421,6 +422,10 @@ function selectNode(d) {
     showDetailCard(d);
     highlightConnections(d);
     zoomToFocus(d);
+
+    // Deep-link the selection so it can be shared
+    const key = d.data?.label;
+    if (key) history.replaceState(null, '', '#network2/' + encodeURIComponent(key));
 }
 
 function deselectNode() {
@@ -428,6 +433,29 @@ function deselectNode() {
     document.getElementById('partner-detail2')?.classList.add('hidden');
     resetHighlight();
     zoomReset();
+    if (isActive()) history.replaceState(null, '', '#network2');
+}
+
+// Select a node by its label (ONG name or ISU code/county) — used for deep-links
+export function selectNet2ByName(name) {
+    if (!net2Data || !name) return;
+    const decoded = decodeURIComponent(name);
+    const entry = Object.values(net2Data.nodes).find(n =>
+        n.label === decoded || n.fullName === decoded);
+    if (!entry) return;
+
+    const existing = currentNodes.find(n => n.id === entry.id);
+    if (existing) {
+        setTimeout(() => selectNode(existing), 100);
+    } else {
+        // Hidden by the current context filter — show everything then select
+        enableAllContexts();
+        rebuildGraph();
+        setTimeout(() => {
+            const n2 = currentNodes.find(n => n.id === entry.id);
+            if (n2) selectNode(n2);
+        }, 350);
+    }
 }
 
 function showDetailCard(d) {
@@ -684,10 +712,14 @@ function setupToolbar() {
         zoomReset();
     });
 
+    document.getElementById('net2-export-btn')?.addEventListener('click', exportGraph);
+
     const legendToggle = document.getElementById('legend-toggle2');
     const legendPanel = document.getElementById('legend-panel2');
     if (legendToggle && legendPanel) {
         legendToggle.addEventListener('click', () => legendPanel.classList.toggle('hidden'));
+        // Open the legend by default on desktop
+        if (window.innerWidth >= 768) legendPanel.classList.remove('hidden');
     }
 
     document.getElementById('close-detail2')?.addEventListener('click', deselectNode);
@@ -699,6 +731,34 @@ function setupToolbar() {
             document.getElementById('net2-search-results')?.classList.add('hidden');
         }
     });
+}
+
+function exportGraph() {
+    if (!svg) return;
+    const svgEl = svg.node();
+    const clone = svgEl.cloneNode(true);
+
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('width', width);
+    bg.setAttribute('height', height);
+    bg.setAttribute('fill', '#0a0e1a');
+    clone.insertBefore(bg, clone.firstChild);
+    clone.setAttribute('width', width);
+    clone.setAttribute('height', height);
+
+    clone.querySelectorAll('text').forEach(el => {
+        if (!el.style.fontFamily) el.style.fontFamily = 'sans-serif';
+    });
+
+    const serializer = new XMLSerializer();
+    const svgString = '<?xml version="1.0" encoding="UTF-8"?>' + serializer.serializeToString(clone);
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'retea-operationala-isu.svg';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ---- STATS / EMPTY ----
