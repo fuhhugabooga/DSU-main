@@ -31,6 +31,9 @@
         </nav>
 
         <div class="header-right">
+            <button id="info-btn" class="header-info-btn" aria-label="Despre platformă" title="Ghid &amp; glosar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </button>
             <div class="header-partner-logos">
                 <a href="https://www.uvt.ro/" target="_blank"><img src="logos/uvt.png" alt="UVT"></a>
                 <a href="https://connectm.uvt.ro/" target="_blank"><img src="logos/S_Logo Fablab (All White) Horizontal.png" alt="Social Fabrics Research Lab"></a>
@@ -210,10 +213,13 @@
                 <div id="graph-container2">
                     <svg id="network2-svg"></svg>
 
-                    <!-- Toolbar (reset zoom) -->
+                    <!-- Toolbar (reset zoom + export) -->
                     <div class="graph-toolbar" id="net2-toolbar">
                         <button class="graph-toolbar-btn" id="net2-reset-btn" title="Resetare zoom">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        </button>
+                        <button class="graph-toolbar-btn" id="net2-export-btn" title="Descarcă graful (SVG)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         </button>
                     </div>
 
@@ -274,6 +280,48 @@
 
     <!-- Overlay for closing dropdowns -->
     <div id="dropdown-overlay" class="hidden"></div>
+
+    <!-- ====== ONBOARDING / WELCOME MODAL ====== -->
+    <div id="onboarding-overlay" class="onboarding-overlay hidden">
+        <div class="onboarding-modal" role="dialog" aria-modal="true" aria-label="Ghid de utilizare">
+            <button id="onboarding-close" class="onboarding-close" title="Închide">&times;</button>
+            <div class="onboarding-eyebrow">Bun venit</div>
+            <h2 class="onboarding-title">Ecosistemul partenerilor DSU</h2>
+            <p class="onboarding-lead">
+                O platformă interactivă care arată cu cine colaborează <strong>Departamentul pentru
+                Situații de Urgență (DSU)</strong> și ce face acesta, în cifre. Explorează cele
+                trei secțiuni:
+            </p>
+
+            <div class="onboarding-cards">
+                <div class="onboarding-card" data-page="network">
+                    <div class="onboarding-card-title">🔗 Rețea parteneri</div>
+                    <div class="onboarding-card-text">Parteneriatele formale ale DSU cu organizații (ONG-uri, universități, instituții, companii), grupate pe domenii de activitate.</div>
+                </div>
+                <div class="onboarding-card" data-page="network2">
+                    <div class="onboarding-card-title">🤝 Rețea operațională</div>
+                    <div class="onboarding-card-text">Colaborările concrete dintre ONG-uri și Inspectoratele Județene pentru Situații de Urgență (ISU) în pandemie și în criza refugiaților din Ucraina.</div>
+                </div>
+                <div class="onboarding-card" data-page="statistics">
+                    <div class="onboarding-card-title">📊 Statistici</div>
+                    <div class="onboarding-card-text">DSU în cifre: intervenții, apeluri 112, timpi de răspuns, activitate medicală și aeriană, prevenire.</div>
+                </div>
+            </div>
+
+            <div class="onboarding-glossary">
+                <div class="onboarding-glossary-title">Glosar rapid</div>
+                <ul>
+                    <li><strong>DSU</strong> — Departamentul pentru Situații de Urgență (coordonează intervenția în urgențe la nivel național)</li>
+                    <li><strong>ISU</strong> — Inspectoratul pentru Situații de Urgență (structura județeană: pompieri, SMURD)</li>
+                    <li><strong>SMURD</strong> — Serviciul Mobil de Urgență, Reanimare și Descarcerare</li>
+                    <li><strong>CNSU</strong> — Comitetul Național pentru Situații de Urgență (ia decizii la nivel național)</li>
+                    <li><strong>SNMSU</strong> — Sistemul Național de Management al Situațiilor de Urgență</li>
+                </ul>
+            </div>
+
+            <button id="onboarding-start" class="onboarding-start">Hai să explorăm</button>
+        </div>
+    </div>
 
     <!-- Loading Screen -->
     <div id="loading-screen">

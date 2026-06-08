@@ -46,6 +46,10 @@ export function initNetwork(networkData) {
     setupSwipeDismiss();
 
     window.addEventListener('resize', () => {
+        // Skip while the network page is hidden — measuring a 0-sized container
+        // would collapse all nodes to (0,0) and blank the graph until reload.
+        const c = document.getElementById('graph-container');
+        if (!c || c.clientWidth === 0 || c.clientHeight === 0) return;
         resizeSVG();
         if (simulation) simulation.alpha(0.3).restart();
     });
@@ -114,8 +118,8 @@ function setupSVG() {
 
 function resizeSVG() {
     const container = document.getElementById('graph-container');
-    width = container.clientWidth;
-    height = container.clientHeight;
+    width = container.clientWidth || width;
+    height = container.clientHeight || height;
 }
 
 // ---- GRAPH BUILDING ----
@@ -494,6 +498,7 @@ function zoomToFocus(d) {
 
     // Scale to fit, capped so we don't zoom in too far
     const scale = Math.min(width / dx, height / dy, 2.5);
+    if (!isFinite(scale) || scale <= 0 || !width || !height) return;
     const tx = width / 2 - cx * scale;
     const ty = height / 2 - cy * scale;
 
@@ -530,6 +535,7 @@ function zoomReset() {
     const cy = (minY + maxY) / 2;
 
     const scale = Math.min(width / dx, height / dy, 1);
+    if (!isFinite(scale) || scale <= 0 || !width || !height) return;
     const tx = width / 2 - cx * scale;
     const ty = height / 2 - cy * scale;
 
@@ -1481,4 +1487,6 @@ if (legendToggle && legendPanel) {
     legendToggle.addEventListener('click', () => {
         legendPanel.classList.toggle('hidden');
     });
+    // Open the legend by default on desktop
+    if (window.innerWidth >= 768) legendPanel.classList.remove('hidden');
 }

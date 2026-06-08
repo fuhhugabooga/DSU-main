@@ -6,7 +6,7 @@ import { loadNetworkData, loadStatsData } from './data.js?v=2';
 import { initNetwork, selectNodeByName } from './network.js?v=2';
 import { initStatistics } from './statistics.js?v=2';
 import { initAbout } from './about.js?v=2';
-import { initNetwork2, resizeNetwork2 } from './network2.js?v=2';
+import { initNetwork2, resizeNetwork2, selectNet2ByName } from './network2.js?v=2';
 
 // Pages that show a filter bar pinned under the navbar
 const FILTER_BAR_PAGES = { network: 'filter-bar', network2: 'filter-bar2' };
@@ -42,6 +42,7 @@ async function init() {
         setupNavigation();
         setupMobileNav();
         setupFilterBarVisibility();
+        setupOnboarding();
 
         // Hide loading screen
         document.getElementById('loading-screen').classList.add('hidden');
@@ -52,7 +53,8 @@ async function init() {
             navigateTo(initialPage);
         }
         if (initialPartner) {
-            setTimeout(() => selectNodeByName(initialPartner), 1200);
+            const sel = initialPage === 'network2' ? selectNet2ByName : selectNodeByName;
+            setTimeout(() => sel(initialPartner), 1200);
         }
 
         // Listen for hash changes
@@ -63,6 +65,9 @@ async function init() {
             }
             if (page === 'network' && partner) {
                 selectNodeByName(partner);
+            }
+            if (page === 'network2' && partner) {
+                setTimeout(() => selectNet2ByName(partner), currentPage === 'network2' ? 50 : 600);
             }
         });
 
@@ -175,6 +180,34 @@ function updateFilterBarVisibility(page) {
     if (!activeBar) {
         document.getElementById('mobile-filter-panel')?.classList.add('hidden');
     }
+}
+
+// ---- ONBOARDING / WELCOME MODAL ----
+
+function setupOnboarding() {
+    const overlay = document.getElementById('onboarding-overlay');
+    if (!overlay) return;
+
+    const open = () => overlay.classList.remove('hidden');
+    const close = () => {
+        overlay.classList.add('hidden');
+        localStorage.setItem('dsu-onboarding-seen', '1');
+    };
+
+    document.getElementById('onboarding-close')?.addEventListener('click', close);
+    document.getElementById('onboarding-start')?.addEventListener('click', close);
+    document.getElementById('info-btn')?.addEventListener('click', open);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    overlay.querySelectorAll('.onboarding-card[data-page]').forEach(card => {
+        card.addEventListener('click', () => {
+            close();
+            navigateTo(card.dataset.page);
+        });
+    });
+
+    // Show automatically on first visit
+    if (!localStorage.getItem('dsu-onboarding-seen')) open();
 }
 
 // ---- MOBILE NAV ----
