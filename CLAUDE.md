@@ -26,7 +26,8 @@ No npm, no bundler, no build process. All dependencies are loaded via CDN in `in
 ├── js/
 │   ├── app.js                 # Routing, initialization, navigation events (single module entry)
 │   ├── data.js                # CSV loading, parsing, entity classification
-│   ├── graph-utils.js         # Helpers shared by both network views (escape, truncate, fit, tooltip, SVG export)
+│   ├── graph-utils.js         # Helpers shared by both network views (icons, escape, fit, tooltip, SVG/PNG export)
+│   ├── metrics.js             # Network analysis (degree, Brandes betweenness) for the "Analiză" panels
 │   ├── network.js             # D3 force graph (partners ↔ domains), filters, search
 │   ├── network2.js            # D3 bipartite force graph (ONG ↔ ISU județean)
 │   ├── statistics.js          # Plotly charts across 4 tabs
@@ -43,6 +44,7 @@ No npm, no bundler, no build process. All dependencies are loaded via CDN in `in
 │   ├── romania.geojson        # County outlines for the choropleth (vendored, simplified)
 │   └── surse-xlsx/            # Raw .xlsx source files behind the CSVs (not loaded by the app)
 ├── logos/                     # Brand assets (DSU, UVT, FSGC, FabLab/ConnecTM)
+├── og-image.png               # 1200×630 Open Graph preview card (regenerate after major visual changes)
 ├── TASKS.md                   # Feature task log
 ├── .github/CODEOWNERS
 └── .nojekyll                  # Disables Jekyll for GitHub Pages
@@ -80,8 +82,9 @@ app.js (entry — the ONLY <script> tag in index.html; everything else is import
 ├── network2.js    — initNetwork2(), bipartite ONG ↔ ISU graph
 ├── statistics.js  — initStatistics(), Plotly chart rendering
 ├── about.js       — initAbout(), static HTML generation
-└── graph-utils.js — shared by network.js / network2.js (escapeHtml, truncate,
-                     moveTooltip, fitTransform, downloadSvg)
+├── graph-utils.js — shared by network.js / network2.js (icons, escapeHtml, truncate,
+│                    moveTooltip, fitTransform, downloadSvg/downloadPng, countUp)
+└── metrics.js     — degree & betweenness centrality (Brandes), used by both network views
 ```
 
 Important: do NOT add the imported modules as separate `<script type="module">`

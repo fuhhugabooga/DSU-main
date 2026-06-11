@@ -6,7 +6,11 @@ import {
     DOMAIN_GROUPS, ENTITY_TYPES, FONSS_PARENT_NAME,
     classifyEntityType
 } from './data.js';
-import { escapeHtml, truncate, moveTooltip, fitTransform, downloadSvg } from './graph-utils.js';
+import {
+    escapeHtml, truncate, moveTooltip, fitTransform,
+    downloadSvg, downloadPng, icons, countUp, REDUCED_MOTION
+} from './graph-utils.js';
+import { betweennessCentrality, degreeMap, bipartiteDensity, formatPercent } from './metrics.js';
 
 let simulation = null;
 let svg, g, linkGroup, nodeGroup, labelGroup;
@@ -43,6 +47,8 @@ export function initNetwork(networkData) {
     setupGraphToolbar();
     setupKeyboard();
     setupSwipeDismiss();
+    buildAnalysisPanel(networkData);
+    setupFabPanels();
 
     window.addEventListener('resize', () => {
         // Skip while the network page is hidden — measuring a 0-sized container
@@ -242,6 +248,7 @@ function rebuildGraph() {
 
 function renderGraph(nodes, links) {
     if (simulation) simulation.stop();
+    resizeSVG(); // ensure width/height reflect the current container size
 
     const shouldAnimate = initialLoadComplete;
 
@@ -302,11 +309,26 @@ function renderGraph(nodes, links) {
         .attr('pointer-events', 'none');
     currentLabelSel = labelSel;
 
-    // Animated enter transitions (skip on initial load)
     if (shouldAnimate) {
+        // Re-render after a filter change: quick fade-in
         linkSel.style('opacity', 0).transition().duration(300).style('opacity', 1);
         nodeSel.style('opacity', 0).transition().duration(400).style('opacity', 1);
         labelSel.style('opacity', 0).transition().duration(400).delay(100).style('opacity', 1);
+    } else {
+        // First load: seed every node at the viewport center so the force
+        // layout "blooms" outward while the nodes fade in, staggered.
+        nodes.forEach(n => {
+            n.x = width / 2 + (Math.random() - 0.5) * 30;
+            n.y = height / 2 + (Math.random() - 0.5) * 30;
+        });
+        if (!REDUCED_MOTION) {
+            nodeSel.style('opacity', 0).transition()
+                .duration(500).delay((d, i) => 150 + i * 7).style('opacity', 1);
+            labelSel.style('opacity', 0).transition()
+                .duration(500).delay((d, i) => 300 + i * 7).style('opacity', 1);
+            linkSel.style('opacity', 0).transition()
+                .duration(800).delay(500).style('opacity', 1);
+        }
     }
     initialLoadComplete = true;
 
@@ -366,7 +388,6 @@ function renderGraph(nodes, links) {
     );
 
     // Force simulation
-    resizeSVG(); // ensure width/height reflect the current container size
     const isMobile = window.innerWidth < 768;
     simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links).id(d => d.id).distance(isMobile ? 80 : 120))
@@ -756,7 +777,7 @@ function buildDomainFilters(networkData) {
 
         html += `<div class="domain-group expanded" data-group="${groupName}">`;
         html += `<div class="domain-group-header">
-            <span class="domain-group-arrow">&#9654;</span>
+            <span class="domain-group-arrow">${icons.chevron({ size: 11 })}</span>
             <span>${groupName}</span>
             <span class="domain-group-count">${available.length}</span>
         </div>`;
@@ -902,13 +923,13 @@ function buildSpecialFilters(networkData) {
     container.innerHTML = `
         <label class="filter-checkbox" title="Parteneri strategici – parteneri cu care DSU are protocoale extinse de colaborare">
             <input type="checkbox" value="strategic">
-            <span class="filter-icon">&#9733;</span>
+            <span class="filter-icon">${icons.star({ size: 13 })}</span>
             <span class="filter-label">Parteneri strategici</span>
             <span class="filter-count">${strategicCount}</span>
         </label>
         <label class="filter-checkbox" title="Parteneri implicați în gestionarea crizei din Ucraina">
             <input type="checkbox" value="ukraine">
-            <span class="filter-icon filter-icon-ua">UA</span>
+            <span class="filter-icon"><span class="flag-ua"></span></span>
             <span class="filter-label">Sprijin Ucraina</span>
             <span class="filter-count">${ukraineCount}</span>
         </label>
@@ -1066,10 +1087,10 @@ function setupMobileFilters(networkData) {
             <div class="mfp-title">Filtre speciale</div>
             <div class="mfp-pills">
                 <button class="special-pill" data-filter="strategic">
-                    <span class="special-pill-icon">&#9733;</span> Strategici
+                    <span class="special-pill-icon">${icons.star({ size: 12 })}</span> Strategici
                 </button>
                 <button class="special-pill" data-filter="ukraine">
-                    <span class="special-pill-icon-ua">UA</span> Ucraina
+                    <span class="flag-ua"></span> Ucraina
                 </button>
             </div>
         `;
@@ -1144,7 +1165,17 @@ function syncDomainFiltersFromMobile() {
 
 // ---- STATS OVERLAY ----
 
+let statsAnimated = false;
+
 function updateStats(partnerCount, domainCount, connectionCount) {
+    if (!statsAnimated) {
+        // First load: animate the counters up from zero
+        countUp(document.getElementById('stat-partners'), partnerCount);
+        countUp(document.getElementById('stat-domains'), domainCount);
+        countUp(document.getElementById('stat-connections'), connectionCount);
+        statsAnimated = true;
+        return;
+    }
     document.getElementById('stat-partners').textContent = partnerCount;
     document.getElementById('stat-domains').textContent = domainCount;
     document.getElementById('stat-connections').textContent = connectionCount;
@@ -1244,7 +1275,7 @@ function setupNavHelp() {
     const helpBtn = document.createElement('button');
     helpBtn.id = 'nav-help-btn';
     helpBtn.className = 'nav-help-btn';
-    helpBtn.innerHTML = '?';
+    helpBtn.innerHTML = icons.help({ size: 14 });
     helpBtn.title = 'Cum navighezi rețeaua';
     helpBtn.style.display = 'none';
     const helpBtnContainer = document.getElementById('nav-help-btn-container');
@@ -1284,12 +1315,9 @@ function setupGraphToolbar() {
     const toolbar = document.createElement('div');
     toolbar.className = 'graph-toolbar';
     toolbar.innerHTML = `
-        <button class="graph-toolbar-btn" id="reset-zoom-btn" title="Resetare zoom (Home)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </button>
-        <button class="graph-toolbar-btn" id="export-graph-btn" title="Descarcă graful (SVG)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </button>
+        <button class="graph-toolbar-btn" id="reset-zoom-btn" title="Resetare zoom">${icons.reset()}</button>
+        <button class="graph-toolbar-btn" id="export-png-btn" title="Descarcă imagine (PNG)">${icons.image()}</button>
+        <button class="graph-toolbar-btn" id="export-graph-btn" title="Descarcă vector (SVG)">${icons.download()}</button>
     `;
     container.appendChild(toolbar);
 
@@ -1298,12 +1326,12 @@ function setupGraphToolbar() {
         zoomReset();
     });
 
-    document.getElementById('export-graph-btn').addEventListener('click', exportGraph);
-}
-
-function exportGraph() {
-    if (!svg) return;
-    downloadSvg(svg.node(), width, height, 'retea-parteneri-dsu.svg');
+    document.getElementById('export-png-btn').addEventListener('click', () => {
+        if (svg) downloadPng(svg.node(), width, height, 'retea-parteneri-dsu.png');
+    });
+    document.getElementById('export-graph-btn').addEventListener('click', () => {
+        if (svg) downloadSvg(svg.node(), width, height, 'retea-parteneri-dsu.svg');
+    });
 }
 
 // ---- KEYBOARD NAVIGATION ----
@@ -1388,13 +1416,93 @@ function setupSwipeDismiss() {
     });
 }
 
-// ---- LEGEND TOGGLE ----
-const legendToggle = document.getElementById('legend-toggle');
-const legendPanel = document.getElementById('legend-panel');
-if (legendToggle && legendPanel) {
-    legendToggle.addEventListener('click', () => {
-        legendPanel.classList.toggle('hidden');
+// ---- ANALYSIS PANEL (network metrics) ----
+
+function buildAnalysisPanel(networkData) {
+    const panel = document.getElementById('analysis-panel');
+    if (!panel) return;
+    const { nodes, edges } = networkData;
+
+    // Analyze the full partner ↔ domain graph. FONSS members are excluded:
+    // they hang off a single parent node and would add no information.
+    const partnerIds = [], domainIds = [];
+    for (const [id, n] of Object.entries(nodes)) {
+        if (n.type === 'Partner' && n.parentId === null) partnerIds.push(id);
+        else if (n.type === 'Domain') domainIds.push(id);
+    }
+    const ids = [...partnerIds, ...domainIds];
+    const deg = degreeMap(ids, edges);
+    const bc = betweennessCentrality(ids, edges);
+
+    const topPartners = partnerIds
+        .map(id => ({ label: nodes[id].label, bc: bc.get(id) || 0, deg: deg.get(id) || 0 }))
+        .sort((a, b) => b.bc - a.bc || b.deg - a.deg)
+        .slice(0, 5);
+    const maxBc = topPartners[0]?.bc || 1;
+
+    const topDomain = domainIds
+        .map(id => ({ label: nodes[id].label, deg: deg.get(id) || 0 }))
+        .sort((a, b) => b.deg - a.deg)[0];
+
+    const density = bipartiteDensity(partnerIds.length, domainIds.length, edges.length);
+    const lead = topPartners[0];
+
+    let html = '<div class="legend-section-title">Analiză de rețea</div>';
+    html += `<div class="ap-grid">
+        <div class="ap-cell"><div class="ap-cell-value">${partnerIds.length}</div><div class="ap-cell-label">Parteneri</div></div>
+        <div class="ap-cell"><div class="ap-cell-value">${domainIds.length}</div><div class="ap-cell-label">Domenii</div></div>
+        <div class="ap-cell"><div class="ap-cell-value">${edges.length}</div><div class="ap-cell-label">Conexiuni</div></div>
+        <div class="ap-cell"><div class="ap-cell-value">${formatPercent(density)}</div><div class="ap-cell-label">Densitate</div></div>
+    </div>`;
+
+    if (lead && topDomain) {
+        html += `<div class="ap-finding"><strong>${escapeHtml(lead.label)}</strong> este principalul
+            conector al rețelei, activ în ${lead.deg} din ${domainIds.length} domenii, iar domeniul
+            <strong>${escapeHtml(topDomain.label)}</strong> grupează ${topDomain.deg} din ${partnerIds.length} parteneri.</div>`;
+    }
+
+    html += '<div class="legend-section-title" style="margin-top:12px">Top conectori · centralitate de intermediere</div>';
+    html += '<div class="ap-rank-list">';
+    topPartners.forEach((p, i) => {
+        const pct = Math.max(6, Math.round((p.bc / maxBc) * 100));
+        html += `<button class="ap-rank-item" data-label="${escapeHtml(p.label)}" title="${escapeHtml(p.label)}">
+            <span class="ap-rank-pos">${i + 1}</span>
+            <span class="ap-rank-main">
+                <span class="ap-rank-name">${escapeHtml(truncate(p.label, 30))}</span>
+                <span class="ap-rank-bar"><span style="width:${pct}%"></span></span>
+            </span>
+            <span class="ap-rank-badge">${p.deg} domenii</span>
+        </button>`;
+    });
+    html += '</div>';
+
+    html += `<div class="ap-note">Centralitatea de intermediere (algoritmul Brandes) măsoară cât de des
+        un nod se află pe cele mai scurte drumuri dintre celelalte noduri — partenerii de mai sus
+        leagă domenii diferite ale ecosistemului. Indicatorii sunt calculați pe rețeaua completă, fără filtre.</div>`;
+
+    panel.innerHTML = html;
+    panel.querySelectorAll('.ap-rank-item').forEach(btn => {
+        btn.addEventListener('click', () => selectNodeByName(btn.dataset.label));
+    });
+}
+
+// ---- FLOATING PANELS (legend / analysis — one open at a time) ----
+
+function setupFabPanels() {
+    const pairs = [
+        { btn: 'legend-toggle', panel: 'legend-panel' },
+        { btn: 'analysis-toggle', panel: 'analysis-panel' }
+    ];
+    pairs.forEach(({ btn, panel }) => {
+        const b = document.getElementById(btn);
+        const p = document.getElementById(panel);
+        if (!b || !p) return;
+        b.addEventListener('click', () => {
+            const willOpen = p.classList.contains('hidden');
+            pairs.forEach(other => document.getElementById(other.panel)?.classList.add('hidden'));
+            if (willOpen) p.classList.remove('hidden');
+        });
     });
     // Open the legend by default on desktop
-    if (window.innerWidth >= 768) legendPanel.classList.remove('hidden');
+    if (window.innerWidth >= 768) document.getElementById('legend-panel')?.classList.remove('hidden');
 }

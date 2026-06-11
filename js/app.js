@@ -129,12 +129,6 @@ function finishNavigation(page, nextEl) {
 
     updateFilterBarVisibility(page);
 
-    // Network-1 overlays (its stats/legend live outside its page element)
-    const statsOverlay = document.getElementById('stats-overlay');
-    if (statsOverlay) statsOverlay.style.display = page === 'network' ? '' : 'none';
-    const legend = document.getElementById('floating-legend');
-    if (legend) legend.style.display = page === 'network' ? '' : 'none';
-
     // Lazy init statistics
     if (page === 'statistics' && !statsInitialized && window._statsData) {
         initStatistics(window._statsData);
