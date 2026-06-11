@@ -517,20 +517,23 @@ body.no-filter-bar #app-container {
 }
 
 .filter-icon {
-    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: var(--amber);
     flex-shrink: 0;
     width: 18px;
-    text-align: center;
 }
 
-.filter-icon-ua {
-    font-size: 0.7rem;
-    font-weight: 700;
+/* Small Ukrainian flag swatch (replaces the old gradient-text "UA") */
+.flag-ua {
+    display: inline-block;
+    width: 16px;
+    height: 11px;
+    border-radius: 2px;
     background: linear-gradient(180deg, #0057b7 50%, #ffd700 50%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    flex-shrink: 0;
 }
 
 .filter-label {
@@ -632,26 +635,13 @@ body.no-filter-bar #app-container {
 }
 
 .special-pill-icon {
-    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
     color: var(--amber);
 }
 
 .special-pill.active .special-pill-icon {
     color: #fff;
-}
-
-.special-pill-icon-ua {
-    font-size: 0.65rem;
-    font-weight: 700;
-    background: linear-gradient(180deg, #0057b7 50%, #ffd700 50%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.special-pill.active .special-pill-icon-ua {
-    -webkit-text-fill-color: #fff;
-    background: none;
 }
 
 .special-pill-count {
@@ -784,8 +774,9 @@ body.no-filter-bar #app-container {
 }
 
 .domain-group-arrow {
+    display: inline-flex;
+    align-items: center;
     transition: transform var(--motion-fast) ease;
-    font-size: 0.6rem;
     color: var(--text-muted);
 }
 
@@ -950,13 +941,20 @@ body.no-filter-bar #app-container {
 }
 
 /* =========================================
-   FLOATING LEGEND
+   FLOATING PANELS (legend + analysis, bottom-left)
    ========================================= */
-#floating-legend {
+.graph-fabs {
     position: absolute;
     bottom: 16px;
     left: 16px;
     z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.fab-wrap {
+    position: relative;
 }
 
 .legend-toggle-btn {
@@ -1058,12 +1056,14 @@ body.no-filter-bar #app-container {
    NAVIGATION HELP CARD (Task 6)
    ========================================= */
 .nav-help-card {
+    /* Top-left: keeps the bottom-left corner free for the legend/analysis
+       buttons and the bottom-right corner free for the stats overlay. */
     position: absolute;
-    bottom: 20px;
-    left: 20px;
+    top: 16px;
+    left: 16px;
     width: 320px;
     max-width: calc(100vw - 40px);
-    max-height: calc(100% - 40px);
+    max-height: calc(100% - 32px);
     overflow-y: auto;
     background: rgba(10, 14, 26, 0.96);
     backdrop-filter: blur(16px);
@@ -1807,7 +1807,7 @@ body.no-filter-bar #app-container {
 
     /* Nav help card on mobile */
     .nav-help-card {
-        bottom: 12px;
+        top: 12px;
         left: 12px;
         right: 12px;
         width: auto;
@@ -1860,9 +1860,21 @@ body.no-filter-bar #app-container {
         grid-template-columns: 1fr;
     }
 
-    /* Floating legend on mobile */
-    #floating-legend {
+    /* Floating panels on mobile: pin popups to the viewport edges so they
+       never overflow, regardless of which button they belong to */
+    .graph-fabs {
         bottom: 10px;
+        left: 10px;
+    }
+
+    .fab-wrap .legend-panel {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 56px;
+        width: auto;
+        min-width: 0;
+        max-width: none;
     }
 }
 
@@ -1996,13 +2008,7 @@ body.no-filter-bar #app-container {
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Floating legend (mirror of #floating-legend) */
-#floating-legend2 {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
-    z-index: 100;
-}
+/* (Legend + analysis on network 2 share the .graph-fabs layout) */
 
 .legend-section-title {
     font-size: 0.66rem;
@@ -2292,7 +2298,8 @@ body.no-filter-bar #app-container {
 }
 
 /* =========================================
-   NETWORK 2 LEGEND EXTRAS (context + top ONGs)
+   NETWORK 2 LEGEND EXTRAS (context line swatches)
+   (Top-ONG rankings moved into the analysis panel)
    ========================================= */
 #legend-panel2 {
     min-width: 240px;
@@ -2311,48 +2318,6 @@ body.no-filter-bar #app-container {
     color: var(--text-dim);
     margin-top: 6px;
     font-style: italic;
-}
-.legend-top-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: 4px;
-}
-.legend-top-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    width: 100%;
-    padding: 5px 8px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-subtle);
-    border-radius: 7px;
-    color: var(--text-secondary);
-    font-family: inherit;
-    font-size: 0.74rem;
-    cursor: pointer;
-    text-align: left;
-    transition: all var(--motion-fast) ease;
-}
-.legend-top-item:hover {
-    border-color: var(--border-accent);
-    background: rgba(220, 38, 38, 0.08);
-    color: var(--text-primary);
-}
-.legend-top-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.legend-top-badge {
-    flex-shrink: 0;
-    font-size: 0.66rem;
-    font-weight: 700;
-    color: var(--accent-light);
-    background: rgba(220, 38, 38, 0.12);
-    padding: 1px 6px;
-    border-radius: 8px;
 }
 
 /* =========================================
@@ -2383,4 +2348,164 @@ body.no-filter-bar #app-container {
     font-size: 0.85rem;
     text-align: center;
     padding: 16px;
+}
+
+/* =========================================
+   ANALYSIS PANEL (network metrics — "Analiză de rețea")
+   ========================================= */
+.analysis-panel {
+    width: 320px;
+    max-height: min(64vh, 520px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.ap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 8px 0 12px;
+}
+
+.ap-cell {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 7px 9px;
+}
+
+.ap-cell-value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.ap-cell-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-dim);
+    margin-top: 1px;
+}
+
+.ap-rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.ap-rank-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: 7px;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.74rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--motion-fast) ease;
+}
+
+.ap-rank-item:hover {
+    border-color: var(--border-accent);
+    background: rgba(220, 38, 38, 0.08);
+    color: var(--text-primary);
+}
+
+.ap-rank-pos {
+    flex-shrink: 0;
+    width: 17px;
+    height: 17px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.15);
+    color: var(--accent-light);
+    font-size: 0.62rem;
+    font-weight: 800;
+}
+
+.ap-rank-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.ap-rank-name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ap-rank-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.07);
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.ap-rank-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%);
+}
+
+.ap-rank-badge {
+    flex-shrink: 0;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: var(--accent-light);
+    background: rgba(220, 38, 38, 0.12);
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+
+.ap-note {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
+.ap-finding {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    background: rgba(220, 38, 38, 0.07);
+    border: 1px solid rgba(220, 38, 38, 0.18);
+    border-left: 3px solid var(--accent);
+    border-radius: 7px;
+    padding: 8px 10px;
+    margin: 10px 0 2px;
+}
+
+.ap-finding strong {
+    color: var(--accent-light);
+}
+
+/* =========================================
+   ONBOARDING CARD ICONS
+   ========================================= */
+.onboarding-card-icon {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: rgba(220, 38, 38, 0.12);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    color: var(--accent-light);
+    margin-bottom: 9px;
 }

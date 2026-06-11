@@ -7,7 +7,11 @@ import {
     loadNetwork2Data, ACTOR_TYPES, NET2_CONTEXTS,
     getActorLabel
 } from './data.js';
-import { escapeHtml, truncate, moveTooltip, fitTransform, downloadSvg } from './graph-utils.js';
+import {
+    escapeHtml, truncate, moveTooltip, fitTransform,
+    downloadSvg, downloadPng, icons, countUp, REDUCED_MOTION
+} from './graph-utils.js';
+import { betweennessCentrality, degreeMap } from './metrics.js';
 
 let net2Data = null;
 let svg, g, linkGroup, nodeGroup, labelGroup;
@@ -36,6 +40,7 @@ export async function initNetwork2() {
     setupSVG();
     buildControls();
     buildLegend();
+    buildAnalysisPanel();
     setupToolbar();
     rebuildGraph();
 
@@ -175,6 +180,7 @@ function sumColaborari(visibleOng) {
 
 function renderGraph(nodes, links) {
     if (simulation) simulation.stop();
+    resizeSVG(); // ensure width/height reflect the current container size
     const animate = !firstRender;
 
     linkGroup.selectAll('*').remove();
@@ -234,6 +240,19 @@ function renderGraph(nodes, links) {
     if (animate) {
         linkSel.style('opacity', 0).transition().duration(300).style('opacity', 1);
         nodeSel.style('opacity', 0).transition().duration(400).style('opacity', 1);
+    } else {
+        // First render: seed everything at the center so the layout "blooms"
+        // outward while the nodes fade in, staggered.
+        nodes.forEach(n => {
+            n.x = width / 2 + (Math.random() - 0.5) * 30;
+            n.y = height / 2 + (Math.random() - 0.5) * 30;
+        });
+        if (!REDUCED_MOTION) {
+            nodeSel.style('opacity', 0).transition()
+                .duration(450).delay((d, i) => 100 + i * 2.5).style('opacity', 1);
+            linkSel.style('opacity', 0).transition()
+                .duration(800).delay(450).style('opacity', 1);
+        }
     }
     firstRender = false;
 
@@ -273,7 +292,6 @@ function renderGraph(nodes, links) {
             d.fx = null; d.fy = null;
         }));
 
-    resizeSVG(); // ensure width/height reflect the current container size
     const mobile = window.innerWidth < 768;
     simulation = d3.forceSimulation(nodes)
         // ONGs sit close to their hub; hubs repel each other strongly so the
@@ -653,7 +671,7 @@ function buildNet2Help() {
     const btn = document.createElement('button');
     btn.id = 'net2-help-btn';
     btn.className = 'nav-help-btn';
-    btn.innerHTML = '?';
+    btn.innerHTML = icons.help({ size: 14 });
     btn.title = 'Cum citești această rețea';
     btn.style.display = 'none';
     const btnContainer = document.getElementById('net2-help-btn-container');
@@ -696,21 +714,88 @@ function buildLegend() {
     }
     html += '<div class="legend-note">Mărimea nodului = nr. colaborări</div>';
 
-    // Top ONGs by county coverage — quick entry points
-    const top = [...ongNodes].sort((a, b) => b.nrISU - a.nrISU || b.nrColaborari - a.nrColaborari).slice(0, 6);
-    html += '<div class="legend-section-title" style="margin-top:10px">Cele mai active ONG-uri</div>';
-    html += '<div class="legend-top-list">';
-    for (const n of top) {
-        html += `<button class="legend-top-item" data-label="${escapeHtml(n.label)}" title="${escapeHtml(n.label)}">
-            <span class="legend-top-name">${escapeHtml(truncate(n.label, 26))}</span>
-            <span class="legend-top-badge">${n.nrISU} jud.</span>
-        </button>`;
+    panel.innerHTML = html;
+}
+
+// ---- ANALYSIS PANEL (network metrics) ----
+
+function buildAnalysisPanel() {
+    const panel = document.getElementById('analysis-panel2');
+    if (!panel) return;
+    const { nodes, edges, stats } = net2Data;
+
+    const ongIds = [], isuIds = [];
+    for (const [id, n] of Object.entries(nodes)) {
+        (n.type === 'ONG' ? ongIds : isuIds).push(id);
     }
+    const ids = [...ongIds, ...isuIds];
+    const deg = degreeMap(ids, edges);
+    const bc = betweennessCentrality(ids, edges);
+
+    // ONGs that bridge counties (betweenness), with coverage shown as N/34
+    const topOng = ongIds
+        .map(id => ({ label: nodes[id].label, bc: bc.get(id) || 0, deg: deg.get(id) || 0 }))
+        .sort((a, b) => b.bc - a.bc || b.deg - a.deg)
+        .slice(0, 5);
+    const maxBc = topOng[0]?.bc || 1;
+
+    // Counties with the most NGO collaborators
+    const topIsu = isuIds
+        .map(id => ({ label: nodes[id].fullName, deg: deg.get(id) || 0 }))
+        .sort((a, b) => b.deg - a.deg)
+        .slice(0, 3);
+
+    const avgCoverage = ongIds.length
+        ? (edges.length / ongIds.length).toLocaleString('ro-RO', { maximumFractionDigits: 1 })
+        : '0';
+    const lead = topOng[0];
+
+    let html = '<div class="legend-section-title">Analiză de rețea</div>';
+    html += `<div class="ap-grid">
+        <div class="ap-cell"><div class="ap-cell-value">${stats.ongCount}</div><div class="ap-cell-label">ONG-uri</div></div>
+        <div class="ap-cell"><div class="ap-cell-value">${stats.isuCount}</div><div class="ap-cell-label">ISU județene</div></div>
+        <div class="ap-cell"><div class="ap-cell-value">${stats.conexiuni.toLocaleString('ro-RO')}</div><div class="ap-cell-label">Conexiuni</div></div>
+        <div class="ap-cell"><div class="ap-cell-value">${avgCoverage}</div><div class="ap-cell-label">Județe / ONG</div></div>
+    </div>`;
+
+    if (lead) {
+        html += `<div class="ap-finding"><strong>${escapeHtml(lead.label)}</strong> este puntea principală a
+            rețelei operaționale: a colaborat cu ISU în <strong>${lead.deg} din ${stats.isuCount}</strong> județe,
+            legând comunități care altfel nu s-ar intersecta.</div>`;
+    }
+
+    html += '<div class="legend-section-title" style="margin-top:12px">Punți între județe · centralitate de intermediere</div>';
+    html += '<div class="ap-rank-list">';
+    topOng.forEach((o, i) => {
+        const pct = Math.max(6, Math.round((o.bc / maxBc) * 100));
+        html += `<button class="ap-rank-item" data-label="${escapeHtml(o.label)}" title="${escapeHtml(o.label)}">
+            <span class="ap-rank-pos">${i + 1}</span>
+            <span class="ap-rank-main">
+                <span class="ap-rank-name">${escapeHtml(truncate(o.label, 30))}</span>
+                <span class="ap-rank-bar"><span style="width:${pct}%"></span></span>
+            </span>
+            <span class="ap-rank-badge">${o.deg}/${stats.isuCount} jud.</span>
+        </button>`;
+    });
     html += '</div>';
 
-    panel.innerHTML = html;
+    html += '<div class="legend-section-title" style="margin-top:12px">Hub-uri județene · cele mai conectate ISU</div>';
+    html += '<div class="ap-rank-list">';
+    topIsu.forEach((h, i) => {
+        html += `<button class="ap-rank-item" data-label="${escapeHtml(h.label)}" title="ISU ${escapeHtml(h.label)}">
+            <span class="ap-rank-pos">${i + 1}</span>
+            <span class="ap-rank-main"><span class="ap-rank-name">ISU ${escapeHtml(h.label)}</span></span>
+            <span class="ap-rank-badge">${h.deg} ONG</span>
+        </button>`;
+    });
+    html += '</div>';
 
-    panel.querySelectorAll('.legend-top-item').forEach(btn => {
+    html += `<div class="ap-note">Centralitatea de intermediere (algoritmul Brandes) identifică organizațiile
+        care fac legătura între județe — actorii critici pentru circulația resurselor și a informației în criză.
+        Indicatorii sunt calculați pe rețeaua completă, fără filtre.</div>`;
+
+    panel.innerHTML = html;
+    panel.querySelectorAll('.ap-rank-item').forEach(btn => {
         btn.addEventListener('click', () => selectNet2ByName(btn.dataset.label));
     });
 }
@@ -723,15 +808,30 @@ function setupToolbar() {
         zoomReset();
     });
 
-    document.getElementById('net2-export-btn')?.addEventListener('click', exportGraph);
+    document.getElementById('net2-export-btn')?.addEventListener('click', () => {
+        if (svg) downloadSvg(svg.node(), width, height, 'retea-operationala-isu.svg');
+    });
+    document.getElementById('net2-export-png-btn')?.addEventListener('click', () => {
+        if (svg) downloadPng(svg.node(), width, height, 'retea-operationala-isu.png');
+    });
 
-    const legendToggle = document.getElementById('legend-toggle2');
-    const legendPanel = document.getElementById('legend-panel2');
-    if (legendToggle && legendPanel) {
-        legendToggle.addEventListener('click', () => legendPanel.classList.toggle('hidden'));
-        // Open the legend by default on desktop
-        if (window.innerWidth >= 768) legendPanel.classList.remove('hidden');
-    }
+    // Legend / analysis floating panels — one open at a time
+    const pairs = [
+        { btn: 'legend-toggle2', panel: 'legend-panel2' },
+        { btn: 'analysis-toggle2', panel: 'analysis-panel2' }
+    ];
+    pairs.forEach(({ btn, panel }) => {
+        const b = document.getElementById(btn);
+        const p = document.getElementById(panel);
+        if (!b || !p) return;
+        b.addEventListener('click', () => {
+            const willOpen = p.classList.contains('hidden');
+            pairs.forEach(other => document.getElementById(other.panel)?.classList.add('hidden'));
+            if (willOpen) p.classList.remove('hidden');
+        });
+    });
+    // Open the legend by default on desktop
+    if (window.innerWidth >= 768) document.getElementById('legend-panel2')?.classList.remove('hidden');
 
     document.getElementById('close-detail2')?.addEventListener('click', deselectNode);
 
@@ -744,14 +844,20 @@ function setupToolbar() {
     });
 }
 
-function exportGraph() {
-    if (!svg) return;
-    downloadSvg(svg.node(), width, height, 'retea-operationala-isu.svg');
-}
-
 // ---- STATS / EMPTY ----
 
+let statsAnimated = false;
+
 function updateStats(ong, isu, colab, conn) {
+    if (!statsAnimated) {
+        // First render: animate the counters up from zero
+        countUp(document.getElementById('n2-stat-ong'), ong);
+        countUp(document.getElementById('n2-stat-isu'), isu);
+        countUp(document.getElementById('n2-stat-colab'), colab);
+        countUp(document.getElementById('n2-stat-conn'), conn);
+        statsAnimated = true;
+        return;
+    }
     setText('n2-stat-ong', ong);
     setText('n2-stat-isu', isu);
     setText('n2-stat-colab', colab);
