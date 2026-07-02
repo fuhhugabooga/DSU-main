@@ -2,20 +2,20 @@
    MAIN APPLICATION - Routing, Init, Events
    ========================================= */
 
-import { loadNetworkData, loadStatsData } from './data.js?v=4';
-import { initNetwork, selectNodeByName } from './network.js?v=4';
-import { initStatistics } from './statistics.js?v=4';
-import { initAbout } from './about.js?v=4';
-import { initNetwork2, resizeNetwork2, selectNet2ByName } from './network2.js?v=4';
+import { loadNetworkData, loadStatsData } from './data.js';
+import { initNetwork, selectNodeByName } from './network.js';
+import { initStatistics } from './statistics.js';
+import { initAbout } from './about.js';
+import { initNetwork2, resizeNetwork2, selectNet2ByName } from './network2.js';
+
+const PAGES = ['network', 'network2', 'statistics', 'about'];
 
 // Pages that show a filter bar pinned under the navbar
 const FILTER_BAR_PAGES = { network: 'filter-bar', network2: 'filter-bar2' };
 
 // Current page state
 let currentPage = 'network';
-let networkInitialized = false;
 let statsInitialized = false;
-let aboutInitialized = false;
 let net2Initialized = false;
 
 // ---- INITIALIZATION ----
@@ -30,14 +30,12 @@ async function init() {
 
         // Initialize network page (default)
         initNetwork(networkData);
-        networkInitialized = true;
 
         // Store stats data for lazy init
         window._statsData = statsData;
 
         // Initialize about page (lightweight)
         initAbout();
-        aboutInitialized = true;
 
         setupNavigation();
         setupMobileNav();
@@ -76,9 +74,9 @@ async function init() {
         console.error('Failed to initialize app:', err);
         document.getElementById('loading-screen').innerHTML = `
             <div class="loader-content">
-                <div style="color: #f87171; font-size: 1.1rem; margin-bottom: 12px;">Eroare la incarcarea datelor</div>
+                <div style="color: #f87171; font-size: 1.1rem; margin-bottom: 12px;">Eroare la încărcarea datelor</div>
                 <div style="color: #94a3b8; font-size: 0.85rem;">${err.message}</div>
-                <button onclick="location.reload()" style="margin-top:16px;padding:10px 24px;background:#dc2626;border:none;border-radius:8px;color:#fff;cursor:pointer;font-family:inherit">Reincearca</button>
+                <button onclick="location.reload()" style="margin-top:16px;padding:10px 24px;background:#dc2626;border:none;border-radius:8px;color:#fff;cursor:pointer;font-family:inherit">Reîncearcă</button>
             </div>
         `;
     }
@@ -131,12 +129,6 @@ function finishNavigation(page, nextEl) {
     if (nextEl) nextEl.classList.add('active');
 
     updateFilterBarVisibility(page);
-
-    // Network-1 overlays (its stats/legend live outside its page element)
-    const statsOverlay = document.getElementById('stats-overlay');
-    if (statsOverlay) statsOverlay.style.display = page === 'network' ? '' : 'none';
-    const legend = document.getElementById('floating-legend');
-    if (legend) legend.style.display = page === 'network' ? '' : 'none';
 
     // Lazy init statistics
     if (page === 'statistics' && !statsInitialized && window._statsData) {
@@ -282,7 +274,9 @@ function parseHash() {
     if (!hash) return { page: 'network', partner: null };
 
     const parts = hash.split('/');
-    const page = parts[0] || 'network';
+    // Unknown page names (mistyped or stale links) fall back to the default
+    // page instead of leaving the app on a blank screen.
+    const page = PAGES.includes(parts[0]) ? parts[0] : 'network';
     const partner = parts.length > 1 ? decodeURIComponent(parts.slice(1).join('/')) : null;
 
     return { page, partner };

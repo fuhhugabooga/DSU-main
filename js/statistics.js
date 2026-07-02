@@ -305,7 +305,9 @@ function renderPrevention(D) {
 
         Plotly.newPlot('chart-map', [{
             type: 'choropleth',
-            geojson: 'https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/romania.geojson',
+            // Vendored locally (simplified from codeforgermany/click_that_hood)
+            // so the map does not depend on a third-party host at runtime.
+            geojson: 'data/romania.geojson',
             locations: judete,
             z: values,
             featureidkey: 'properties.name',
@@ -318,8 +320,7 @@ function renderPrevention(D) {
             ],
             marker: { line: { width: 1, color: LINE_COLOR } },
             colorbar: {
-                title: 'Persoane',
-                font: { color: TEXT_COLOR },
+                title: { text: 'Persoane', font: { color: TEXT_COLOR } },
                 tickfont: { color: TEXT_COLOR },
                 len: 0.5,
                 thickness: 12,
