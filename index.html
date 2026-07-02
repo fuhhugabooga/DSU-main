@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
-    <link rel="stylesheet" href="css/app.css?v=3">
+    <link rel="stylesheet" href="css/app.css?v=4">
 </head>
 <body>
     <!-- ====== NAVBAR ====== -->
@@ -31,6 +31,9 @@
         </nav>
 
         <div class="header-right">
+            <button id="theme-toggle" class="header-info-btn" aria-label="Schimbă tema" title="Schimbă tema">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
             <button id="info-btn" class="header-info-btn" aria-label="Despre platformă" title="Ghid &amp; glosar">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </button>
@@ -99,17 +102,17 @@
 
             <div class="fb-separator"></div>
 
-            <!-- Special filters dropdown -->
-            <div class="fb-dropdown-wrap">
-                <button class="fb-dropdown-btn" id="special-dropdown-btn">
-                    Alte filtre
-                    <span class="fb-dropdown-count" id="special-count-label"></span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="fb-dropdown-panel hidden" id="special-panel">
-                    <div id="special-filters"></div>
-                </div>
-            </div>
+            <!-- Special filter toggles (replaces the old "Alte filtre" dropdown) -->
+            <button class="fb-toggle" id="special-strategic-btn" title="Parteneri cu care DSU are protocoale extinse de colaborare">
+                <span class="filter-icon">&#9733;</span>
+                Strategici
+                <span class="fb-toggle-count" id="strategic-count">0</span>
+            </button>
+            <button class="fb-toggle" id="special-ukraine-btn" title="Parteneri implicați în gestionarea crizei din Ucraina">
+                <span class="filter-icon-ua">UA</span>
+                Ucraina
+                <span class="fb-toggle-count" id="ukraine-count">0</span>
+            </button>
 
             <!-- Mobile filter toggle -->
             <button id="mobile-filter-toggle" class="fb-mobile-toggle">
@@ -332,11 +335,11 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="js/data.js?v=3"></script>
-    <script type="module" src="js/network.js?v=3"></script>
-    <script type="module" src="js/network2.js?v=3"></script>
-    <script type="module" src="js/statistics.js?v=3"></script>
-    <script type="module" src="js/about.js?v=3"></script>
-    <script type="module" src="js/app.js?v=3"></script>
+    <script type="module" src="js/data.js?v=4"></script>
+    <script type="module" src="js/network.js?v=4"></script>
+    <script type="module" src="js/network2.js?v=4"></script>
+    <script type="module" src="js/statistics.js?v=4"></script>
+    <script type="module" src="js/about.js?v=4"></script>
+    <script type="module" src="js/app.js?v=4"></script>
 </body>
 </html>

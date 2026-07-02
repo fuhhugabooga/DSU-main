@@ -4,19 +4,33 @@
 
 import { ISU_TO_JUDET } from './data.js';
 
+// Chart text color follows the app theme; refreshed on every (re)render
+let TEXT_COLOR = '#cbd5e1';
+
 const PLOTLY_LAYOUT_BASE = {
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { color: '#cbd5e1', family: 'Nunito, Inter, sans-serif' },
+    font: { color: TEXT_COLOR, family: 'Nunito, Inter, sans-serif' },
     margin: { l: 50, r: 20, t: 20, b: 50 }
 };
+
+function refreshThemeColors() {
+    const light = document.documentElement.getAttribute('data-theme') === 'light';
+    TEXT_COLOR = light ? '#334155' : '#cbd5e1';
+    PLOTLY_LAYOUT_BASE.font.color = TEXT_COLOR;
+}
 
 const PLOTLY_CONFIG = {
     responsive: true,
     displayModeBar: false
 };
 
+let currentStatsData = null;
+let tabsBound = false;
+
 export function initStatistics(statsData) {
+    currentStatsData = statsData;
+    refreshThemeColors();
     setupTabs();
     renderOperational(statsData);
     renderMedical(statsData);
@@ -24,6 +38,11 @@ export function initStatistics(statsData) {
     renderAdvanced(statsData);
     finalizeEmptyStates();
 }
+
+// Plotly bakes colors in at render time — re-render all charts on theme switch
+window.addEventListener('dsu-theme-change', () => {
+    if (currentStatsData) initStatistics(currentStatsData);
+});
 
 // Any chart container still empty after rendering = missing data -> show a
 // consistent empty state (so the loading shimmer doesn't linger forever).
@@ -39,6 +58,8 @@ function finalizeEmptyStates() {
 }
 
 function setupTabs() {
+    if (tabsBound) return; // avoid stacking listeners on theme re-renders
+    tabsBound = true;
     const tabs = document.querySelectorAll('.stats-tab');
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -123,7 +144,7 @@ function renderOperational(D) {
     ], {
         ...PLOTLY_LAYOUT_BASE,
         height: 380,
-        legend: { orientation: 'h', y: 1.12, font: { color: '#cbd5e1' } }
+        legend: { orientation: 'h', y: 1.12, font: { color: TEXT_COLOR } }
     }, PLOTLY_CONFIG);
 
     // Chart: IGSU pie
@@ -152,7 +173,7 @@ function renderOperational(D) {
                 y: -0.15,
                 x: 0.5,
                 xanchor: 'center',
-                font: { color: '#cbd5e1', size: 11 }
+                font: { color: TEXT_COLOR, size: 11 }
             },
             margin: { l: 20, r: 20, t: 20, b: 60 }
         }, PLOTLY_CONFIG);
@@ -288,8 +309,8 @@ function renderPrevention(D) {
             marker: { line: { width: 1, color: 'rgba(255,255,255,0.4)' } },
             colorbar: {
                 title: 'Persoane',
-                font: { color: '#cbd5e1' },
-                tickfont: { color: '#cbd5e1' },
+                font: { color: TEXT_COLOR },
+                tickfont: { color: TEXT_COLOR },
                 len: 0.5,
                 thickness: 12,
                 x: 1.0,
@@ -487,7 +508,7 @@ function renderResponseTime(D) {
         barmode: 'stack',
         height: 160,
         showlegend: true,
-        legend: { orientation: 'h', y: 1.2, x: 0.5, xanchor: 'center', font: { color: '#cbd5e1' } },
+        legend: { orientation: 'h', y: 1.2, x: 0.5, xanchor: 'center', font: { color: TEXT_COLOR } },
         xaxis: { title: 'Minute' },
         yaxis: { showticklabels: false },
         margin: { l: 10, r: 20, t: 40, b: 40 }
@@ -659,7 +680,7 @@ function renderTimeline(D) {
     for (const [tip, color] of Object.entries(tipColors)) {
         legendHtml += `<span style="display:inline-flex;align-items:center;gap:5px">
             <span style="width:12px;height:12px;background:${color};border-radius:50%;display:inline-block"></span>
-            <span style="font-size:0.75rem;color:#cbd5e1">${tip}</span>
+            <span style="font-size:0.75rem;color:${TEXT_COLOR}">${tip}</span>
         </span>`;
     }
     legendHtml += '</div>';

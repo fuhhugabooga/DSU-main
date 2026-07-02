@@ -12,6 +12,7 @@
 :root {
     --bg-primary: #0a0e1a;
     --bg-secondary: #1a0f0f;
+    --panel-rgb: 10, 14, 26;   /* RGB base of all floating panels/bars (alpha varies per use) */
     --bg-card: rgba(255, 255, 255, 0.05);
     --bg-card-hover: rgba(255, 255, 255, 0.08);
     --border-subtle: rgba(255, 255, 255, 0.1);
@@ -269,7 +270,7 @@ body {
     right: 0;
     z-index: 9000;
     height: var(--filter-bar-height);
-    background: rgba(10, 14, 26, 0.98);
+    background: rgba(var(--panel-rgb), 0.98);
     border-bottom: 1px solid var(--border-subtle);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
     overflow: visible;
@@ -346,7 +347,7 @@ body.no-filter-bar #app-container {
     top: calc(100% + 2px);
     left: 0;
     right: 0;
-    background: rgba(10, 14, 26, 0.98);
+    background: rgba(var(--panel-rgb), 0.98);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     max-height: 280px;
@@ -551,7 +552,7 @@ body.no-filter-bar #app-container {
     width: 320px;
     max-height: 400px;
     overflow-y: auto;
-    background: rgba(10, 14, 26, 0.98);
+    background: rgba(var(--panel-rgb), 0.98);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 12px;
@@ -694,7 +695,7 @@ body.no-filter-bar #app-container {
     left: 0;
     right: 0;
     z-index: 8999;
-    background: rgba(10, 14, 26, 0.98);
+    background: rgba(var(--panel-rgb), 0.98);
     border-bottom: 1px solid var(--border-subtle);
     padding: 16px;
     max-height: 60vh;
@@ -905,7 +906,7 @@ body.no-filter-bar #app-container {
     bottom: 16px;
     right: 16px;
     width: 180px;
-    background: rgba(10, 14, 26, 0.88);
+    background: rgba(var(--panel-rgb), 0.88);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-subtle);
@@ -961,7 +962,7 @@ body.no-filter-bar #app-container {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: rgba(10, 14, 26, 0.88);
+    background: rgba(var(--panel-rgb), 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-subtle);
@@ -976,7 +977,7 @@ body.no-filter-bar #app-container {
 
 .legend-toggle-btn:hover {
     border-color: var(--border-accent);
-    background: rgba(10, 14, 26, 0.95);
+    background: rgba(var(--panel-rgb), 0.95);
 }
 
 .legend-panel {
@@ -984,7 +985,7 @@ body.no-filter-bar #app-container {
     bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(10, 14, 26, 0.96);
+    background: rgba(var(--panel-rgb), 0.96);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-subtle);
@@ -1063,7 +1064,7 @@ body.no-filter-bar #app-container {
     max-width: calc(100vw - 40px);
     max-height: calc(100% - 40px);
     overflow-y: auto;
-    background: rgba(10, 14, 26, 0.96);
+    background: rgba(var(--panel-rgb), 0.96);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-accent);
@@ -1139,7 +1140,7 @@ body.no-filter-bar #app-container {
 .nav-help-btn {
     width: 28px;
     height: 28px;
-    background: rgba(10, 14, 26, 0.88);
+    background: rgba(var(--panel-rgb), 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-subtle);
@@ -1159,7 +1160,7 @@ body.no-filter-bar #app-container {
 
 .nav-help-btn:hover {
     border-color: var(--border-accent);
-    background: rgba(10, 14, 26, 0.95);
+    background: rgba(var(--panel-rgb), 0.95);
     color: var(--accent-light);
 }
 
@@ -1173,7 +1174,7 @@ body.no-filter-bar #app-container {
     transform: translateX(-50%);
     width: 90%;
     max-width: 540px;
-    background: rgba(10, 14, 26, 0.96);
+    background: rgba(var(--panel-rgb), 0.96);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-accent);
@@ -1269,7 +1270,7 @@ body.no-filter-bar #app-container {
 #tooltip {
     position: absolute;
     pointer-events: none;
-    background: rgba(10, 14, 26, 0.95);
+    background: rgba(var(--panel-rgb), 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-accent);
@@ -1898,7 +1899,7 @@ body.no-filter-bar #app-container {
     justify-content: center;
     width: 32px;
     height: 32px;
-    background: rgba(10, 14, 26, 0.88);
+    background: rgba(var(--panel-rgb), 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-subtle);
@@ -1973,7 +1974,7 @@ body.no-filter-bar #app-container {
     bottom: 16px;
     right: 16px;
     width: 180px;
-    background: rgba(10, 14, 26, 0.88);
+    background: rgba(var(--panel-rgb), 0.88);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-subtle);
@@ -2009,7 +2010,7 @@ body.no-filter-bar #app-container {
     transform: translateX(-50%);
     width: 90%;
     max-width: 540px;
-    background: rgba(10, 14, 26, 0.96);
+    background: rgba(var(--panel-rgb), 0.96);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-accent);
@@ -2077,7 +2078,7 @@ body.no-filter-bar #app-container {
 #tooltip2 {
     position: absolute;
     pointer-events: none;
-    background: rgba(10, 14, 26, 0.95);
+    background: rgba(var(--panel-rgb), 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-accent);
@@ -2153,7 +2154,7 @@ body.no-filter-bar #app-container {
     max-width: 640px;
     max-height: calc(100vh - 48px);
     overflow-y: auto;
-    background: linear-gradient(160deg, rgba(16, 21, 38, 0.98) 0%, rgba(26, 15, 15, 0.98) 100%);
+    background: rgba(var(--panel-rgb), 0.98);
     border: 1px solid var(--border-accent);
     border-radius: var(--radius-lg);
     padding: 28px 30px;
@@ -2367,4 +2368,124 @@ body.no-filter-bar #app-container {
     font-size: 0.85rem;
     text-align: center;
     padding: 16px;
+}
+
+/* =========================================
+   LIGHT THEME
+   Everything themable is variable-driven; the handful of dark-only
+   hard-coded styles get targeted overrides below.
+   ========================================= */
+[data-theme="light"] {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: #fdf4f4;
+    --panel-rgb: 255, 255, 255;
+    --bg-card: rgba(15, 23, 42, 0.045);
+    --bg-card-hover: rgba(15, 23, 42, 0.08);
+    --border-subtle: rgba(15, 23, 42, 0.14);
+    --border-accent: rgba(220, 38, 38, 0.4);
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --accent-light: #dc2626;
+    --accent-glow: rgba(220, 38, 38, 0.2);
+}
+
+/* Dark-only hard-coded backgrounds -> light equivalents */
+[data-theme="light"] .nav-link,
+[data-theme="light"] .mobile-nav-link {
+    background: rgba(15, 23, 42, 0.05);
+}
+[data-theme="light"] .nav-link.active,
+[data-theme="light"] .mobile-nav-link.active {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    color: #fff;
+}
+[data-theme="light"] #app-header,
+[data-theme="light"] #filter-bar,
+[data-theme="light"] #filter-bar2 {
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+}
+[data-theme="light"] .mobile-nav-toggle { color: var(--accent); }
+[data-theme="light"] .fb-search input,
+[data-theme="light"] .fb-dropdown-btn,
+[data-theme="light"] .fb-toggle,
+[data-theme="light"] .fb-panel-btn,
+[data-theme="light"] .mfp-btn {
+    background: rgba(15, 23, 42, 0.04);
+}
+[data-theme="light"] .onboarding-card,
+[data-theme="light"] .legend-top-item {
+    background: rgba(15, 23, 42, 0.03);
+}
+
+/* SVG graph text: CSS wins over presentation attributes, so these override
+   the fills set from JS without touching the modules */
+[data-theme="light"] #network-svg .labels text,
+[data-theme="light"] #network2-svg .labels text {
+    fill: #334155;
+}
+[data-theme="light"] .nodes circle { stroke: rgba(15, 23, 42, 0.25); }
+[data-theme="light"] .nodes rect { stroke: rgba(15, 23, 42, 0.3); }
+
+/* Shimmer skeleton needs a dark-on-light gradient */
+[data-theme="light"] #page-statistics [id^="chart-"]:empty {
+    background: linear-gradient(100deg,
+        rgba(15, 23, 42, 0.05) 30%,
+        rgba(15, 23, 42, 0.1) 50%,
+        rgba(15, 23, 42, 0.05) 70%);
+    background-size: 200% 100%;
+}
+
+/* =========================================
+   FILTER BAR TOGGLE BUTTONS (Strategici / Ucraina)
+   ========================================= */
+.fb-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--motion-fast) ease;
+}
+.fb-toggle:hover {
+    border-color: var(--border-accent);
+    color: var(--text-secondary);
+}
+.fb-toggle.active {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 12px var(--accent-glow);
+}
+.fb-toggle.active .filter-icon,
+.fb-toggle.active .filter-icon-ua,
+.fb-toggle.active .fb-toggle-count { color: #fff; }
+.fb-toggle-count {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--accent-light);
+    background: rgba(220, 38, 38, 0.12);
+    padding: 1px 7px;
+    border-radius: 8px;
+}
+.fb-toggle.active .fb-toggle-count { background: rgba(255, 255, 255, 0.2); }
+
+/* Clickable tags in detail cards — behave like clicking the node itself */
+.tag-clickable {
+    cursor: pointer;
+    transition: all var(--motion-fast) ease;
+}
+.tag-clickable:hover {
+    background: rgba(220, 38, 38, 0.18);
+    border-color: var(--border-accent);
+    color: var(--text-primary);
 }
