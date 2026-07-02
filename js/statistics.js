@@ -18,12 +18,15 @@ const PLOTLY_LAYOUT_BASE = {
 // white-on-dark need a dark equivalent in light mode
 let LINE_COLOR = 'rgba(255,255,255,0.3)';
 let OUTLINE_COLOR = '#ffffff';
+let MAP_LOW_COLOR = 'rgba(254, 226, 226, 0.6)';
 
 function refreshThemeColors() {
     const light = document.documentElement.getAttribute('data-theme') === 'light';
     TEXT_COLOR = light ? '#334155' : '#cbd5e1';
     LINE_COLOR = light ? 'rgba(15,23,42,0.3)' : 'rgba(255,255,255,0.3)';
     OUTLINE_COLOR = light ? '#475569' : '#ffffff';
+    // Zero-valued counties must stay visible against the page background
+    MAP_LOW_COLOR = light ? 'rgba(253, 213, 213, 1)' : 'rgba(254, 226, 226, 0.6)';
     PLOTLY_LAYOUT_BASE.font.color = TEXT_COLOR;
 }
 
@@ -290,7 +293,11 @@ function renderPrevention(D) {
 
     // Choropleth map
     if (D.instruire) {
+        // Start every county at 0 so the whole country renders (a choropleth
+        // only draws the locations present in the data)
         const mapData = {};
+        [...new Set(Object.values(ISU_TO_JUDET))].forEach(judet => { mapData[judet] = 0; });
+
         D.instruire.forEach(row => {
             const parts = (row.Unitate || '').split(' ');
             const code = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
@@ -312,10 +319,10 @@ function renderPrevention(D) {
             z: values,
             featureidkey: 'properties.name',
             colorscale: [
-                [0, 'rgba(254, 226, 226, 0.6)'],
-                [0.25, 'rgba(252, 165, 165, 0.7)'],
-                [0.5, 'rgba(248, 113, 113, 0.8)'],
-                [0.75, 'rgba(220, 38, 38, 0.9)'],
+                [0, MAP_LOW_COLOR],
+                [0.25, 'rgba(252, 165, 165, 0.85)'],
+                [0.5, 'rgba(248, 113, 113, 0.9)'],
+                [0.75, 'rgba(220, 38, 38, 0.95)'],
                 [1, 'rgba(153, 27, 27, 1)']
             ],
             marker: { line: { width: 1, color: LINE_COLOR } },
@@ -354,7 +361,7 @@ function renderPrevention(D) {
             cliponaxis: false,
             marker: {
                 color: sorted.map(r => parseFloat(r['Număr organizații'])),
-                colorscale: 'Reds'
+                colorscale: [[0, '#fca5a5'], [0.5, '#dc2626'], [1, '#991b1b']]
             }
         }], {
             ...PLOTLY_LAYOUT_BASE,
@@ -549,7 +556,7 @@ function renderSanctions(D) {
         cliponaxis: false,
         marker: {
             color: sorted.map(r => parseFloat(r.Numar)),
-            colorscale: [['0', '#fecaca'], ['0.33', '#f87171'], ['0.66', '#dc2626'], ['1', '#991b1b']]
+            colorscale: [['0', '#fca5a5'], ['0.33', '#f87171'], ['0.66', '#dc2626'], ['1', '#991b1b']]
         },
         customdata: sorted.map(r => [r.Valoare_RON, r.Top_Judet]),
         hovertemplate: '<b>%{y}</b><br>Sancțiuni: %{x}<br>Valoare: %{customdata[0]} RON<br>Top județ: %{customdata[1]}<extra></extra>'
