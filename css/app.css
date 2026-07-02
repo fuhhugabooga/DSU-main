@@ -2382,7 +2382,7 @@ body.no-filter-bar #app-container {
 [data-theme="light"] .mobile-nav-toggle { color: var(--accent); }
 [data-theme="light"] .fb-search input,
 [data-theme="light"] .fb-dropdown-btn,
-[data-theme="light"] .fb-toggle,
+[data-theme="light"] .fb-toggle:not(.active),
 [data-theme="light"] .fb-panel-btn,
 [data-theme="light"] .mfp-btn {
     background: rgba(15, 23, 42, 0.04);
@@ -2467,11 +2467,11 @@ body.no-filter-bar #app-container {
 /* Light theme: remaining white-tint surfaces + tag readability (QA #5/#9) */
 [data-theme="light"] .tag-domain { color: #b91c1c; }
 [data-theme="light"] .metric-card,
-[data-theme="light"] .stats-tab,
+[data-theme="light"] .stats-tab:not(.active),
 [data-theme="light"] .data-notice,
 [data-theme="light"] .domain-group-header,
-[data-theme="light"] .entity-pill,
-[data-theme="light"] .special-pill,
+[data-theme="light"] .entity-pill:not(.active),
+[data-theme="light"] .special-pill:not(.active),
 [data-theme="light"] .header-info-btn {
     background: rgba(15, 23, 42, 0.05);
 }
@@ -2639,3 +2639,11 @@ body.no-filter-bar #app-container {
     color: var(--accent-light);
     margin-bottom: 9px;
 }
+
+
+/* =========================================
+   THEME-DEPENDENT LOGOS
+   ========================================= */
+.logo-light { display: none; }
+[data-theme="light"] .logo-dark { display: none; }
+[data-theme="light"] .logo-light { display: inline-block; }

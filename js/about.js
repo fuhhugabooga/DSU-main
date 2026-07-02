@@ -119,7 +119,7 @@ export function initAbout() {
                             <img src="logos/dsu.png" alt="DSU">
                         </a>
                         <a href="https://www.uvt.ro" target="_blank" title="Universitatea de Vest din Timișoara">
-                            <img src="logos/uvt.png" alt="UVT">
+                            <img src="logos/uvt.png" alt="UVT" class="logo-dark"><img src="logos/uvt-color.png" alt="UVT" class="logo-light">
                         </a>
                         <a href="https://fsgc.uvt.ro" target="_blank" title="Facultatea de Științe ale Guvernării și Comunicării">
                             <img src="logos/fsgc.png" alt="FSGC">
