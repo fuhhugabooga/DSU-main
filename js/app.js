@@ -199,6 +199,9 @@ function setupOnboarding() {
     document.getElementById('onboarding-start')?.addEventListener('click', close);
     document.getElementById('info-btn')?.addEventListener('click', open);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !overlay.classList.contains('hidden')) close();
+    });
 
     overlay.querySelectorAll('.onboarding-card[data-page]').forEach(card => {
         card.addEventListener('click', () => {

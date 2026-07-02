@@ -766,6 +766,7 @@ function setupToolbar() {
         if (e.key === 'Escape') {
             if (selectedNodeId) deselectNode();
             document.getElementById('net2-search-results')?.classList.add('hidden');
+            document.getElementById('net2-context-panel')?.classList.add('hidden');
         }
     });
 }

@@ -607,7 +607,9 @@ function selectNode(d) {
     }
 
     selectedNodeId = d.id;
-    keyboardFocusIndex = currentNodes.indexOf(d);
+    // Index into the Partner-only array used by the Tab handler (domains
+    // precede partners in currentNodes, so indexOf(d) would be off/oob)
+    keyboardFocusIndex = currentNodes.filter(n => n.type === 'Partner').indexOf(d);
     showDetailCard(d);
 
     // Update URL hash

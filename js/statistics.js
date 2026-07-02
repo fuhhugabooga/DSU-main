@@ -14,9 +14,16 @@ const PLOTLY_LAYOUT_BASE = {
     margin: { l: 50, r: 20, t: 20, b: 50 }
 };
 
+// Structural strokes (axis lines, marker outlines, map borders) that were
+// white-on-dark need a dark equivalent in light mode
+let LINE_COLOR = 'rgba(255,255,255,0.3)';
+let OUTLINE_COLOR = '#ffffff';
+
 function refreshThemeColors() {
     const light = document.documentElement.getAttribute('data-theme') === 'light';
     TEXT_COLOR = light ? '#334155' : '#cbd5e1';
+    LINE_COLOR = light ? 'rgba(15,23,42,0.3)' : 'rgba(255,255,255,0.3)';
+    OUTLINE_COLOR = light ? '#475569' : '#ffffff';
     PLOTLY_LAYOUT_BASE.font.color = TEXT_COLOR;
 }
 
@@ -31,6 +38,9 @@ let tabsBound = false;
 export function initStatistics(statsData) {
     currentStatsData = statsData;
     refreshThemeColors();
+    // Purge old plots before innerHTML wipes their divs — with responsive:true
+    // each plot holds a window-resize listener that only purge releases
+    document.querySelectorAll('#page-statistics .js-plotly-plot').forEach(gd => Plotly.purge(gd));
     setupTabs();
     renderOperational(statsData);
     renderMedical(statsData);
@@ -306,7 +316,7 @@ function renderPrevention(D) {
                 [0.75, 'rgba(220, 38, 38, 0.9)'],
                 [1, 'rgba(153, 27, 27, 1)']
             ],
-            marker: { line: { width: 1, color: 'rgba(255,255,255,0.4)' } },
+            marker: { line: { width: 1, color: LINE_COLOR } },
             colorbar: {
                 title: 'Persoane',
                 font: { color: TEXT_COLOR },
@@ -460,7 +470,7 @@ function renderSankey(D) {
         type: 'sankey',
         node: {
             pad: 15, thickness: 20,
-            line: { color: 'rgba(255,255,255,0.3)', width: 0.5 },
+            line: { color: LINE_COLOR, width: 0.5 },
             label: allNodes,
             color: nodeColors
         },
@@ -616,7 +626,7 @@ function renderTimeline(D) {
         x: [Math.min(...years) - 2, Math.max(...years) + 2],
         y: [0, 0],
         mode: 'lines',
-        line: { color: 'rgba(255,255,255,0.3)', width: 2 },
+        line: { color: LINE_COLOR, width: 2 },
         hoverinfo: 'skip',
         showlegend: false
     });
@@ -628,7 +638,7 @@ function renderTimeline(D) {
             x: [parseInt(row.An)],
             y: [0],
             mode: 'markers',
-            marker: { size: 20, color, line: { color: '#fff', width: 2 } },
+            marker: { size: 20, color, line: { color: OUTLINE_COLOR, width: 2 } },
             hovertemplate: `<b>${row.An}</b><br>${row.Eveniment}<br><i>${row.Descriere}</i><extra></extra>`,
             showlegend: false
         });

@@ -590,14 +590,6 @@ body.no-filter-bar #app-container {
     color: var(--text-secondary);
 }
 
-/* Special filter pills */
-#special-filters {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-shrink: 0;
-}
-
 .special-pill {
     display: flex;
     align-items: center;
@@ -1608,7 +1600,7 @@ body.no-filter-bar #app-container {
 }
 
 .about-card a:hover {
-    color: #fff;
+    color: var(--text-primary);
     text-decoration: underline;
 }
 
@@ -1634,7 +1626,7 @@ body.no-filter-bar #app-container {
 }
 
 .source-link:hover {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .about-logos {
@@ -1664,9 +1656,6 @@ body.no-filter-bar #app-container {
 /* =========================================
    DROPDOWN OVERLAY (disabled - not used)
    ========================================= */
-#dropdown-overlay {
-    display: none !important;
-}
 
 /* =========================================
    UTILITY
@@ -1735,7 +1724,7 @@ body.no-filter-bar #app-container {
     #entity-filters,
     .fb-separator,
     .fb-dropdown-wrap,
-    #special-filters {
+    .fb-toggle {
         display: none !important;
     }
 
@@ -2425,9 +2414,6 @@ body.no-filter-bar #app-container {
 [data-theme="light"] #network2-svg .labels text {
     fill: #334155;
 }
-[data-theme="light"] .nodes circle { stroke: rgba(15, 23, 42, 0.25); }
-[data-theme="light"] .nodes rect { stroke: rgba(15, 23, 42, 0.3); }
-
 /* Shimmer skeleton needs a dark-on-light gradient */
 [data-theme="light"] #page-statistics [id^="chart-"]:empty {
     background: linear-gradient(100deg,
@@ -2467,8 +2453,12 @@ body.no-filter-bar #app-container {
     box-shadow: 0 4px 12px var(--accent-glow);
 }
 .fb-toggle.active .filter-icon,
-.fb-toggle.active .filter-icon-ua,
 .fb-toggle.active .fb-toggle-count { color: #fff; }
+.fb-toggle.active .filter-icon-ua {
+    color: #fff;
+    background: none;
+    -webkit-text-fill-color: #fff;
+}
 .fb-toggle-count {
     font-size: 0.68rem;
     font-weight: 700;
@@ -2488,4 +2478,20 @@ body.no-filter-bar #app-container {
     background: rgba(220, 38, 38, 0.18);
     border-color: var(--border-accent);
     color: var(--text-primary);
+}
+
+/* Light theme: remaining white-tint surfaces + tag readability (QA #5/#9) */
+[data-theme="light"] .tag-domain { color: #b91c1c; }
+[data-theme="light"] .metric-card,
+[data-theme="light"] .stats-tab,
+[data-theme="light"] .data-notice,
+[data-theme="light"] .domain-group-header,
+[data-theme="light"] .entity-pill,
+[data-theme="light"] .special-pill,
+[data-theme="light"] .header-info-btn {
+    background: rgba(15, 23, 42, 0.05);
+}
+[data-theme="light"] .filter-count,
+[data-theme="light"] .detail-type {
+    background: rgba(15, 23, 42, 0.08);
 }
