@@ -102,7 +102,8 @@ function serializeSvg(svgNode, width, height) {
     const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     bg.setAttribute('width', width);
     bg.setAttribute('height', height);
-    bg.setAttribute('fill', '#0a0e1a');
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    bg.setAttribute('fill', isDark ? '#0a0e1a' : '#f8fafc');
     clone.insertBefore(bg, clone.firstChild);
 
     // Fonts are not embedded in the export, so give text a safe fallback

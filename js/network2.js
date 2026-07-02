@@ -193,8 +193,8 @@ function renderGraph(nodes, links) {
         .data(links)
         .join('line')
         .attr('stroke', d => d.color)
-        .attr('stroke-opacity', 0.18)
-        .attr('stroke-width', 1.2);
+        .attr('stroke-opacity', 0.4)
+        .attr('stroke-width', 1.4);
 
     nodeSel = nodeGroup.selectAll('g')
         .data(nodes, d => d.id)
@@ -368,7 +368,7 @@ function resetHighlight() {
         .style('opacity', 1)
         .style('display', n => n.type === 'ISU' ? null : 'none');
     linkSel.transition().duration(200)
-        .attr('stroke', l => l.color).attr('stroke-opacity', 0.18).attr('stroke-width', 1.2);
+        .attr('stroke', l => l.color).attr('stroke-opacity', 0.4).attr('stroke-width', 1.4);
     nodeSel.selectAll('circle').transition().duration(200)
         .attr('stroke', 'rgba(255,255,255,0.2)').attr('stroke-width', 1).style('filter', null);
     nodeSel.selectAll('rect').transition().duration(200)
@@ -469,7 +469,11 @@ export function selectNet2ByName(name) {
 function showDetailCard(d) {
     const detail = document.getElementById('partner-detail2');
     const content = document.getElementById('detail-content2');
-    const { nodes, edges } = net2Data;
+
+    // Lists reflect the currently rendered graph (active context filter),
+    // and each tag is clickable — same behavior as clicking the node itself.
+    const ids = connectedIdSet(d);
+    const neighbors = currentNodes.filter(n => n.id !== d.id && ids.has(n.id));
     let html = '';
 
     if (d.type === 'ONG') {
@@ -488,27 +492,24 @@ function showDetailCard(d) {
 
         html += `<div class="detail-desc">${escapeHtml(n.description)}</div>`;
 
-        const myIsu = edges.filter(e => e.source === d.id)
-            .map(e => nodes[e.target])
-            .filter(Boolean);
+        const myIsu = neighbors.filter(n2 => n2.type === 'ISU');
         html += `<div class="detail-domains-label">Județe acoperite (${myIsu.length})</div>`;
         html += `<div class="detail-domains">`;
-        myIsu.sort((a, b) => a.label.localeCompare(b.label)).forEach(isu => {
-            html += `<span class="tag-domain" title="${escapeHtml(isu.fullName)}">${escapeHtml(isu.label)}</span>`;
+        myIsu.sort((a, b) => a.data.label.localeCompare(b.data.label)).forEach(isu => {
+            html += `<span class="tag-domain tag-clickable" data-node-id="${isu.id}" title="${escapeHtml(isu.data.fullName)}">${escapeHtml(isu.data.label)}</span>`;
         });
         html += `</div>`;
     } else {
         const n = d.data;
-        const partners = edges.filter(e => e.target === d.id)
-            .map(e => nodes[e.source]).filter(Boolean);
+        const partners = neighbors.filter(n2 => n2.type === 'ONG');
         html += `<div class="detail-name">ISU ${escapeHtml(n.fullName)}</div>`;
         html += `<div class="detail-type">Inspectorat pentru Situații de Urgență (${escapeHtml(n.label)})</div>`;
-        html += `<div class="domain-partner-count">Au colaborat operațional <strong>${partners.length}</strong> ONG-uri în acest județ.</div>`;
+        html += `<div class="domain-partner-count">Au colaborat operațional <strong>${partners.length}</strong> ONG-uri afișate în acest județ.</div>`;
         if (partners.length > 0) {
             html += `<div class="detail-domains-label" style="margin-top:12px">ONG-uri colaboratoare</div>`;
             html += `<div class="detail-domains">`;
-            partners.sort((a, b) => a.label.localeCompare(b.label)).forEach(p => {
-                html += `<span class="tag-domain">${escapeHtml(p.label)}</span>`;
+            partners.sort((a, b) => a.data.label.localeCompare(b.data.label)).forEach(p => {
+                html += `<span class="tag-domain tag-clickable" data-node-id="${p.id}">${escapeHtml(p.data.label)}</span>`;
             });
             html += `</div>`;
         }
@@ -516,6 +517,13 @@ function showDetailCard(d) {
 
     content.innerHTML = html;
     detail.classList.remove('hidden');
+
+    content.querySelectorAll('.tag-clickable').forEach(tag => {
+        tag.addEventListener('click', () => {
+            const node = currentNodes.find(n => n.id === tag.dataset.nodeId);
+            if (node) selectNode(node);
+        });
+    });
 }
 
 // ---- CONTROLS (filter bar: search + context dropdown + help) ----
@@ -840,6 +848,7 @@ function setupToolbar() {
         if (e.key === 'Escape') {
             if (selectedNodeId) deselectNode();
             document.getElementById('net2-search-results')?.classList.add('hidden');
+            document.getElementById('net2-context-panel')?.classList.add('hidden');
         }
     });
 }

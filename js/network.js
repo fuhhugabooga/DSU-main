@@ -262,7 +262,7 @@ function renderGraph(nodes, links) {
     const linkSel = linkGroup.selectAll('line')
         .data(links)
         .join('line')
-        .attr('stroke', 'rgba(220, 38, 38, 0.15)')
+        .attr('stroke', 'rgba(220, 38, 38, 0.35)')
         .attr('stroke-width', 1.5);
     currentLinkSel = linkSel;
 
@@ -455,7 +455,7 @@ function resetHighlight(linkSel, nodeSel, labelSel) {
         .style('opacity', 1);
 
     linkSel.transition().duration(200)
-        .attr('stroke', 'rgba(220, 38, 38, 0.15)')
+        .attr('stroke', 'rgba(220, 38, 38, 0.35)')
         .attr('stroke-width', 1.5);
 
     nodeSel.selectAll('circle')
@@ -519,20 +519,33 @@ function zoomReset() {
 
 // ---- TOOLTIP ----
 
+// Neighbors of a node in the *currently rendered* graph — counts and lists
+// must reflect the active filters, not the full dataset.
+function visibleNeighbors(id) {
+    const ids = new Set();
+    currentLinks.forEach(l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        if (s === id) ids.add(t);
+        if (t === id) ids.add(s);
+    });
+    return currentNodes.filter(n => ids.has(n.id));
+}
+
 function showTooltip(event, d, el) {
-    const { edges } = allNetworkData;
     let html = `<div class="tooltip-name">${escapeHtml(d.data.label)}</div>`;
+    const neighbors = visibleNeighbors(d.id);
 
     if (d.type === 'Partner') {
         html += `<div class="tooltip-type">${escapeHtml(d.entityType)}</div>`;
-        const domainCount = edges.filter(e => e.source === d.id).length;
+        const domainCount = neighbors.filter(n => n.type === 'Domain').length;
         html += `<div class="tooltip-connections">${domainCount} domenii conectate</div>`;
         if (d.data.strategic) html += `<div style="color:#f59e0b;font-size:0.72rem">Partener strategic</div>`;
         if (d.data.ukraine) html += `<div style="color:#3b82f6;font-size:0.72rem">Sprijin Ucraina</div>`;
     } else {
-        const partnerCount = edges.filter(e => e.target === d.id).length;
+        const partnerCount = neighbors.filter(n => n.type === 'Partner').length;
         html += `<div class="tooltip-type">Domeniu de activitate</div>`;
-        html += `<div class="tooltip-connections">${partnerCount} parteneri</div>`;
+        html += `<div class="tooltip-connections">${partnerCount} parteneri afișați</div>`;
     }
 
     el.innerHTML = html;
@@ -650,8 +663,9 @@ function collapseFonss() {
 function showDetailCard(d) {
     const detail = document.getElementById('partner-detail');
     const content = document.getElementById('detail-content');
-    const { nodes, edges } = allNetworkData;
 
+    // Lists and counts reflect only what's currently visible (active filters)
+    const neighbors = visibleNeighbors(d.id);
     let html = '';
 
     if (d.type === 'Partner') {
@@ -671,31 +685,25 @@ function showDetailCard(d) {
         if (d.data.isFonssMember) {
             html += `<span class="tag-domain">Servicii sociale</span>`;
         } else {
-            const myDomains = edges
-                .filter(e => e.source === d.id)
-                .map(e => nodes[e.target]?.label)
-                .filter(Boolean);
-            [...new Set(myDomains)].sort().forEach(dom => {
-                html += `<span class="tag-domain">${escapeHtml(dom)}</span>`;
+            const myDomains = neighbors.filter(n => n.type === 'Domain');
+            myDomains.sort((a, b) => a.data.label.localeCompare(b.data.label)).forEach(n => {
+                html += `<span class="tag-domain tag-clickable" data-node-id="${n.id}">${escapeHtml(n.data.label)}</span>`;
             });
         }
         html += `</div>`;
 
     } else {
-        const linkedPartners = edges
-            .filter(e => e.target === d.id)
-            .map(e => nodes[e.source]?.label)
-            .filter(Boolean);
+        const linkedPartners = neighbors.filter(n => n.type === 'Partner');
 
         html += `<div class="detail-name">${escapeHtml(d.data.label)}</div>`;
         html += `<div class="detail-type">Domeniu de activitate</div>`;
-        html += `<div class="domain-partner-count">Acest domeniu conectează <strong>${linkedPartners.length}</strong> parteneri.</div>`;
+        html += `<div class="domain-partner-count">Acest domeniu conectează <strong>${linkedPartners.length}</strong> parteneri afișați.</div>`;
 
         if (linkedPartners.length > 0) {
             html += `<div class="detail-domains-label" style="margin-top:12px">Parteneri conectați</div>`;
             html += `<div class="detail-domains">`;
-            linkedPartners.sort().forEach(name => {
-                html += `<span class="tag-domain">${escapeHtml(name)}</span>`;
+            linkedPartners.sort((a, b) => a.data.label.localeCompare(b.data.label)).forEach(n => {
+                html += `<span class="tag-domain tag-clickable" data-node-id="${n.id}">${escapeHtml(n.data.label)}</span>`;
             });
             html += `</div>`;
         }
@@ -703,6 +711,14 @@ function showDetailCard(d) {
 
     content.innerHTML = html;
     detail.classList.remove('hidden');
+
+    // Tags act like clicking the node itself in the graph
+    content.querySelectorAll('.tag-clickable').forEach(tag => {
+        tag.addEventListener('click', () => {
+            const node = currentNodes.find(n => n.id === tag.dataset.nodeId);
+            if (node) selectNode(node);
+        });
+    });
 }
 
 // Close detail card button
@@ -713,7 +729,7 @@ document.getElementById('close-detail')?.addEventListener('click', deselectNode)
 function buildFilters(networkData) {
     buildEntityFilters(networkData);
     buildDomainFilters(networkData);
-    buildSpecialFilters(networkData);
+    buildSpecialFilters();
     buildSearch(networkData);
     setupMobileFilters(networkData);
     setupDropdowns();
@@ -851,8 +867,7 @@ function setupDropdowns() {
     // Setup all filter dropdowns
     const dropdowns = [
         { btn: 'entity-dropdown-btn', panel: 'entity-panel' },
-        { btn: 'domain-dropdown-btn', panel: 'domain-panel' },
-        { btn: 'special-dropdown-btn', panel: 'special-panel' }
+        { btn: 'domain-dropdown-btn', panel: 'domain-panel' }
     ];
 
     // Close all panels function
@@ -907,52 +922,24 @@ function setupDropdowns() {
     });
 }
 
-function buildSpecialFilters(networkData) {
-    const { nodes } = networkData;
-    const container = document.getElementById('special-filters');
-    if (!container) return;
+// Standalone toggle buttons in the filter bar (Strategici / Ucraina)
+const SPECIAL_BUTTONS = { strategic: 'special-strategic-btn', ukraine: 'special-ukraine-btn' };
 
-    let strategicCount = 0, ukraineCount = 0;
-    for (const [, node] of Object.entries(nodes)) {
-        if (node.type === 'Partner' && node.parentId === null) {
-            if (node.strategic) strategicCount++;
-            if (node.ukraine) ukraineCount++;
-        }
-    }
-
-    container.innerHTML = `
-        <label class="filter-checkbox" title="Parteneri strategici – parteneri cu care DSU are protocoale extinse de colaborare">
-            <input type="checkbox" value="strategic">
-            <span class="filter-icon">${icons.star({ size: 13 })}</span>
-            <span class="filter-label">Parteneri strategici</span>
-            <span class="filter-count">${strategicCount}</span>
-        </label>
-        <label class="filter-checkbox" title="Parteneri implicați în gestionarea crizei din Ucraina">
-            <input type="checkbox" value="ukraine">
-            <span class="filter-icon"><span class="flag-ua"></span></span>
-            <span class="filter-label">Sprijin Ucraina</span>
-            <span class="filter-count">${ukraineCount}</span>
-        </label>
-    `;
-
-    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => {
-            filterState.specialFilters = [...container.querySelectorAll('input[type="checkbox"]:checked')].map(c => c.value);
-            updateSpecialCountLabel();
+function buildSpecialFilters() {
+    for (const btnId of Object.values(SPECIAL_BUTTONS)) {
+        const btn = document.getElementById(btnId);
+        if (!btn) continue;
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('active');
+            filterState.specialFilters = Object.entries(SPECIAL_BUTTONS)
+                .filter(([, id]) => document.getElementById(id)?.classList.contains('active'))
+                .map(([v]) => v);
+            filterState.specialFilter = filterState.specialFilters[0] || null; // backward compat
             deselectNode();
             rebuildGraph();
             syncMobileFilters();
         });
-    });
-}
-
-function updateSpecialCountLabel() {
-    const label = document.getElementById('special-count-label');
-    if (!label) return;
-    const container = document.getElementById('special-filters');
-    if (!container) return;
-    const count = container.querySelectorAll('input[type="checkbox"]:checked').length;
-    label.textContent = count > 0 ? count : '';
+    }
 }
 
 function buildSearch(networkData) {
@@ -1138,12 +1125,9 @@ function syncDesktopEntityFilters() {
 }
 
 function syncDesktopSpecialFilters() {
-    const desktop = document.getElementById('special-filters');
-    if (desktop) {
-        desktop.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.checked = (filterState.specialFilters || []).includes(cb.value);
-        });
-        updateSpecialCountLabel();
+    for (const [value, btnId] of Object.entries(SPECIAL_BUTTONS)) {
+        document.getElementById(btnId)?.classList.toggle(
+            'active', (filterState.specialFilters || []).includes(value));
     }
 }
 
@@ -1206,14 +1190,11 @@ function updateFilterCounts(visiblePartnerIds) {
         if (input && countEl) countEl.textContent = typeCounts[input.value] || 0;
     });
 
-    // Desktop special filter counts
-    document.querySelectorAll('#special-filters .filter-checkbox').forEach(label => {
-        const input = label.querySelector('input[type="checkbox"]');
-        const countEl = label.querySelector('.filter-count');
-        if (!input || !countEl) return;
-        if (input.value === 'strategic') countEl.textContent = strategicVisible;
-        if (input.value === 'ukraine') countEl.textContent = ukraineVisible;
-    });
+    // Special toggle button counts (visible partners with each flag)
+    const strategicEl = document.getElementById('strategic-count');
+    if (strategicEl) strategicEl.textContent = strategicVisible;
+    const ukraineEl = document.getElementById('ukraine-count');
+    if (ukraineEl) ukraineEl.textContent = ukraineVisible;
 }
 
 // ---- EMPTY MESSAGE (Task 4) ----
